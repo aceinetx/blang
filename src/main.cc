@@ -7,8 +7,11 @@ int main() {
   Blang blang = Blang("b");
   blang.input = R"(
 main() {
-	extrn stderr;
-	return stderr;
+	extrn initscr, mvprintw, getch, endwin;
+	initscr();
+	mvprintw(0, 0, "Hello, World!");
+	getch();
+	endwin();
 }
 )";
 
