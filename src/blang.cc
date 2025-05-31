@@ -55,6 +55,14 @@ Result<NoSuccess, std::string> Blang::parseAndCompile() {
 
   delete parser->root;
 
+  {
+    Metadata *textnode = MDString::get(
+        context, fmt::format("blang llvm {}", LLVM_VERSION_STRING));
+    MDNode *IdentNode = MDNode::get(context, ArrayRef<Metadata *>(textnode));
+    NamedMDNode *IdentMD = fmodule.getOrInsertNamedMetadata("llvm.ident");
+    IdentMD->addOperand(IdentNode);
+  }
+
   verifyModule(fmodule);
 
   return Result<NoSuccess, std::string>::success({});
