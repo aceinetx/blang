@@ -199,9 +199,10 @@ assignment:
 	;
 
 deref:
-	MULTIPLY rvalue {
+	MULTIPLY lvalue {
 		auto* node = new blang::AstDeref();
 		node->expr = $2;
+		node->times = 1;
 		$$ = node;
 	}
 
@@ -230,9 +231,11 @@ lvalue:
 		var->index = $3;
 		$$ = var;
 	}
+	| deref
 
 rvalue:
-	rvalue_term
+	lvalue
+	| rvalue_term
 	| rvalue PLUS rvalue_term {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
@@ -313,7 +316,6 @@ rvalue_factor:
 	NUMBER {
 		$$ = new blang::AstNumber($1);
 	}
-	| lvalue
 	| STRING_LITERAL {
 		auto* var = new blang::AstStrRef();
 		var->str = *$1;

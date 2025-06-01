@@ -26,9 +26,36 @@ bool AstDeref::compile(Blang *blang) {
   Value *value = blang->values.top();
   blang->values.pop();
 
-  for (int i = 0; i < times + (blang->expr_types.top() == Blang::RVALUE); i++) {
-    value = blang->builder.CreateLoad(blang->builder.getInt64Ty(), value);
+  if (blang->expr_types.top() == Blang::LVALUE) {
+    for (int i = 0; i < times - 1; i++) {
+      value = blang->builder.CreateLoad(
+          blang->builder.getInt64Ty(),
+          blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
+    }
+    value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
   }
+  if (blang->expr_types.top() == Blang::RVALUE) {
+    for (int i = 0; i < times; i++) {
+      value = blang->builder.CreateLoad(
+          blang->builder.getInt64Ty(),
+          blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
+    }
+    value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
+  }
+
+  /*
+for (int i = 0; i < times + (blang->expr_types.top() == Blang::LVALUE); i++) {
+value = blang->builder.CreateLoad(
+  blang->builder.getInt64Ty(),
+  blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
+}
+
+if (blang->expr_types.top() == Blang::LVALUE) {
+value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
+}
+  */
+
+  blang->values.push(value);
 
   blang->expr_types.pop();
 
