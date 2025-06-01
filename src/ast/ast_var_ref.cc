@@ -19,7 +19,7 @@ bool AstVarRef::compile(Blang *blang) {
 
   if (blang->expr_types.top() == Blang::RVALUE) {
     blang->values.push(
-        blang->builder.CreateLoad(blang->builder.getInt64Ty(), var->value));
+        blang->builder.CreateLoad(blang->getBWordTy(), var->value));
   } else if (blang->expr_types.top() == Blang::LVALUE) {
     blang->values.push(var->value);
   }

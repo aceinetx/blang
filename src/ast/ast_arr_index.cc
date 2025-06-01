@@ -38,11 +38,11 @@ bool AstArrIndex::compile(Blang *blang) {
 
   Value *element;
   if (blang->expr_types.top() == Blang::LVALUE) {
-    element = blang->builder.CreateGEP(blang->builder.getInt64Ty(), array, idx);
+    element = blang->builder.CreateGEP(blang->getBWordTy(), array, idx);
   } else if (blang->expr_types.top() == Blang::RVALUE) {
     element = blang->builder.CreateLoad(
-        blang->builder.getInt64Ty(),
-        blang->builder.CreateGEP(blang->builder.getInt64Ty(), array, idx));
+        blang->getBWordTy(),
+        blang->builder.CreateGEP(blang->getBWordTy(), array, idx));
   }
 
   blang->values.push(element);

@@ -6,7 +6,9 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-main(){
+main(argc, argv){
+	extrn printf;
+	printf("%s", *argv);
 
 	return 0;
 }

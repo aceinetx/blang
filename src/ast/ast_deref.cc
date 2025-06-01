@@ -29,7 +29,7 @@ bool AstDeref::compile(Blang *blang) {
   if (blang->expr_types.top() == Blang::LVALUE) {
     for (int i = 0; i < times - 1; i++) {
       value = blang->builder.CreateLoad(
-          blang->builder.getInt64Ty(),
+          blang->getBWordTy(),
           blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
     }
     value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
@@ -37,7 +37,7 @@ bool AstDeref::compile(Blang *blang) {
   if (blang->expr_types.top() == Blang::RVALUE) {
     for (int i = 0; i < times; i++) {
       value = blang->builder.CreateLoad(
-          blang->builder.getInt64Ty(),
+          blang->getBWordTy(),
           blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
     }
     value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
@@ -46,7 +46,7 @@ bool AstDeref::compile(Blang *blang) {
   /*
 for (int i = 0; i < times + (blang->expr_types.top() == Blang::LVALUE); i++) {
 value = blang->builder.CreateLoad(
-  blang->builder.getInt64Ty(),
+  blang->getBWordTy(),
   blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
 }
 

@@ -18,7 +18,7 @@ bool AstNumber::compile(Blang *blang) {
     return false;
   }
 
-  Value *v = ConstantInt::get(blang->builder.getInt64Ty(), value);
+  Value *v = ConstantInt::get(blang->getBWordTy(), value);
   blang->values.push(v);
 
   blang->expr_types.pop();

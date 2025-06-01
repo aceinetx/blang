@@ -29,7 +29,7 @@ bool AstFuncCall::compile(Blang *blang) {
       ext.isFunction = true;
 
       if (!ext.isExterned) {
-        Type *returnType = blang->builder.getInt64Ty();
+        Type *returnType = blang->getBWordTy();
         FunctionType *functionType = FunctionType::get(returnType, {}, true);
         Function *externalFunction = Function::Create(
             functionType, Function::ExternalLinkage, name, blang->fmodule);

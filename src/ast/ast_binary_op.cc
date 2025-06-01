@@ -52,10 +52,10 @@ bool AstBinaryOp::compile(Blang *blang) {
     return false;
   } else if (op == "equal") {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpEQ(LHS, RHS),
-                                       blang->builder.getInt64Ty());
+                                       blang->getBWordTy());
   } else if (op == "nequal") {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpNE(LHS, RHS),
-                                       blang->builder.getInt64Ty());
+                                       blang->getBWordTy());
   }
 
   blang->values.push(result);

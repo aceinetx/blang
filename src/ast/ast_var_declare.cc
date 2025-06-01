@@ -20,7 +20,7 @@ bool AstVarDeclare::compile(Blang *blang) {
     auto var = std::make_unique<Variable>();
     var->name = name;
     var->value =
-        blang->builder.CreateAlloca(blang->builder.getInt64Ty(), nullptr, name);
+        blang->builder.CreateAlloca(blang->getBWordTy(), nullptr, name);
 
     blang->scopes.back().variables.push_back(std::move(var));
   }

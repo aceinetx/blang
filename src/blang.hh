@@ -28,6 +28,10 @@ public:
   std::string input;
   std::string compile_error;
 
+  std::string targetTriple;
+  llvm::Target *target;
+  llvm::TargetMachine *targetMachine;
+
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   llvm::Module fmodule;
@@ -48,6 +52,8 @@ public:
 
   Result<NoSuccess, std::string> parseAndCompile();
   Variable *getVariable(std::string name);
+
+  llvm::Type *getBWordTy();
 
   enum EmitLevel {
     EMIT_OBJ,

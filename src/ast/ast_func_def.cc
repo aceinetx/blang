@@ -19,9 +19,9 @@ void AstFuncDef::print(int indent) const {
 bool AstFuncDef::compile(Blang *bc) {
   std::vector<Type *> arg_types = {};
   for (size_t i = 0; i < args.size(); i++) {
-    arg_types.push_back(bc->builder.getInt64Ty());
+    arg_types.push_back(bc->getBWordTy());
   }
-  auto type = FunctionType::get(bc->builder.getInt64Ty(), arg_types, false);
+  auto type = FunctionType::get(bc->getBWordTy(), arg_types, false);
   auto func =
       Function::Create(type, Function::ExternalLinkage, name, bc->fmodule);
   auto block = BasicBlock::Create(bc->context, "_" + name, func);
@@ -36,8 +36,7 @@ bool AstFuncDef::compile(Blang *bc) {
     {
       auto var = std::make_unique<Variable>();
       var->name = args[i];
-      var->value =
-          bc->builder.CreateAlloca(bc->builder.getInt64Ty(), nullptr, args[i]);
+      var->value = bc->builder.CreateAlloca(bc->getBWordTy(), nullptr, args[i]);
       bc->builder.CreateStore(arg, var->value);
 
       bc->scopes.back().variables.push_back(std::move(var));
@@ -50,7 +49,7 @@ bool AstFuncDef::compile(Blang *bc) {
     return false;
 
   if (!block->getTerminator()) {
-    bc->builder.CreateRet(ConstantInt::get(bc->builder.getInt64Ty(), 0));
+    bc->builder.CreateRet(ConstantInt::get(bc->getBWordTy(), 0));
   }
 
   bc->scopes.pop_back();

@@ -22,6 +22,24 @@ Blang::Blang(std::string moduleName)
   InitializeAllAsmParsers();
   InitializeAllAsmPrinters();
 
+  std::string TargetTriple = llvm::sys::getDefaultTargetTriple();
+
+  std::string err;
+  const llvm::Target *Target =
+      llvm::TargetRegistry::lookupTarget(TargetTriple, err);
+  if (!Target) {
+    std::cerr << "blang: error: failed to lookup target " + TargetTriple +
+                     ": " + err;
+    return;
+  }
+
+  llvm::TargetOptions opt;
+  targetMachine = Target->createTargetMachine(
+      TargetTriple, "generic", "", opt, std::optional<llvm::Reloc::Model>());
+
+  fmodule.setTargetTriple(TargetTriple);
+  fmodule.setDataLayout(targetMachine->createDataLayout());
+
   parser = new Parser();
 }
 
@@ -84,7 +102,7 @@ Variable *Blang::getVariable(std::string name) {
 
     if (!ext.isExterned) {
       GlobalVariable *GV =
-          new GlobalVariable(fmodule, builder.getInt64Ty(), false,
+          new GlobalVariable(fmodule, getBWordTy(), false,
                              GlobalValue::ExternalLinkage, nullptr, name);
       auto var = std::make_unique<Variable>();
       var->value = GV;
@@ -98,6 +116,14 @@ Variable *Blang::getVariable(std::string name) {
   }
 
   return nullptr;
+}
+
+llvm::Type *Blang::getBWordTy() {
+  llvm::DataLayout DL = fmodule.getDataLayout();
+  // unsigned LargestInt = DL.getLargestLegalIntTypeSizeInBits();
+  unsigned maxIntSize = DL.getLargestLegalIntTypeSizeInBits();
+  Type *maxIntType = IntegerType::get(context, maxIntSize);
+  return builder.getInt32Ty();
 }
 
 Result<NoSuccess, std::string> Blang::emit(std::string filename,
