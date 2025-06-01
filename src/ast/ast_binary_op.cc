@@ -23,8 +23,12 @@ AstBinaryOp::~AstBinaryOp() {
 }
 
 bool AstBinaryOp::compile(Blang *blang) {
+  // TODO: BinaryOp in rvalues
+
+  blang->expr_types.push(Blang::RVALUE);
   if (!left->compile(blang))
     return false;
+  blang->expr_types.push(Blang::RVALUE);
   if (!right->compile(blang))
     return false;
 
@@ -32,6 +36,8 @@ bool AstBinaryOp::compile(Blang *blang) {
   blang->values.pop();
   Value *LHS = blang->values.top();
   blang->values.pop();
+
+  // TODO: Implement a check if a valid lvalue binary operation is here
 
   Value *result = nullptr;
 
@@ -44,6 +50,12 @@ bool AstBinaryOp::compile(Blang *blang) {
   } else if (op == "div") {
     blang->compile_error = "div is a TODO";
     return false;
+  } else if (op == "equal") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpEQ(LHS, RHS),
+                                       blang->builder.getInt64Ty());
+  } else if (op == "nequal") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpNE(LHS, RHS),
+                                       blang->builder.getInt64Ty());
   }
 
   blang->values.push(result);

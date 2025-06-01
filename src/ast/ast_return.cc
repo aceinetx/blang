@@ -17,6 +17,7 @@ AstReturn::~AstReturn() {
 }
 
 bool AstReturn::compile(Blang *blang) {
+  blang->expr_types.push(Blang::RVALUE);
   if (!expr->compile(blang))
     return false;
 

@@ -17,7 +17,14 @@ bool AstVarRef::compile(Blang *blang) {
     return false;
   }
 
-  blang->values.push(
-      blang->builder.CreateLoad(blang->builder.getInt64Ty(), var->value));
+  if (blang->expr_types.top() == Blang::RVALUE) {
+    blang->values.push(
+        blang->builder.CreateLoad(blang->builder.getInt64Ty(), var->value));
+  } else if (blang->expr_types.top() == Blang::LVALUE) {
+    blang->values.push(var->value);
+  }
+
+  blang->expr_types.pop();
+
   return true;
 }

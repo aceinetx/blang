@@ -42,27 +42,28 @@ blang::Parser* yyget_extra(void*);
 	std::vector<blang::AstNode*>* func_list;
 	
 	std::vector<std::string>* identifier_list;
-	std::vector<blang::AstNode*>* expression_commalist;
+	std::vector<blang::AstNode*>* rvalue_commalist;
 }
 
 %token <number> NUMBER
 %token <string> IDENTIFIER
 %token <string> STRING_LITERAL
-%token RETURN AUTO EXTRN
-%token ASSIGN PLUS MINUS MULTIPLY DIVIDE
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON AMPERSAND COMMA
+%token RETURN AUTO EXTRN IF
+%token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
+%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND COMMA
 
 %type <node> program function_definition
-%type <node> expression term factor
+%type <node> rvalue lvalue rvalue_term rvalue_factor
 %type <node> statement declaration assignment return_statement func_call extrn
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
 %type <identifier_list> identifier_list
-%type <expression_commalist> expression_commalist 
+%type <rvalue_commalist> rvalue_commalist 
 
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
+%left EQUAL NEQUAL GREATER LESS GREQ LSEQ
 
 %%
 
@@ -145,7 +146,7 @@ extrn:
 	}
 
 func_call:
-	IDENTIFIER LPAREN expression_commalist RPAREN {
+	IDENTIFIER LPAREN rvalue_commalist RPAREN {
 		auto* node = new blang::AstFuncCall();
 		node->args = *$3;
 		node->name = *$1;
@@ -159,11 +160,11 @@ func_call:
 		$$ = node;
 	}
 
-expression_commalist:
-	expression {
+rvalue_commalist:
+	rvalue {
 		$$ = new std::vector<blang::AstNode*>();
 		$$->push_back($1);
-	} | expression_commalist COMMA expression {
+	} | rvalue_commalist COMMA rvalue {
     $1->push_back($3);
     $$ = $1;
 	}
@@ -189,17 +190,16 @@ identifier_list:
 	}
 
 assignment:
-	IDENTIFIER ASSIGN expression {
+	lvalue ASSIGN rvalue {
 		auto* assign = new blang::AstVarAssign();
-		assign->name = *$1;
-		assign->expr = $3;
-		delete $1;
+		assign->lexpr = $1;
+		assign->rexpr = $3;
 		$$ = assign;
 	}
 	;
 
 return_statement:
-	RETURN expression SEMICOLON {
+	RETURN rvalue SEMICOLON {
 		auto* ret = new blang::AstReturn();
 		ret->expr = $2;
 		$$ = ret;
@@ -210,34 +210,90 @@ return_statement:
 	}
 	;
 
-expression:
-	term
-	| expression PLUS term {
+lvalue:
+	IDENTIFIER {
+		auto* var = new blang::AstVarRef();
+		var->name = *$1;
+		delete $1;
+		$$ = var;
+	}
+	| lvalue LBRACKET rvalue RBRACKET {
+		auto* var = new blang::AstArrIndex();
+		var->expr = $1;
+		var->index = $3;
+		$$ = var;
+	}
+
+rvalue:
+	rvalue_term
+	| rvalue PLUS rvalue_term {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "add";
 		$$ = op;
 	}
-	| expression MINUS term {
+	| rvalue MINUS rvalue_term {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "sub";
 		$$ = op;
 	}
+	| rvalue EQUAL rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "equal";
+		$$ = op;
+	}
+	| rvalue NEQUAL rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "nequal";
+		$$ = op;
+	}
+	| rvalue GREATER rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "greater";
+		$$ = op;
+	}
+	| rvalue LESS rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "less";
+		$$ = op;
+	}
+	| rvalue GREQ rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "greq";
+		$$ = op;
+	}
+	| rvalue LSEQ rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "lseq";
+		$$ = op;
+	}
 	;
 
-term:
-	factor
-	| term MULTIPLY factor {
+rvalue_term:
+	rvalue_factor
+	| rvalue_term MULTIPLY rvalue_factor {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "mul";
 		$$ = op;
 	}
-	| term DIVIDE factor {
+	| rvalue_term DIVIDE rvalue_factor {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
@@ -246,16 +302,11 @@ term:
 	}
 	;
 
-factor:
+rvalue_factor:
 	NUMBER {
 		$$ = new blang::AstNumber($1);
 	}
-	| IDENTIFIER {
-		auto* var = new blang::AstVarRef();
-		var->name = *$1;
-		delete $1;
-		$$ = var;
-	}
+	| lvalue
 	| STRING_LITERAL {
 		auto* var = new blang::AstStrRef();
 		var->str = *$1;
@@ -264,7 +315,7 @@ factor:
 	}
 	| func_call
 	| assignment
-	| LPAREN expression RPAREN {
+	| LPAREN rvalue RPAREN {
 		$$ = $2;
 	}
 	;

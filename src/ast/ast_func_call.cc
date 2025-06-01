@@ -46,7 +46,9 @@ bool AstFuncCall::compile(Blang *blang) {
 
   std::vector<Value *> arg_values = {};
   for (auto arg : args) {
-    arg->compile(blang);
+    blang->expr_types.push(Blang::RVALUE);
+    if (!arg->compile(blang))
+      return false;
     arg_values.push_back(blang->values.top());
     blang->values.pop();
   }

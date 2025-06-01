@@ -7,12 +7,15 @@ int main() {
   Blang blang = Blang("b");
   blang.input = R"(
 main() {
-	extrn initscr, mvprintw, refresh, getch, endwin;
-	initscr();
-	mvprintw(0, 0, "Hello, World!");
-	refresh();
-	getch();
-	endwin();
+	extrn malloc, free, printf, putchar;
+	auto arr;
+	arr = malloc(8*5);
+
+	arr[0] = 68;
+	printf("%d", arr[0] == 69);
+	putchar(10);
+
+	free(arr);
 }
 )";
 

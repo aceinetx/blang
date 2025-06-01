@@ -13,8 +13,15 @@ void AstStrRef::print(int indent) const {
 }
 
 bool AstStrRef::compile(Blang *blang) {
+  if (blang->expr_types.top() == Blang::LVALUE) {
+    blang->compile_error = fmt::format("string cannot be an lvalue");
+    return false;
+  }
+
   blang->values.push(
       blang->builder.CreateGlobalStringPtr(str, "", 0U, &blang->fmodule));
+
+  blang->expr_types.pop();
 
   return true;
 }

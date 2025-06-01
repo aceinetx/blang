@@ -5,107 +5,118 @@ namespace blang {
 class Blang;
 class AstNode {
 public:
-	virtual ~AstNode() = 0;
-	virtual void print(int indent = 0) const = 0;
-	virtual bool compile(Blang* blang);
+  virtual ~AstNode() = 0;
+  virtual void print(int indent = 0) const = 0;
+  virtual bool compile(Blang *blang);
 
-	std::vector<AstNode*> children;
+  std::vector<AstNode *> children;
 
 protected:
-	void printIndent(int indent) const;
+  void printIndent(int indent) const;
 };
 
 class AstRootNode : public AstNode {
 public:
-	void print(int indent = 0) const override;
+  void print(int indent = 0) const override;
 };
 
 class AstFuncDef : public AstNode {
 public:
-	std::string name;
-	std::vector<std::string> args;
+  std::string name;
+  std::vector<std::string> args;
 
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 };
 
 class AstVarDeclare : public AstNode {
 public:
-	std::vector<std::string> names;
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  std::vector<std::string> names;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 };
 
 class AstVarAssign : public AstNode {
 public:
-	std::string name;
-	AstNode* expr;
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
-	~AstVarAssign();
+  AstNode *lexpr;
+  AstNode *rexpr;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+  ~AstVarAssign();
 };
 
 class AstNumber : public AstNode {
 public:
-	int value;
-	explicit AstNumber(int val) : value(val) {
-	}
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  int value;
+  explicit AstNumber(int val) : value(val) {
+  }
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 };
 
 class AstBinaryOp : public AstNode {
 public:
-	AstNode* left;
-	AstNode* right;
-	std::string op;
+  AstNode *left;
+  AstNode *right;
+  std::string op;
 
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 
-	~AstBinaryOp();
+  ~AstBinaryOp();
 };
 
 class AstReturn : public AstNode {
 public:
-	AstNode* expr;
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  AstNode *expr;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 
-	~AstReturn();
+  ~AstReturn();
 };
 
 class AstVarRef : public AstNode {
 public:
-	std::string name;
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  std::string name;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 };
 
 class AstFuncCall : public AstNode {
 public:
-	std::vector<AstNode*> args;
-	std::string name;
+  std::vector<AstNode *> args;
+  std::string name;
 
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 
-	~AstFuncCall();
+  ~AstFuncCall();
 };
 
 class AstExtrn : public AstNode {
 public:
-	std::vector<std::string> names;
+  std::vector<std::string> names;
 
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
 };
 
 class AstStrRef : public AstNode {
 public:
-	std::string str;
+  std::string str;
 
-	void print(int indent = 0) const override;
-	bool compile(Blang* blang) override;
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+};
+
+class AstArrIndex : public AstNode {
+public:
+  AstNode *expr;
+  AstNode *index;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstArrIndex();
 };
 } // namespace blang

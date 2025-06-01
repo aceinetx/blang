@@ -6,48 +6,54 @@
 namespace blang {
 
 typedef struct Variable {
-	std::string name;
-	llvm::Value* value;
+  std::string name;
+  llvm::Value *value;
 } Variable;
 
 typedef struct ExternSymbol {
-	std::string name;
-	bool isFunction;
-	bool isExterned;
+  std::string name;
+  bool isFunction;
+  bool isExterned;
 } ExternSymbol;
 
 typedef struct Scope {
-	std::vector<std::unique_ptr<Variable>> variables;
+  std::vector<std::unique_ptr<Variable>> variables;
 
-	Scope();
+  Scope();
 } Scope;
 
 class Blang {
 public:
-	Parser* parser;
-	std::string input;
-	std::string compile_error;
+  Parser *parser;
+  std::string input;
+  std::string compile_error;
 
-	llvm::LLVMContext context;
-	llvm::IRBuilder<> builder;
-	llvm::Module fmodule;
+  llvm::LLVMContext context;
+  llvm::IRBuilder<> builder;
+  llvm::Module fmodule;
 
-	Scope global_scope;
-	std::vector<Scope> scopes;
-	std::stack<llvm::Value*> values;
-	std::map<std::string, ExternSymbol> extern_symbols;
+  Scope global_scope;
+  std::vector<Scope> scopes;
+  std::stack<llvm::Value *> values;
+  std::map<std::string, ExternSymbol> extern_symbols;
 
-	Blang(std::string moduleName);
-	~Blang();
+  enum ExprType {
+    LVALUE,
+    RVALUE,
+  };
+  std::stack<ExprType> expr_types;
 
-	Result<NoSuccess, std::string> parseAndCompile();
-	Variable* getVariable(std::string name);
+  Blang(std::string moduleName);
+  ~Blang();
 
-	enum EmitLevel {
-		EMIT_OBJ,
-		EMIT_IR,
-	};
+  Result<NoSuccess, std::string> parseAndCompile();
+  Variable *getVariable(std::string name);
 
-	Result<NoSuccess, std::string> emit(std::string filename, EmitLevel level);
+  enum EmitLevel {
+    EMIT_OBJ,
+    EMIT_IR,
+  };
+
+  Result<NoSuccess, std::string> emit(std::string filename, EmitLevel level);
 };
 } // namespace blang

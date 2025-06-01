@@ -18,6 +18,7 @@ typedef void* yyscan_t;
 "return"        { return RETURN; }
 "auto"  	      { return AUTO; }
 "extrn"  	      { return EXTRN; }
+"if"  	   		  { return IF; }
 [0-9]+          { yylval->number = std::stoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval->string = new std::string(yytext);
@@ -27,6 +28,12 @@ typedef void* yyscan_t;
 	yylval->string = new std::string(yytext + 1, yytext + yyleng - 1);
   return STRING_LITERAL;
 }
+"=="            { return EQUAL; }
+"!="            { return NEQUAL; }
+">"             { return GREATER; }
+"<"             { return LESS; }
+">="            { return GREQ; }
+"<="            { return LSEQ; }
 "="             { return ASSIGN; }
 "+"             { return PLUS; }
 "-"             { return MINUS; }
@@ -36,6 +43,8 @@ typedef void* yyscan_t;
 ")"             { return RPAREN; }
 "{"             { return LBRACE; }
 "}"             { return RBRACE; }
+"["             { return LBRACKET; }
+"]"             { return RBRACKET; }
 ";"             { return SEMICOLON; }
 "&"             { return AMPERSAND; }
 ","             { return COMMA; }
