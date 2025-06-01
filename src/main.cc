@@ -7,10 +7,12 @@ int main() {
   Blang blang = Blang("b");
   blang.input = R"(
 main(argc, argv){
-	extrn printf;
-	printf("%s", *argv);
+	extrn atoi;
+	auto a, b;
+	a = atoi(argv[1]);
+	b = atoi(argv[2]);
 
-	return 0;
+	return a + b;
 }
 )";
 

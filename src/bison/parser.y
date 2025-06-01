@@ -234,8 +234,7 @@ lvalue:
 	| deref
 
 rvalue:
-	lvalue
-	| rvalue_term
+	rvalue_term
 	| rvalue PLUS rvalue_term {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
@@ -324,6 +323,7 @@ rvalue_factor:
 	}
 	| func_call
 	| assignment
+	| lvalue
 	| LPAREN rvalue RPAREN {
 		$$ = $2;
 	}
