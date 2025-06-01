@@ -16,7 +16,7 @@ main(argc, argv){
 
   auto result = blang.parseAndCompile();
   if (result.is_error()) {
-    fmt::println("[blang] {}", result.get_error().value());
+    fmt::println("blang: error: {}", result.get_error().value());
     return 1;
   }
 

@@ -48,6 +48,6 @@ typedef void* yyscan_t;
 ";"             { return SEMICOLON; }
 "&"             { return AMPERSAND; }
 ","             { return COMMA; }
-.               { printf("[blang] unknown token: %s\n", yytext); }
+.               { printf("blang: error: unknown token: %s\n", yytext); }
 
 %%
