@@ -54,7 +54,7 @@ blang::Parser* yyget_extra(void*);
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn
+%type <node> statement declaration assignment return_statement func_call extrn deref
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -197,6 +197,13 @@ assignment:
 		$$ = assign;
 	}
 	;
+
+deref:
+	MULTIPLY rvalue {
+		auto* node = new blang::AstDeref();
+		node->expr = $2;
+		$$ = node;
+	}
 
 return_statement:
 	RETURN rvalue SEMICOLON {

@@ -6,16 +6,17 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-main() {
+main(argc, argv) {
 	extrn malloc, free, printf, putchar;
-	auto arr;
-	arr = malloc(8*5);
+	auto i;
+	i = malloc(8);
 
-	arr[0] = 68;
-	printf("%d", arr[0] == 69);
+	*i = 123;
+	
+	printf("%d", *i);
 	putchar(10);
 
-	free(arr);
+	free(i);
 }
 )";
 

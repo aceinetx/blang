@@ -119,4 +119,15 @@ public:
 
   ~AstArrIndex();
 };
+
+class AstDeref : public AstNode {
+public:
+  AstNode *expr;
+  int times;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstDeref();
+};
 } // namespace blang
