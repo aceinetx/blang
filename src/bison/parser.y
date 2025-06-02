@@ -35,11 +35,11 @@ blang::Parser* yyget_extra(void*);
 	std::string *string;
 	blang::AstNode* node;
 	blang::AstNode* stmt;
-
 	std::vector<blang::AstNode*>* top_stmt_list;
 
 	std::vector<blang::AstNode*>* stmt_list;
 	std::vector<blang::AstNode*>* func_list;
+	std::vector<blang::AstNode*>* node_list;
 	
 	std::vector<std::string>* identifier_list;
 	std::vector<blang::AstNode*>* rvalue_commalist;
@@ -54,7 +54,7 @@ blang::Parser* yyget_extra(void*);
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else
+%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -135,9 +135,23 @@ statement:
 	| return_statement
 	| func_call SEMICOLON
 	| extrn
-	| if
-	| elif
-	| else
+	| if_chain
+	;
+
+if_chain:
+	if {
+		auto* node = new blang::AstIfChain();
+		node->ifs.push_back($1);
+		$$ = node;
+	}
+	| if_chain elif {
+		((blang::AstIfChain*)$1)->ifs.push_back($2);
+		((blang::AstIfChain*)$$)->ifs = ((blang::AstIfChain*)$1)->ifs;
+	}
+	| if_chain else {
+		((blang::AstIfChain*)$1)->ifs.push_back($2);
+		((blang::AstIfChain*)$$)->ifs = ((blang::AstIfChain*)$1)->ifs;
+	}
 	;
 
 if:

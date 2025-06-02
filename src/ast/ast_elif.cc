@@ -20,38 +20,46 @@ AstElif::~AstElif() {
 }
 
 bool AstElif::compile(Blang *blang) {
+  If &i = blang->ifs.top();
+
+  blang->builder.SetInsertPoint(i.fallthrough);
+
   blang->expr_types.push(Blang::RVALUE);
   if (!expr->compile(blang))
     return false;
 
-  If &parentIf = blang->ifs.top();
+  BasicBlock *part = BasicBlock::Create(
+      blang->context, fmt::format("part{}of{}", i.parts.size(), blang->ifID),
+      blang->current_func, i.end);
+
+  BasicBlock *fallthrough = BasicBlock::Create(
+      blang->context,
+      fmt::format("fallthough{}of{}", i.parts.size(), blang->ifID),
+      blang->current_func);
+  fallthrough->moveAfter(i.fallthrough);
+
+  i.parts.push_back(part);
+
+  blang->expr_types.push(Blang::RVALUE);
+  if (!expr->compile(blang))
+    return false;
 
   Value *cmpValue = blang->values.top();
   blang->values.pop();
   cmpValue = blang->builder.CreateTrunc(cmpValue, blang->builder.getInt1Ty());
 
-  unsigned int id = ++blang->ifID;
-  BasicBlock *trueBlock = BasicBlock::Create(
-      blang->context, fmt::format("{}t", id), blang->current_func);
-  BasicBlock *falseBlock = BasicBlock::Create(
-      blang->context, fmt::format("{}f", id), blang->current_func);
+  blang->builder.CreateCondBr(cmpValue, part, fallthrough);
 
-  blang->builder.SetInsertPoint(parentIf.falseBlock);
-  blang->builder.CreateCondBr(cmpValue, trueBlock, falseBlock);
+  i.fallthrough = fallthrough;
 
-  blang->builder.SetInsertPoint(trueBlock);
+  blang->builder.SetInsertPoint(part);
   for (AstNode *n : body) {
-    if (!n->compile(blang))
+    if (!n->compile(blang)) {
       return false;
+    }
   }
 
-  if (!blang->builder.GetInsertBlock()->getTerminator())
-    blang->builder.CreateBr(parentIf.mergeBlock);
-
-  parentIf.falseBlock = falseBlock;
-  parentIf.elif = true;
-
-  blang->builder.SetInsertPoint(falseBlock);
+  blang->builder.CreateBr(i.end);
 
   return true;
 }

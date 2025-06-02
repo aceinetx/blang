@@ -173,4 +173,14 @@ public:
 
   ~AstElse();
 };
+
+class AstIfChain : public AstNode {
+public:
+  std::vector<AstNode *> ifs;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstIfChain();
+};
 } // namespace blang

@@ -23,10 +23,9 @@ typedef struct Scope {
 } Scope;
 
 typedef struct If {
-  llvm::BasicBlock *trueBlock;
-  llvm::BasicBlock *falseBlock;
-  llvm::BasicBlock *mergeBlock;
-  bool elif;
+  llvm::BasicBlock *fallthrough;
+  std::vector<llvm::BasicBlock *> parts;
+  llvm::BasicBlock *end;
 } If;
 
 class Blang {

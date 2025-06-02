@@ -12,10 +12,8 @@ main(argc){
 		puts("argc == 1");
 	} else if (argc == 2){
 		puts("argc == 2");
-	} else if (argc == 3){
-		puts("argc == 3");
 	} else {
-		puts("none of the above");
+		puts("argc != 1 || 2");
 	}
 
 	return 0;

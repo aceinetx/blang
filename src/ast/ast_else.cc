@@ -19,18 +19,14 @@ AstElse::~AstElse() {
 bool AstElse::compile(Blang *blang) {
   If &i = blang->ifs.top();
 
-  blang->builder.SetInsertPoint(i.falseBlock);
+  blang->builder.SetInsertPoint(i.fallthrough);
   for (AstNode *n : body) {
     if (!n->compile(blang))
       return false;
   }
 
-  if (!blang->builder.GetInsertBlock()->getTerminator())
-    blang->builder.CreateBr(i.mergeBlock);
-
-  blang->builder.SetInsertPoint(i.mergeBlock);
-
-  blang->ifs.pop();
+  blang->builder.CreateBr(i.end);
+  blang->builder.SetInsertPoint(i.end);
 
   return true;
 }
