@@ -1,6 +1,6 @@
 #pragma once
+#include "parser/parser.hh"
 #include "result.hh"
-#include "yy.hh"
 #include <pch.hh>
 
 namespace blang {
@@ -30,7 +30,9 @@ typedef struct If {
 
 class Blang {
 public:
-  Parser *parser;
+  Lexer lexer;
+  Parser parser;
+
   std::string input;
   std::string compile_error;
 

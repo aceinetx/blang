@@ -1,10 +1,4 @@
 #include "blang.hh"
-#include <parser.hh>
-
-typedef void *yyscan_t;
-void yylex_init(yyscan_t *);
-void yylex_destroy(yyscan_t);
-void yyset_extra(blang::Parser *user_defined, void *yyscanner);
 
 using namespace blang;
 using namespace llvm;
@@ -14,7 +8,9 @@ Scope::Scope() {
 }
 
 Blang::Blang(std::string moduleName)
-    : builder(context), fmodule(moduleName, context), ifID(0) {
+    : lexer(), parser(lexer), builder(context), fmodule(moduleName, context),
+      ifID(0) {
+
   InitializeNativeTarget();
   InitializeAllTargetInfos();
   InitializeAllTargets();
@@ -39,39 +35,26 @@ Blang::Blang(std::string moduleName)
 
   fmodule.setTargetTriple(TargetTriple);
   fmodule.setDataLayout(targetMachine->createDataLayout());
-
-  parser = new Parser();
 }
 
 Blang::~Blang() {
-  if (parser)
-    delete parser;
 }
 
 Result<NoSuccess, std::string> Blang::parseAndCompile() {
-  yyscan_t scanner;
-  YY_BUFFER_STATE buffer;
+  lexer.code = input;
+  parser.parse();
 
-  yylex_init(&scanner);
-  yyset_extra(this->parser, scanner);
-
-  buffer = yy_scan_string(input.c_str(), scanner);
-  yyparse(scanner, this->parser);
-
-  if (!parser->root) {
+  if (!parser.error.empty()) {
     return Result<NoSuccess, std::string>::error(
-        fmt::format("root == nullptr (parse error: {})", parser->error));
+        fmt::format("parse error: {}", parser.error));
   }
 
-  yy_delete_buffer(buffer, scanner);
-  yylex_destroy(scanner);
-
-  if (!parser->root->compile(this)) {
+  if (!parser.root->compile(this)) {
     return Result<NoSuccess, std::string>::error(
         fmt::format("compile error: {}", compile_error));
   }
 
-  delete parser->root;
+  parser.root->print();
 
   {
     Metadata *textnode = MDString::get(

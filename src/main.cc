@@ -1,25 +1,12 @@
 #include "blang.hh"
-#include <parser.hh>
 
 using namespace blang;
 
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-factorial(n){
-	if(n < 2){
-		return 1;
-	}
-	return n * factorial(n - 1);
-}
-
 main(argc){
-	extrn printf, putchar;
-
-	printf("%ld", factorial(6));
-	putchar(10);
-
-	return 0;
+	return 2 + 2 * 2;
 }
 )";
   // 720
