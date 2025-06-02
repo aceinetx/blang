@@ -141,4 +141,36 @@ public:
 
   ~AstAddrof();
 };
+
+class AstIf : public AstNode {
+public:
+  AstNode *body;
+  AstNode *expr;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstIf();
+};
+
+class AstElif : public AstNode {
+public:
+  AstNode *body;
+  AstNode *expr;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstElif();
+};
+
+class AstElse : public AstNode {
+public:
+  AstNode *body;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstElse();
+};
 } // namespace blang

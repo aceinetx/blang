@@ -16,19 +16,19 @@ void AstFuncDef::print(int indent) const {
   }
 }
 
-bool AstFuncDef::compile(Blang *bc) {
+bool AstFuncDef::compile(Blang *blang) {
   std::vector<Type *> arg_types = {};
   for (size_t i = 0; i < args.size(); i++) {
-    arg_types.push_back(bc->getBWordTy());
+    arg_types.push_back(blang->getBWordTy());
   }
-  auto type = FunctionType::get(bc->getBWordTy(), arg_types, false);
+  auto type = FunctionType::get(blang->getBWordTy(), arg_types, false);
   auto func =
-      Function::Create(type, Function::ExternalLinkage, name, bc->fmodule);
-  auto block = BasicBlock::Create(bc->context, "_" + name, func);
+      Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
+  auto block = BasicBlock::Create(blang->context, "_" + name, func);
 
-  bc->builder.SetInsertPoint(block);
+  blang->builder.SetInsertPoint(block);
 
-  bc->scopes.push_back({});
+  blang->scopes.push_back({});
 
   auto fnArgs = func->arg_begin();
   Value *arg = fnArgs++;
@@ -36,25 +36,27 @@ bool AstFuncDef::compile(Blang *bc) {
     {
       auto var = std::make_unique<Variable>();
       var->name = args[i];
-      var->value = bc->builder.CreateAlloca(bc->getBWordTy(), nullptr, args[i]);
-      bc->builder.CreateStore(arg, var->value);
+      var->value =
+          blang->builder.CreateAlloca(blang->getBWordTy(), nullptr, args[i]);
+      blang->builder.CreateStore(arg, var->value);
 
-      bc->scopes.back().variables.push_back(std::move(var));
+      blang->scopes.back().variables.push_back(std::move(var));
     }
 
     arg = fnArgs++;
   }
 
-  if (!AstNode::compile(bc))
+  blang->current_func = func;
+  if (!AstNode::compile(blang))
     return false;
 
   if (!block->getTerminator()) {
-    bc->builder.CreateRet(ConstantInt::get(bc->getBWordTy(), 0));
+    blang->builder.CreateRet(ConstantInt::get(blang->getBWordTy(), 0));
   }
 
-  bc->scopes.pop_back();
-  while (!bc->values.empty())
-    bc->values.pop();
+  blang->scopes.pop_back();
+  while (!blang->values.empty())
+    blang->values.pop();
 
   return true;
 }

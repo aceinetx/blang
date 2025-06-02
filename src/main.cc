@@ -6,11 +6,17 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-main(){
-	auto i, pi, ppi;	
-	pi = &i;
-	ppi = &pi;
-	**ppi = 69;
+main(argc){
+	extrn printf;
+	if(argc == 1){
+		printf("argc == 1");
+	} else if (argc == 2){
+		printf("argc == 2");
+	} else if (argc == 3){
+		printf("argc == 3");
+	} else {
+		printf("none of the above");
+	}
 
 	return i;
 }

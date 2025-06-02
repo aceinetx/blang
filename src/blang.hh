@@ -22,6 +22,13 @@ typedef struct Scope {
   Scope();
 } Scope;
 
+typedef struct If {
+  llvm::BasicBlock *trueBlock;
+  llvm::BasicBlock *falseBlock;
+  llvm::BasicBlock *mergeBlock;
+  bool elif;
+} If;
+
 class Blang {
 public:
   Parser *parser;
@@ -40,6 +47,11 @@ public:
   std::vector<Scope> scopes;
   std::stack<llvm::Value *> values;
   std::map<std::string, ExternSymbol> extern_symbols;
+
+  std::stack<If> ifs;
+  unsigned long ifID;
+
+  llvm::Function *current_func;
 
   enum ExprType {
     LVALUE,
