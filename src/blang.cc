@@ -123,7 +123,7 @@ llvm::Type *Blang::getBWordTy() {
   // unsigned LargestInt = DL.getLargestLegalIntTypeSizeInBits();
   unsigned maxIntSize = DL.getLargestLegalIntTypeSizeInBits();
   Type *maxIntType = IntegerType::get(context, maxIntSize);
-  return builder.getInt32Ty();
+  return maxIntType;
 }
 
 Result<NoSuccess, std::string> Blang::emit(std::string filename,
