@@ -49,6 +49,7 @@ public:
 
   std::stack<If> ifs;
   unsigned long ifID;
+  unsigned long whileID;
 
   llvm::Function *current_func;
 

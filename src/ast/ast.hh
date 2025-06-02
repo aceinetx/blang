@@ -183,4 +183,15 @@ public:
 
   ~AstIfChain();
 };
+
+class AstWhile : public AstNode {
+public:
+  AstNode *expr;
+  std::vector<AstNode *> body;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstWhile();
+};
 } // namespace blang

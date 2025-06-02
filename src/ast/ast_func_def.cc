@@ -50,7 +50,7 @@ bool AstFuncDef::compile(Blang *blang) {
   if (!AstNode::compile(blang))
     return false;
 
-  if (!block->getTerminator()) {
+  if (!blang->builder.GetInsertBlock()->getTerminator()) {
     blang->builder.CreateRet(ConstantInt::get(blang->getBWordTy(), 0));
   }
 

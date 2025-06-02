@@ -14,7 +14,7 @@ Scope::Scope() {
 }
 
 Blang::Blang(std::string moduleName)
-    : builder(context), fmodule(moduleName, context), ifID(0) {
+    : builder(context), fmodule(moduleName, context), ifID(0), whileID(0) {
   InitializeNativeTarget();
   InitializeAllTargetInfos();
   InitializeAllTargets();

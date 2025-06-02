@@ -48,13 +48,13 @@ blang::Parser* yyget_extra(void*);
 %token <number> NUMBER
 %token <string> IDENTIFIER
 %token <string> STRING_LITERAL
-%token RETURN AUTO EXTRN IF ELSE 
+%token RETURN AUTO EXTRN IF ELSE WHILE
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND COMMA
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain
+%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -136,7 +136,17 @@ statement:
 	| func_call SEMICOLON
 	| extrn
 	| if_chain
+	| while
 	;
+
+while:
+	WHILE LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
+		node->body = *$6;
+		delete $6;
+		$$ = node;
+	}
 
 if_chain:
 	if {
@@ -253,6 +263,12 @@ deref:
 	MULTIPLY lvalue {
 		auto* node = new blang::AstDeref();
 		node->expr = $2;
+		node->times = 1;
+		$$ = node;
+	}
+	| MULTIPLY LPAREN rvalue RPAREN {
+		auto* node = new blang::AstDeref();
+		node->expr = $3;
 		node->times = 1;
 		$$ = node;
 	}

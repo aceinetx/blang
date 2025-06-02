@@ -20,6 +20,7 @@ typedef void* yyscan_t;
 "extrn"  	      { return EXTRN; }
 "if"  	   		  { return IF; }
 "else"  	   	  { return ELSE; }
+"while"  	   	  { return WHILE; }
 [0-9]+          { yylval->number = std::stoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval->string = new std::string(yytext);

@@ -6,20 +6,24 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-factorial(n){
-	if(n < 2){
-		return 1;
-	}
-	return n * factorial(n - 1);
-}
+main(argc, argv) {
+    extrn printf, fprintf, stderr, atoi;
 
-main(argc){
-	extrn printf, putchar;
+    auto W;
+    W = 8;
 
-	printf("%ld", factorial(6));
-	putchar(10);
+    if (argc <= 1) {
+        fprintf(stderr, "%s: missing operand\n", *argv);
+        return(1);
+    }
 
-	return 0;
+    auto i, n;
+    n = atoi(*(argv + W));
+    i = 1;
+    while (i <= n) {
+        printf("%d\n", i);
+        i = i + 1;
+    }
 }
 )";
   // 720
