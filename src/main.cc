@@ -6,7 +6,7 @@ int main() {
   Blang blang = Blang("b");
   blang.input = R"(
 main(argc){
-	return 2 + 2 * 2;
+	return argc + 1 - 1;
 }
 )";
   // 720

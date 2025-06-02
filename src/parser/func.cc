@@ -44,6 +44,7 @@ std::vector<AstNode *> Parser::func_body() {
       ERRRET({});
       body.push_back(node);
     } else if (token.type == Token::RETURN) {
+      lexer.next();
       AstNode *node = _return();
       ERRRET({});
       body.push_back(node);

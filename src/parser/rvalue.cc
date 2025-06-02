@@ -7,7 +7,6 @@ enum class Assoc {
   RIGHT,
 };
 
-static Prec min_prec = 1;
 static std::map<Token::Type, std::pair<Prec, Assoc>> opinfo_map = {
     {Token::PLUS, {1, Assoc::LEFT}},
     {Token::MINUS, {1, Assoc::LEFT}},
@@ -39,15 +38,19 @@ AstNode *Parser::rvalue_atom() {
     SYNTAX_ERROR0(tok, "expected an atom, got a binop-kind token");
     return nullptr;
   } else {
-    if (tok.type != Token::NUMBER) {
-      SYNTAX_ERROR0(tok, "expected a number");
-      return nullptr;
-    }
-
     lexer.next();
 
-    AstNumber *node = new AstNumber(tok.number);
-    return node;
+    if (tok.type == Token::NUMBER) {
+      AstNumber *node = new AstNumber(tok.number);
+      return node;
+    } else if (tok.type == Token::IDENTIFIER) {
+      AstVarRef *node = new AstVarRef();
+      node->name = tok.str;
+      return node;
+    }
+
+    SYNTAX_ERROR0(tok, "expected one of the following: NUMBER IDENTIFIER");
+    return nullptr;
   }
 }
 
