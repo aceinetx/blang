@@ -41,6 +41,7 @@ bool AstDeref::compile(Blang *blang) {
           blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy()));
     }
     value = blang->builder.CreateIntToPtr(value, blang->builder.getPtrTy());
+    value = blang->builder.CreatePtrToInt(value, blang->getBWordTy());
   }
 
   /*

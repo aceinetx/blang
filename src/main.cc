@@ -6,13 +6,13 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-main(argc, argv){
-	extrn atoi;
-	auto a, b;
-	a = atoi(argv[1]);
-	b = atoi(argv[2]);
+main(){
+	auto i, pi, ppi;	
+	pi = &i;
+	ppi = &pi;
+	**ppi = 69;
 
-	return a + b;
+	return i;
 }
 )";
 

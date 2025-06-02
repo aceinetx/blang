@@ -130,4 +130,15 @@ public:
 
   ~AstDeref();
 };
+
+class AstAddrof : public AstNode {
+public:
+  AstNode *expr;
+  int times;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstAddrof();
+};
 } // namespace blang

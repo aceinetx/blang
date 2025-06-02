@@ -54,7 +54,7 @@ blang::Parser* yyget_extra(void*);
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn deref
+%type <node> statement declaration assignment return_statement func_call extrn deref addrof
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -198,6 +198,14 @@ assignment:
 	}
 	;
 
+addrof:
+	AMPERSAND lvalue {
+		auto* node = new blang::AstAddrof();
+		node->expr = $2;
+		node->times = 1;
+		$$ = node;
+	}
+
 deref:
 	MULTIPLY lvalue {
 		auto* node = new blang::AstDeref();
@@ -232,6 +240,7 @@ lvalue:
 		$$ = var;
 	}
 	| deref
+	| addrof
 
 rvalue:
 	rvalue_term
