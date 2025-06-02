@@ -39,9 +39,8 @@ bool AstIfChain::compile(Blang *blang) {
   if (!i.fallthrough->getTerminator()) {
     blang->builder.SetInsertPoint(i.fallthrough);
     blang->builder.CreateBr(i.end);
+    blang->builder.SetInsertPoint(i.end);
   }
-
-  blang->builder.SetInsertPoint(i.end);
 
   blang->ifs.pop();
 

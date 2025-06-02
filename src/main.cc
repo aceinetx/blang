@@ -6,19 +6,23 @@ using namespace blang;
 int main() {
   Blang blang = Blang("b");
   blang.input = R"(
-main(argc){
-	extrn puts;
-	if(argc == 1){
-		puts("argc == 1");
-	} else if (argc == 2){
-		puts("argc == 2");
-	} else {
-		puts("argc != 1 || 2");
+factorial(n){
+	if(n < 2){
+		return 1;
 	}
+	return n * factorial(n - 1);
+}
+
+main(argc){
+	extrn printf, putchar;
+
+	printf("%ld", factorial(6));
+	putchar(10);
 
 	return 0;
 }
 )";
+  // 720
 
   auto result = blang.parseAndCompile();
   if (result.is_error()) {

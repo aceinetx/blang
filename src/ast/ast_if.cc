@@ -52,7 +52,9 @@ bool AstIf::compile(Blang *blang) {
     }
   }
 
-  blang->builder.CreateBr(i.end);
+  if (!part->getTerminator()) {
+    blang->builder.CreateBr(i.end);
+  }
 
   return true;
 }

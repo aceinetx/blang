@@ -56,8 +56,19 @@ bool AstBinaryOp::compile(Blang *blang) {
   } else if (op == "nequal") {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpNE(LHS, RHS),
                                        blang->getBWordTy());
+  } else if (op == "greater") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGT(LHS, RHS),
+                                       blang->getBWordTy());
+  } else if (op == "less") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLT(LHS, RHS),
+                                       blang->getBWordTy());
+  } else if (op == "greq") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGE(LHS, RHS),
+                                       blang->getBWordTy());
+  } else if (op == "lseq") {
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLE(LHS, RHS),
+                                       blang->getBWordTy());
   }
-
   blang->values.push(result);
 
   return true;
