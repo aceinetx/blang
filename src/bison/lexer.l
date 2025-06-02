@@ -19,6 +19,7 @@ typedef void* yyscan_t;
 "auto"  	      { return AUTO; }
 "extrn"  	      { return EXTRN; }
 "if"  	   		  { return IF; }
+"else"  	   	  { return ELSE; }
 [0-9]+          { yylval->number = std::stoi(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval->string = new std::string(yytext);

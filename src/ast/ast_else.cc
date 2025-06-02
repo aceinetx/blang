@@ -9,24 +9,28 @@ void AstElse::print(int indent) const {
   printIndent(indent);
   std::cout << "AstElse" << "\n";
   printIndent(indent + 1);
-  body->print(indent + 2);
 }
 
 AstElse::~AstElse() {
-  delete body;
+  for (AstNode *n : body)
+    delete n;
 }
 
 bool AstElse::compile(Blang *blang) {
   If &i = blang->ifs.top();
 
-  // Generate else block code in the false block
   blang->builder.SetInsertPoint(i.falseBlock);
-  if (!doBlock(block))
-    return false;
+  for (AstNode *n : body) {
+    if (!n->compile(blang))
+      return false;
+  }
 
-  // Add branch to merge block if not already terminated
   if (!blang->builder.GetInsertBlock()->getTerminator())
     blang->builder.CreateBr(i.mergeBlock);
+
+  blang->builder.SetInsertPoint(i.mergeBlock);
+
+  blang->ifs.pop();
 
   return true;
 }

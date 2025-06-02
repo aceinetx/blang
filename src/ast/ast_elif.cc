@@ -11,12 +11,12 @@ void AstElif::print(int indent) const {
   printIndent(indent + 1);
   std::cout << "expr:" << "\n";
   expr->print(indent + 2);
-  body->print(indent + 2);
 }
 
 AstElif::~AstElif() {
   delete expr;
-  delete body;
+  for (AstNode *n : body)
+    delete n;
 }
 
 bool AstElif::compile(Blang *blang) {
@@ -28,6 +28,7 @@ bool AstElif::compile(Blang *blang) {
 
   Value *cmpValue = blang->values.top();
   blang->values.pop();
+  cmpValue = blang->builder.CreateTrunc(cmpValue, blang->builder.getInt1Ty());
 
   unsigned int id = ++blang->ifID;
   BasicBlock *trueBlock = BasicBlock::Create(
@@ -39,8 +40,10 @@ bool AstElif::compile(Blang *blang) {
   blang->builder.CreateCondBr(cmpValue, trueBlock, falseBlock);
 
   blang->builder.SetInsertPoint(trueBlock);
-  if (!body->compile(blang))
-    return false;
+  for (AstNode *n : body) {
+    if (!n->compile(blang))
+      return false;
+  }
 
   if (!blang->builder.GetInsertBlock()->getTerminator())
     blang->builder.CreateBr(parentIf.mergeBlock);

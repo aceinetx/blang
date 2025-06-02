@@ -7,18 +7,18 @@ int main() {
   Blang blang = Blang("b");
   blang.input = R"(
 main(argc){
-	extrn printf;
+	extrn puts;
 	if(argc == 1){
-		printf("argc == 1");
+		puts("argc == 1");
 	} else if (argc == 2){
-		printf("argc == 2");
+		puts("argc == 2");
 	} else if (argc == 3){
-		printf("argc == 3");
+		puts("argc == 3");
 	} else {
-		printf("none of the above");
+		puts("none of the above");
 	}
 
-	return i;
+	return 0;
 }
 )";
 

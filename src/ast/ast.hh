@@ -144,7 +144,7 @@ public:
 
 class AstIf : public AstNode {
 public:
-  AstNode *body;
+  std::vector<AstNode *> body;
   AstNode *expr;
 
   void print(int indent = 0) const override;
@@ -155,7 +155,7 @@ public:
 
 class AstElif : public AstNode {
 public:
-  AstNode *body;
+  std::vector<AstNode *> body;
   AstNode *expr;
 
   void print(int indent = 0) const override;
@@ -166,7 +166,7 @@ public:
 
 class AstElse : public AstNode {
 public:
-  AstNode *body;
+  std::vector<AstNode *> body;
 
   void print(int indent = 0) const override;
   bool compile(Blang *blang) override;

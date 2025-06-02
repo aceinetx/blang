@@ -48,13 +48,13 @@ blang::Parser* yyget_extra(void*);
 %token <number> NUMBER
 %token <string> IDENTIFIER
 %token <string> STRING_LITERAL
-%token RETURN AUTO EXTRN IF
+%token RETURN AUTO EXTRN IF ELSE 
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND COMMA
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn deref addrof
+%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -135,7 +135,36 @@ statement:
 	| return_statement
 	| func_call SEMICOLON
 	| extrn
+	| if
+	| elif
+	| else
 	;
+
+if:
+	IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		node->body = *$6;
+		delete $6;
+		$$ = node;
+	}
+
+elif:
+	ELSE IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		node->body = *$7;
+		delete $7;
+		$$ = node;
+	}
+
+else:
+	ELSE LBRACE statement_list RBRACE {
+		auto* node = new blang::AstElse();
+		node->body = *$3;
+		delete $3;
+		$$ = node;
+	}
 
 extrn:
 	EXTRN identifier_list SEMICOLON {
