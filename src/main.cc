@@ -16,18 +16,10 @@ main() {
 	x = y = 1;
 	k = 0;
 
-	auto QUIT, UP, DOWN, LEFT, RIGHT;
-	// initalize keys
-	QUIT = 113;
-	UP = 119;
-	DOWN = 115;
-	LEFT = 97;
-	RIGHT = 100;
-
 	initscr();
 	curs_set(0);
 
-	while(k != QUIT) {
+	while(k != 'q') {
 		clear();
 
 		mvprintw(0, 0, "Hello ncurses, from B!");
@@ -37,13 +29,13 @@ main() {
 		
 		k = getch();
 
-		if(k == UP){
+		if(k == 'w'){
 			y -= 1;
-		} else if(k == DOWN){
+		} else if(k == 's'){
 			y += 1;
-		} else if(k == LEFT){
+		} else if(k == 'a'){
 			x -= 1;
-		} else if(k == RIGHT){
+		} else if(k == 'd'){
 			x += 1;
 		}
 	}
