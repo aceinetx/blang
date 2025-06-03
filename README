@@ -2,3 +2,20 @@ blang
 =====
 
 Ken Thompson's B language compiler implemented in C++ & LLVM
+
+Examples testing
+----------------
+https://github.com/tsoding/b
+
+- examples/01_hello_world.b
+ Works perfectly
+- examples/02_seq.b
+ Works perfectly
+- examples/03_echo.b
+ Works perfectly
+- examples/04_fib.b
+ Works perfectly
+- examples/05_rule110.b
+ Works perfectly
+- examples/06_raylib.b
+ Compile error due to lack of modulo operator

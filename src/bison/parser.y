@@ -31,7 +31,7 @@ blang::Parser* yyget_extra(void*);
 }
 
 %union {
-	int number;
+	long number;
 	std::string *string;
 	blang::AstNode* node;
 	blang::AstNode* stmt;

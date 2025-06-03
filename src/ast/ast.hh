@@ -47,7 +47,7 @@ public:
 
 class AstNumber : public AstNode {
 public:
-  int value;
+  long value;
   explicit AstNumber(int val) : value(val) {
   }
   void print(int indent = 0) const override;
