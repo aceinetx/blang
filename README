@@ -18,12 +18,11 @@ https://github.com/tsoding/b
 - examples/05_rule110.b
  Works perfectly
 
-How to compile blang and a test program
------------------------------
+How to compile blang and test programs
+--------------------------------------
 mkdir build -p && cd build
 cmake .. -GNinja
 ninja -j$(nproc)
-./blang
-llc a.out -o a.s -relocation-model=pic
-as a.s -o a.o
-cc a.o -o a -lncurses
+
+cd ../examples
+make
