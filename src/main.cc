@@ -6,7 +6,7 @@ using namespace blang;
 
 int main(int argc, char **argv) {
   std::string output = "a.out";
-  Blang::EmitLevel emit_level = Blang::EMIT_OBJ;
+  Blang::EmitLevel emit_level = Blang::EMIT_EXE;
 
   Blang blang = Blang("b");
   if (!blang.target)
@@ -41,5 +41,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  blang.emit(output, emit_level);
+  result = blang.emit(output, emit_level);
+  if (result.is_error()) {
+    fmt::println("blang: {}", result.get_error().value());
+    return 1;
+  }
 }

@@ -138,11 +138,15 @@ Result<NoSuccess, std::string> Blang::emit(std::string filename,
 #define SUCCESS(...) return Result<NoSuccess, std::string>::success({})
 
   switch (level) {
+  case EmitLevel::EMIT_EXE:
+    [[fallthrough]];
   case EmitLevel::EMIT_OBJ: {
     std::string error;
+    std::string obj_filename =
+        (level == EmitLevel::EMIT_EXE) ? filename + ".o" : filename;
 
     std::error_code EC;
-    raw_fd_ostream dest(filename, EC, sys::fs::OF_None);
+    raw_fd_ostream dest(obj_filename, EC, sys::fs::OF_None);
     if (EC) {
       ERROR("could not open output file: {}", EC.message());
     }
@@ -155,6 +159,25 @@ Result<NoSuccess, std::string> Blang::emit(std::string filename,
 
     pass.run(fmodule);
     dest.flush();
+
+    if (level == EmitLevel::EMIT_EXE) {
+      std::string clang_path;
+      if (auto Path = sys::findProgramByName("clang")) {
+        clang_path = *Path;
+      } else {
+        ERROR("clang not found in path");
+      }
+
+      std::vector<StringRef> linker_args = {clang_path, obj_filename, "-o",
+                                            filename};
+      std::string linker_error;
+      sys::ExecuteAndWait(linker_args[0], linker_args,
+                          std::optional<ArrayRef<StringRef>>(), {}, 0, 0,
+                          &linker_error);
+
+      std::error_code err = sys::fs::remove(obj_filename);
+      (void)err;
+    }
 
     SUCCESS();
   } break;

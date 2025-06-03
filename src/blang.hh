@@ -68,6 +68,7 @@ public:
   llvm::Type *getBWordTy();
 
   enum EmitLevel {
+    EMIT_EXE,
     EMIT_OBJ,
     EMIT_IR,
   };
