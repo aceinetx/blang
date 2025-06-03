@@ -194,4 +194,26 @@ public:
 
   ~AstWhile();
 };
+
+class AstAssignBinop : public AstNode {
+public:
+  AstNode *var;
+  AstNode *value;
+  std::string op;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstAssignBinop();
+};
+
+class AstUnot : public AstNode {
+public:
+  AstNode *value;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstUnot();
+};
 } // namespace blang

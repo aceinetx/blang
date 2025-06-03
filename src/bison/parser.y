@@ -49,12 +49,15 @@ blang::Parser* yyget_extra(void*);
 %token <string> IDENTIFIER
 %token <string> STRING_LITERAL
 %token RETURN AUTO EXTRN IF ELSE WHILE
+%token INCREMENT DECREMENT
+%token PLUSASSIGN MINUSASSIGN MULTASSIGN DIVASSIGN
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
-%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND COMMA
+%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND EXCLAMATION COMMA
 
 %type <node> program function_definition
 %type <node> rvalue lvalue rvalue_term rvalue_factor
 %type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
+%type <node> plus_assign minus_assign mult_assign div_assign
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
@@ -64,7 +67,7 @@ blang::Parser* yyget_extra(void*);
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 %left EQUAL NEQUAL GREATER LESS GREQ LSEQ
-%right ASSIGN
+%right EXCLAMATION
 
 %%
 
@@ -147,7 +150,47 @@ statement:
 	| extrn
 	| if_chain
 	| while
+	| plus_assign
+	| minus_assign
+	| mult_assign
+	| div_assign
 	;
+
+plus_assign:
+	lvalue PLUSASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "add";
+		$$ = assign;
+	}
+
+minus_assign:
+	lvalue MINUSASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "sub";
+		$$ = assign;
+	}
+
+mult_assign:
+	lvalue MULTASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "mul";
+		$$ = assign;
+	}
+
+div_assign:
+	lvalue DIVASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "div";
+		$$ = assign;
+	}
 
 while:
 	WHILE LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
@@ -155,6 +198,11 @@ while:
 		node->expr = $3;
 		node->body = *$6;
 		delete $6;
+		$$ = node;
+	} | WHILE LPAREN rvalue RPAREN statement {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
+		node->body.push_back($5);
 		$$ = node;
 	}
 	| WHILE LPAREN rvalue RPAREN LBRACE RBRACE {
@@ -186,6 +234,11 @@ if:
 		node->body = *$6;
 		delete $6;
 		$$ = node;
+	} | IF LPAREN rvalue RPAREN statement {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		node->body.push_back($5);
+		$$ = node;
 	}
 	| IF LPAREN rvalue RPAREN LBRACE RBRACE {
 		auto* node = new blang::AstIf();
@@ -200,7 +253,7 @@ elif:
 		node->body = *$7;
 		delete $7;
 		$$ = node;
-	}
+	} 
 	| ELSE IF LPAREN rvalue RPAREN LBRACE RBRACE {
 		auto* node = new blang::AstElif();
 		node->expr = $4;
@@ -332,6 +385,11 @@ lvalue:
 
 rvalue:
 	rvalue_term
+	| EXCLAMATION rvalue {
+		auto* op = new blang::AstUnot();
+		op->value = $2;
+		$$ = op;
+	}
 	| rvalue PLUS rvalue_term {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;

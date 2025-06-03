@@ -30,6 +30,10 @@ typedef void* yyscan_t;
 	yylval->string = new std::string(yytext + 1, yytext + yyleng - 1);
   return STRING_LITERAL;
 }
+"+="            { return PLUSASSIGN; }
+"-="            { return MINUSASSIGN; }
+"*="            { return MULTASSIGN; }
+"/="            { return DIVASSIGN; }
 "=="            { return EQUAL; }
 "!="            { return NEQUAL; }
 ">"             { return GREATER; }
@@ -48,6 +52,7 @@ typedef void* yyscan_t;
 "["             { return LBRACKET; }
 "]"             { return RBRACKET; }
 ";"             { return SEMICOLON; }
+"!"             { return EXCLAMATION; }
 "&"             { return AMPERSAND; }
 ","             { return COMMA; }
 .               { printf("blang: error: unknown token: %s\n", yytext); }

@@ -46,7 +46,8 @@ bool AstElif::compile(Blang *blang) {
 
   Value *cmpValue = blang->values.top();
   blang->values.pop();
-  cmpValue = blang->builder.CreateTrunc(cmpValue, blang->builder.getInt1Ty());
+  cmpValue = blang->builder.CreateICmpNE(
+      cmpValue, ConstantInt::get(blang->getBWordTy(), 0));
 
   blang->builder.CreateCondBr(cmpValue, part, fallthrough);
 

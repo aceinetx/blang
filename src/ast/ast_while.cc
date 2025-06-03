@@ -36,7 +36,8 @@ bool AstWhile::compile(Blang *blang) {
 
   Value *cmpValue = blang->values.top();
   blang->values.pop();
-  cmpValue = blang->builder.CreateTrunc(cmpValue, blang->builder.getInt1Ty());
+  cmpValue = blang->builder.CreateICmpNE(
+      cmpValue, ConstantInt::get(blang->getBWordTy(), 0));
 
   blang->builder.CreateCondBr(cmpValue, body_block, end);
 
@@ -47,8 +48,9 @@ bool AstWhile::compile(Blang *blang) {
     }
   }
 
-  if (!body_block->getTerminator()) {
-    blang->builder.SetInsertPoint(body_block);
+  end->moveAfter(blang->builder.GetInsertBlock());
+
+  if (!blang->builder.GetInsertBlock()->getTerminator()) {
     blang->builder.CreateBr(cmp);
   }
 
