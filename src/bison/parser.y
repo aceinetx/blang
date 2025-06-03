@@ -89,6 +89,13 @@ function_definition:
 		delete $3;
 		delete $1;
 		$$ = func;
+	} | IDENTIFIER LPAREN identifier_list RPAREN LBRACE RBRACE {
+		auto* func = new blang::AstFuncDef();
+		func->name = *$1;
+		func->args = *$3;
+		delete $3;
+		delete $1;
+		$$ = func;
 	} | IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
 		auto* func = new blang::AstFuncDef();
 		func->name = *$1;
@@ -96,6 +103,11 @@ function_definition:
 			func->children.push_back(stmt);
 		}
 		delete $5;
+		delete $1;
+		$$ = func;
+	} | IDENTIFIER LPAREN RPAREN LBRACE RBRACE {
+		auto* func = new blang::AstFuncDef();
+		func->name = *$1;
 		delete $1;
 		$$ = func;
 	}
@@ -124,9 +136,6 @@ statement_list:
 		$1->push_back($2);
 		$$ = $1;
 	}
-	| {
-		$$ = new std::vector<blang::AstNode*>();
-	}
 	;
 
 statement:
@@ -145,6 +154,11 @@ while:
 		node->expr = $3;
 		node->body = *$6;
 		delete $6;
+		$$ = node;
+	}
+	| WHILE LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
 		$$ = node;
 	}
 
@@ -172,6 +186,11 @@ if:
 		delete $6;
 		$$ = node;
 	}
+	| IF LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		$$ = node;
+	}
 
 elif:
 	ELSE IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
@@ -181,12 +200,21 @@ elif:
 		delete $7;
 		$$ = node;
 	}
+	| ELSE IF LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		$$ = node;
+	}
 
 else:
 	ELSE LBRACE statement_list RBRACE {
 		auto* node = new blang::AstElse();
 		node->body = *$3;
 		delete $3;
+		$$ = node;
+	}
+	| ELSE LBRACE RBRACE {
+		auto* node = new blang::AstElse();
 		$$ = node;
 	}
 
