@@ -10,16 +10,44 @@ int main() {
 
   blang.input = R"(
 main() {
-    extrn printf;
-    auto a, b, c;
-    a = 0;
-    b = 1;
-    while (a < 1000000) {
-        printf("%d\n", a);
-        c = a + b;
-        a = b;
-        b = c;
-    }
+	extrn initscr, clear, mvprintw, refresh, getch, endwin, curs_set;
+
+	auto x, y, k;
+	x = y = 1;
+	k = 0;
+
+	auto QUIT, UP, DOWN, LEFT, RIGHT;
+	QUIT = 113;
+	UP = 119;
+	DOWN = 115;
+	LEFT = 97;
+	RIGHT = 100;
+
+	initscr();
+	curs_set(0);
+
+	while(k != QUIT) {
+		clear();
+
+		mvprintw(0, 0, "Hello ncurses, from B!");
+		mvprintw(y, x, "@");
+
+		refresh();
+		
+		k = getch();
+
+		if(k == UP){
+			y -= 1;
+		} else if(k == DOWN){
+			y += 1;
+		} else if(k == LEFT){
+			x -= 1;
+		} else if(k == RIGHT){
+			x += 1;
+		}
+	}
+
+	endwin();
 }
 )";
 

@@ -19,3 +19,13 @@ https://github.com/tsoding/b
  Works perfectly
 - examples/06_raylib.b
  Compile error due to lack of modulo operator
+
+How to compile blang and a test program
+-----------------------------
+mkdir build -p && cd build
+cmake .. -GNinja
+ninja -j$(nproc)
+./blang
+llc a.out -o a.s -relocation-model=pic
+as a.s -o a.o
+cc a.o -o a -lncurses
