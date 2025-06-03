@@ -29,10 +29,10 @@ int main(int argc, char **argv) {
 USAGE: blang [options] file...
 
 OPTIONS:
-	--help              Print this message
+  --help              Print this message
   -o                  Set an output filename
-	-c                  Output object file
-	-emit-llvm          Output LLVM IR
+  -c                  Output object file
+  -emit-llvm          Output LLVM IR
 )");
         return 0;
       } else {
