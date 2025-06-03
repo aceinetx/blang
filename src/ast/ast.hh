@@ -217,6 +217,16 @@ public:
   ~AstUnot();
 };
 
+class AstUrev : public AstNode {
+public:
+  AstNode *value;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstUrev();
+};
+
 class AstGvarDeclare : public AstNode {
 public:
   std::string name;

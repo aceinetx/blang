@@ -458,6 +458,11 @@ rvalue:
 		op->value = $2;
 		$$ = op;
 	}
+	| MINUS rvalue {
+		auto* op = new blang::AstUrev();
+		op->value = $2;
+		$$ = op;
+	}
 	| rvalue EQUAL rvalue_aftercmp {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;

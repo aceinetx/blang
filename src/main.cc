@@ -51,6 +51,12 @@ main() {
 }
 )";
 
+  blang.input = R"(
+main(){
+	return -1;
+}
+)";
+
   auto result = blang.parseAndCompile();
   if (result.is_error()) {
     fmt::println("blang: {}", result.get_error().value());
