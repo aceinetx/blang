@@ -1,48 +1,39 @@
 #include "blang.hh"
+#include "util.hh"
 #include <parser.hh>
 
 using namespace blang;
 
-int main() {
+int main(int argc, char **argv) {
+  std::string output = "a.out";
+  Blang::EmitLevel emit_level = Blang::EMIT_OBJ;
+
   Blang blang = Blang("b");
   if (!blang.target)
     return 1;
 
-  blang.input = R"(
-main() {
-	extrn initscr, clear, mvprintw, refresh, getch, endwin, curs_set;
+  argsShift();
+  for ([[maybe_unused]] int i = 0; argc; ++i) {
+    std::string arg = argsShift();
 
-	auto x, y, k;
-	x = y = 1;
-	k = 0;
+    if (arg.starts_with("-")) {
+      if (arg == "-o") {
+        output = argsShift();
+      } else if (arg == "-c") {
+        emit_level = Blang::EMIT_OBJ;
+      } else if (arg == "-emit-llvm") {
+        emit_level = Blang::EMIT_IR;
+      }
+    } else { /* assume it's a file */
+      auto result = readFile(arg);
+      if (result.is_error()) {
+        fmt::println("blang: {}", result.get_error().value());
+        return 1;
+      }
 
-	initscr();
-	curs_set(0);
-
-	while(k != 'q') {
-		clear();
-
-		mvprintw(0, 0, "Hello ncurses, from B!");
-		mvprintw(y, x, "@");
-
-		refresh();
-		
-		k = getch();
-
-		if(k == 'w'){
-			y -= 1;
-		} else if(k == 's'){
-			y += 1;
-		} else if(k == 'a'){
-			x -= 1;
-		} else if(k == 'd'){
-			x += 1;
-		}
-	}
-
-	endwin();
-}
-)";
+      blang.input = result.get_success().value();
+    }
+  }
 
   auto result = blang.parseAndCompile();
   if (result.is_error()) {
@@ -50,5 +41,5 @@ main() {
     return 1;
   }
 
-  blang.emit("a.out", Blang::EMIT_IR);
+  blang.emit(output, emit_level);
 }

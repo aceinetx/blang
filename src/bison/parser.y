@@ -82,6 +82,8 @@ program:
 			PARSER->root->children.push_back(func);
 		}
 		delete $1;
+	} | {
+		PARSER->root = new blang::AstRootNode();
 	}
 	;
 

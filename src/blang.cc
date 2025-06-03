@@ -34,7 +34,7 @@ Blang::Blang(std::string moduleName)
 
   TargetOptions opt;
   targetMachine = target->createTargetMachine(TargetTriple, "generic", "", opt,
-                                              std::optional<Reloc::Model>());
+                                              Reloc::PIC_);
 
   fmodule.setTargetTriple(TargetTriple);
   fmodule.setDataLayout(targetMachine->createDataLayout());
@@ -139,23 +139,7 @@ Result<NoSuccess, std::string> Blang::emit(std::string filename,
 
   switch (level) {
   case EmitLevel::EMIT_OBJ: {
-    std::string targetTriple = sys::getDefaultTargetTriple();
-
     std::string error;
-    auto target = TargetRegistry::lookupTarget(targetTriple, error);
-    if (!target) {
-      ERROR("target lookup error: {}", error);
-    }
-
-    auto cpu = "generic";
-    auto features = "";
-
-    TargetOptions opt;
-    auto targetMachine = target->createTargetMachine(
-        targetTriple, cpu, features, opt, Reloc::PIC_);
-
-    fmodule.setDataLayout(targetMachine->createDataLayout());
-    fmodule.setTargetTriple(targetTriple);
 
     std::error_code EC;
     raw_fd_ostream dest(filename, EC, sys::fs::OF_None);
