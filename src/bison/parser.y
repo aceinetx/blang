@@ -64,6 +64,7 @@ blang::Parser* yyget_extra(void*);
 %left PLUS MINUS
 %left MULTIPLY DIVIDE
 %left EQUAL NEQUAL GREATER LESS GREQ LSEQ
+%right ASSIGN
 
 %%
 
