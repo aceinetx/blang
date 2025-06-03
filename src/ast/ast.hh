@@ -216,4 +216,12 @@ public:
 
   ~AstUnot();
 };
+
+class AstGvarDeclare : public AstNode {
+public:
+  std::string name;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+};
 } // namespace blang

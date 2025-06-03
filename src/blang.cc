@@ -22,20 +22,19 @@ Blang::Blang(std::string moduleName)
   InitializeAllAsmParsers();
   InitializeAllAsmPrinters();
 
-  std::string TargetTriple = llvm::sys::getDefaultTargetTriple();
+  std::string TargetTriple = sys::getDefaultTargetTriple();
 
   std::string err;
-  const llvm::Target *Target =
-      llvm::TargetRegistry::lookupTarget(TargetTriple, err);
-  if (!Target) {
+  target = (Target *)TargetRegistry::lookupTarget(TargetTriple, err);
+  if (!target) {
     std::cerr << "blang: error: failed to lookup target " + TargetTriple +
                      ": " + err;
     return;
   }
 
-  llvm::TargetOptions opt;
-  targetMachine = Target->createTargetMachine(
-      TargetTriple, "generic", "", opt, std::optional<llvm::Reloc::Model>());
+  TargetOptions opt;
+  targetMachine = target->createTargetMachine(TargetTriple, "generic", "", opt,
+                                              std::optional<Reloc::Model>());
 
   fmodule.setTargetTriple(TargetTriple);
   fmodule.setDataLayout(targetMachine->createDataLayout());
@@ -46,9 +45,14 @@ Blang::Blang(std::string moduleName)
 Blang::~Blang() {
   if (parser)
     delete parser;
+  if (targetMachine)
+    delete targetMachine;
 }
 
 Result<NoSuccess, std::string> Blang::parseAndCompile() {
+  scopes.clear();
+  scopes.push_back({});
+
   yyscan_t scanner;
   YY_BUFFER_STATE buffer;
 
@@ -118,8 +122,8 @@ Variable *Blang::getVariable(std::string name) {
   return nullptr;
 }
 
-llvm::Type *Blang::getBWordTy() {
-  llvm::DataLayout DL = fmodule.getDataLayout();
+Type *Blang::getBWordTy() {
+  DataLayout DL = fmodule.getDataLayout();
   // unsigned LargestInt = DL.getLargestLegalIntTypeSizeInBits();
   unsigned maxIntSize = DL.getLargestLegalIntTypeSizeInBits();
   Type *maxIntType = IntegerType::get(context, maxIntSize);

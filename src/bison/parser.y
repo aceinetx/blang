@@ -54,7 +54,7 @@ blang::Parser* yyget_extra(void*);
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND EXCLAMATION COMMA
 
-%type <node> program function_definition
+%type <node> program function_definition global_declaration
 %type <node> rvalue lvalue rvalue_term rvalue_factor
 %type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
 %type <node> plus_assign minus_assign mult_assign div_assign
@@ -129,6 +129,7 @@ topstatements:
 
 topstatement:
 	function_definition
+	| global_declaration
 	;
 
 statement_list:
@@ -155,6 +156,14 @@ statement:
 	| mult_assign
 	| div_assign
 	;
+
+global_declaration:
+	IDENTIFIER SEMICOLON {
+		auto* node = new blang::AstGvarDeclare();
+		node->name = *$1;
+		delete $1;
+		$$ = node;
+	}
 
 plus_assign:
 	lvalue PLUSASSIGN rvalue SEMICOLON {
