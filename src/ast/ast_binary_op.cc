@@ -68,8 +68,18 @@ bool AstBinaryOp::compile(Blang *blang) {
   } else if (op == "lseq") {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpSLE(LHS, RHS),
                                        blang->getBWordTy());
+  } else if (op == "bitshl") {
+    result = blang->builder.CreateShl(LHS, RHS);
+  } else if (op == "bitshr") {
+    result = blang->builder.CreateLShr(LHS, RHS);
+  } else if (op == "bitand") {
+    result = blang->builder.CreateAnd(LHS, RHS);
+  } else if (op == "bitor") {
+    result = blang->builder.CreateOr(LHS, RHS);
   }
   blang->values.push(result);
+
+  blang->expr_types.pop();
 
   return true;
 }

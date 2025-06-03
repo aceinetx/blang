@@ -11,6 +11,7 @@ void AstVarAssign::print(int indent) const {
   printIndent(indent + 1);
   std::cout << "lexpr:" << std::endl;
   lexpr->print(indent + 2);
+  printIndent(indent + 1);
   std::cout << "rexpr:" << std::endl;
   rexpr->print(indent + 2);
 }

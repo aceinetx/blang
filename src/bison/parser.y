@@ -52,20 +52,29 @@ blang::Parser* yyget_extra(void*);
 %token INCREMENT DECREMENT
 %token PLUSASSIGN MINUSASSIGN MULTASSIGN DIVASSIGN
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
-%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON AMPERSAND EXCLAMATION COMMA
+%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON EXCLAMATION COMMA
 
 %type <node> program function_definition global_declaration
 %type <node> rvalue lvalue rvalue_term rvalue_factor
-%type <node> statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
-%type <node> plus_assign minus_assign mult_assign div_assign
+%type <node> statement_no_if statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
+%type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <stmt_list> statement_list
 %type <node> topstatement
 %type <top_stmt_list> topstatements
 %type <identifier_list> identifier_list
 %type <rvalue_commalist> rvalue_commalist 
 
+//%left PLUS MINUS
+//%left MULTIPLY DIVIDE
+//%left EQUAL NEQUAL GREATER LESS GREQ LSEQ
+//%left BITSHL BITSHR BITAND BITOR
+//%right EXCLAMATION
+
 %left PLUS MINUS
-%left MULTIPLY DIVIDE
+%left MULTIPLY DIVIDE MODULO
+%left BITAND
+%left BITOR
+%left BITSHL BITSHR
 %left EQUAL NEQUAL GREATER LESS GREQ LSEQ
 %right EXCLAMATION
 
@@ -143,18 +152,26 @@ statement_list:
 	}
 	;
 
-statement:
+statement_no_if:
 	declaration
 	| assignment SEMICOLON
 	| return_statement
 	| func_call SEMICOLON
 	| extrn
-	| if_chain
 	| while
 	| plus_assign
 	| minus_assign
 	| mult_assign
 	| div_assign
+	| bitshl_assign
+	| bitshr_assign
+	| bitand_assign
+	| bitor_assign
+	;
+
+statement:
+	statement_no_if
+	| if_chain
 	;
 
 global_declaration:
@@ -163,6 +180,42 @@ global_declaration:
 		node->name = *$1;
 		delete $1;
 		$$ = node;
+	}
+
+bitshl_assign:
+	lvalue BITSHL ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitshl";
+		$$ = assign;
+	}
+
+bitshr_assign:
+	lvalue BITSHR ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitshr";
+		$$ = assign;
+	}
+
+bitand_assign:
+	lvalue BITAND ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitand";
+		$$ = assign;
+	}
+
+bitor_assign:
+	lvalue BITOR ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitor";
+		$$ = assign;
 	}
 
 plus_assign:
@@ -243,7 +296,7 @@ if:
 		node->body = *$6;
 		delete $6;
 		$$ = node;
-	} | IF LPAREN rvalue RPAREN statement {
+	} | IF LPAREN rvalue RPAREN statement_no_if {
 		auto* node = new blang::AstIf();
 		node->expr = $3;
 		node->body.push_back($5);
@@ -268,6 +321,12 @@ elif:
 		node->expr = $4;
 		$$ = node;
 	}
+	| ELSE IF LPAREN rvalue RPAREN statement_no_if {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		node->body.push_back($6);
+		$$ = node;
+	}
 
 else:
 	ELSE LBRACE statement_list RBRACE {
@@ -278,6 +337,11 @@ else:
 	}
 	| ELSE LBRACE RBRACE {
 		auto* node = new blang::AstElse();
+		$$ = node;
+	}
+	| ELSE statement_no_if {
+		auto* node = new blang::AstElse();
+		node->body.push_back($2);
 		$$ = node;
 	}
 
@@ -343,7 +407,7 @@ assignment:
 	;
 
 addrof:
-	AMPERSAND lvalue {
+	BITAND lvalue {
 		auto* node = new blang::AstAddrof();
 		node->expr = $2;
 		node->times = 1;
@@ -455,6 +519,34 @@ rvalue:
 		op->op = "lseq";
 		$$ = op;
 	}
+	| rvalue BITSHL rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "bitshl";
+		$$ = op;
+	}
+	| rvalue BITSHR rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "bitshr";
+		$$ = op;
+	}
+	| rvalue BITAND rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "bitand";
+		$$ = op;
+	}
+	| rvalue BITOR rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "bitor";
+		$$ = op;
+	}
 	;
 
 rvalue_term:
@@ -496,5 +588,5 @@ rvalue_factor:
 %%
 
 void yyerror([[maybe_unused]] yyscan_t scanner,blang::Parser *ctx, const char *s) {
-	ctx->error = fmt::format("error at line {}: {}", ctx->line_num, s);
+	ctx->error = fmt::format("line {}: {}", ctx->line_num, s);
 }

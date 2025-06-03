@@ -19,6 +19,8 @@ AstAssignBinop::~AstAssignBinop() {
 bool AstAssignBinop::compile(Blang *blang) {
   Value *dest, *LHS, *RHS, *result;
 
+  result = nullptr;
+
   blang->expr_types.push(Blang::LVALUE);
   if (!var->compile(blang))
     return false;
@@ -46,6 +48,14 @@ bool AstAssignBinop::compile(Blang *blang) {
   } else if (op == "div") {
     blang->compile_error = "div is a TODO";
     return false;
+  } else if (op == "bitshl") {
+    result = blang->builder.CreateShl(LHS, RHS);
+  } else if (op == "bitshr") {
+    result = blang->builder.CreateLShr(LHS, RHS);
+  } else if (op == "bitand") {
+    result = blang->builder.CreateAnd(LHS, RHS);
+  } else if (op == "bitor") {
+    result = blang->builder.CreateOr(LHS, RHS);
   }
 
   blang->builder.CreateStore(result, dest, blang->getBWordTy());

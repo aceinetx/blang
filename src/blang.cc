@@ -64,11 +64,13 @@ Result<NoSuccess, std::string> Blang::parseAndCompile() {
 
   if (!parser->root) {
     return Result<NoSuccess, std::string>::error(
-        fmt::format("root == nullptr (parse error: {})", parser->error));
+        fmt::format("parse error: {}", parser->error));
   }
 
   yy_delete_buffer(buffer, scanner);
   yylex_destroy(scanner);
+
+  parser->root->print();
 
   if (!parser->root->compile(this)) {
     return Result<NoSuccess, std::string>::error(

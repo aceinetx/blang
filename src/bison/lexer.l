@@ -53,8 +53,11 @@ typedef void* yyscan_t;
 "]"             { return RBRACKET; }
 ";"             { return SEMICOLON; }
 "!"             { return EXCLAMATION; }
-"&"             { return AMPERSAND; }
 ","             { return COMMA; }
+"<<"            { return BITSHL; }
+">>"            { return BITSHR; }
+"&"             { return BITAND; }
+"|"             { return BITOR; }
 .               { printf("blang: error: unknown token: %s\n", yytext); }
 
 %%

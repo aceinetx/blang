@@ -14,7 +14,8 @@ void AstGvarDeclare::print(int indent) const {
 bool AstGvarDeclare::compile(Blang *blang) {
   llvm::GlobalVariable *var = new llvm::GlobalVariable(
       blang->fmodule, blang->getBWordTy(), false,
-      llvm::GlobalValue::ExternalLinkage, nullptr, name);
+      llvm::GlobalValue::ExternalLinkage,
+      llvm::ConstantInt::get(blang->getBWordTy(), 0), name);
 
   auto variable = std::make_unique<Variable>();
   variable->name = name;

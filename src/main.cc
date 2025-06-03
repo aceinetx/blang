@@ -9,9 +9,9 @@ int main() {
     return 1;
 
   blang.input = R"(
-word;
+base; word; n;
 
-display(base, n) {
+display() {
     extrn printf;
     auto it, i;
 
@@ -25,7 +25,7 @@ display(base, n) {
     printf("\n");
 }
 
-next(base, n) {
+next() {
     auto it, i, state;
 
     it = base;
@@ -44,20 +44,19 @@ next(base, n) {
 
 main() {
     extrn malloc, memset;
-    auto base, n;
 
-    word = 8;
     n    = 100;
+    word = 8;
     base = malloc(word*n);
     memset(base, 0, word*n);
     *(base + (n - 2)*word) = 1;
 
-    display(base, n);
+    display();
     auto i;
     i = 0;
     while (i < n - 3) {
-        next(base, n);
-        display(base, n);
+        next();
+        display();
         i += 1;
     }
 }
