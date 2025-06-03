@@ -23,6 +23,21 @@ int main(int argc, char **argv) {
         emit_level = Blang::EMIT_OBJ;
       } else if (arg == "-emit-llvm") {
         emit_level = Blang::EMIT_IR;
+      } else if (arg == "--help") {
+        fmt::printf(R"(OVERVIEW: blang LLVM compiler
+
+USAGE: blang [options] file...
+
+OPTIONS:
+	--help              Print this message
+  -o                  Set an output filename
+	-c                  Output object file
+	-emit-llvm          Output LLVM IR
+)");
+        return 0;
+      } else {
+        fmt::printf("blang: error: unknown argument: {}", arg);
+        return 1;
       }
     } else { /* assume it's a file */
       auto result = readFile(arg);
