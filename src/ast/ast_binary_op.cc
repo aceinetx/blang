@@ -48,8 +48,7 @@ bool AstBinaryOp::compile(Blang *blang) {
   } else if (op == "mul") {
     result = blang->builder.CreateMul(LHS, RHS);
   } else if (op == "div") {
-    blang->compile_error = "div is a TODO";
-    return false;
+    result = blang->builder.CreateSDiv(LHS, RHS);
   } else if (op == "equal") {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpEQ(LHS, RHS),
                                        blang->getBWordTy());

@@ -46,8 +46,7 @@ bool AstAssignBinop::compile(Blang *blang) {
   } else if (op == "mul") {
     result = blang->builder.CreateMul(LHS, RHS);
   } else if (op == "div") {
-    blang->compile_error = "div is a TODO";
-    return false;
+    result = blang->builder.CreateSDiv(LHS, RHS);
   } else if (op == "bitshl") {
     result = blang->builder.CreateShl(LHS, RHS);
   } else if (op == "bitshr") {

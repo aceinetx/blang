@@ -169,8 +169,7 @@ term(){
 		if(op == MULT){
 			left *= right;
 		} else if(op == DIV){
-			// we dont support it yet
-			// left /= right;
+			left /= right;
 		}
 		op = token;
 		if(op == 0) 
