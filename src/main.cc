@@ -36,7 +36,8 @@ next() {
         state <<= 1;
         state  |= *it;
         state  &= 7;
-        *(it - word) = (110>>state)&1;
+        *(it - word) = 
+				(110>>state)&1;
         i  += 1;
         it += word;
     }
