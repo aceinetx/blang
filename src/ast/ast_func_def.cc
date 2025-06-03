@@ -21,9 +21,12 @@ bool AstFuncDef::compile(Blang *blang) {
   for (size_t i = 0; i < args.size(); i++) {
     arg_types.push_back(blang->getBWordTy());
   }
-  auto type = FunctionType::get(blang->getBWordTy(), arg_types, false);
-  auto func =
-      Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
+  Function *func;
+  if (!(func = blang->fmodule.getFunction(name))) {
+    auto type = FunctionType::get(blang->getBWordTy(), arg_types, false);
+    func =
+        Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
+  }
   auto block = BasicBlock::Create(blang->context, "_" + name, func);
 
   blang->builder.SetInsertPoint(block);

@@ -39,8 +39,8 @@ bool AstFuncCall::compile(Blang *blang) {
         ext.isExterned = true;
       }
     } else {
-      blang->compile_error = fmt::format("undefined function: {}", name);
-      return false;
+      // blang->compile_error = fmt::format("undefined function: {}", name);
+      // return false;
     }
   }
 
@@ -53,7 +53,17 @@ bool AstFuncCall::compile(Blang *blang) {
     blang->values.pop();
   }
 
-  blang->values.push(blang->builder.CreateCall(func, arg_values));
+  if (!func) {
+    std::vector<Type *> art;
+    for (AstNode *arg : args)
+      art.push_back(blang->getBWordTy());
+    Type *returnType = blang->getBWordTy();
+    FunctionType *functionType = FunctionType::get(returnType, art, false);
+    auto f = blang->fmodule.getOrInsertFunction(name, functionType);
+    blang->values.push(blang->builder.CreateCall(f, arg_values));
+  } else {
+    blang->values.push(blang->builder.CreateCall(func, arg_values));
+  }
 
   if (!blang->expr_types.empty()) {
     blang->expr_types.pop();
