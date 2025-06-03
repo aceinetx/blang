@@ -71,6 +71,7 @@ Result<NoSuccess, std::string> Blang::parseAndCompile() {
   yylex_destroy(scanner);
 
   if (!parser->root->compile(this)) {
+    delete parser->root;
     return Result<NoSuccess, std::string>::error(
         fmt::format("compile error: {}", compile_error));
   }

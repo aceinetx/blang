@@ -13,6 +13,8 @@ typedef void* yyscan_t;
 
 %%
 
+"//".*            ;
+"/*"([^*]|\*+[^*/])*\*+"/" ; 
 [ \t]           ;
 [\n]            { PARSER->line_num++; }
 "return"        { return RETURN; }

@@ -17,8 +17,6 @@ https://github.com/tsoding/b
  Works perfectly
 - examples/05_rule110.b
  Works perfectly
-- examples/06_raylib.b
- Compile error due to lack of modulo operator
 
 How to compile blang and a test program
 -----------------------------

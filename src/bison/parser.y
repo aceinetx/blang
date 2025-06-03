@@ -97,6 +97,14 @@ function_definition:
 		delete $3;
 		delete $1;
 		$$ = func;
+	} | IDENTIFIER LPAREN identifier_list RPAREN statement {
+		auto* func = new blang::AstFuncDef();
+		func->name = *$1;
+		func->args = *$3;
+		func->children.push_back($5);
+		delete $3;
+		delete $1;
+		$$ = func;
 	} | IDENTIFIER LPAREN identifier_list RPAREN LBRACE RBRACE {
 		auto* func = new blang::AstFuncDef();
 		func->name = *$1;
@@ -111,6 +119,12 @@ function_definition:
 			func->children.push_back(stmt);
 		}
 		delete $5;
+		delete $1;
+		$$ = func;
+	} | IDENTIFIER LPAREN RPAREN statement {
+		auto* func = new blang::AstFuncDef();
+		func->name = *$1;
+		func->children.push_back($4);
 		delete $1;
 		$$ = func;
 	} | IDENTIFIER LPAREN RPAREN LBRACE RBRACE {

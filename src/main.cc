@@ -17,6 +17,7 @@ main() {
 	k = 0;
 
 	auto QUIT, UP, DOWN, LEFT, RIGHT;
+	// initalize keys
 	QUIT = 113;
 	UP = 119;
 	DOWN = 115;
@@ -48,12 +49,6 @@ main() {
 	}
 
 	endwin();
-}
-)";
-
-  blang.input = R"(
-main(){
-	return -1;
 }
 )";
 
