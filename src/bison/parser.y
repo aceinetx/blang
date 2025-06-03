@@ -55,7 +55,7 @@ blang::Parser* yyget_extra(void*);
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON EXCLAMATION COMMA
 
 %type <node> program function_definition global_declaration
-%type <node> rvalue lvalue rvalue_term rvalue_factor rvalue_shift
+%type <node> rvalue lvalue rvalue_term rvalue_factor rvalue_shift rvalue_namelater
 %type <node> statement_no_if statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
 %type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <stmt_list> statement_list
@@ -64,19 +64,13 @@ blang::Parser* yyget_extra(void*);
 %type <identifier_list> identifier_list
 %type <rvalue_commalist> rvalue_commalist 
 
-//%left PLUS MINUS
-//%left MULTIPLY DIVIDE
-//%left EQUAL NEQUAL GREATER LESS GREQ LSEQ
-//%left BITSHL BITSHR BITAND BITOR
-//%right EXCLAMATION
-
+%left GREATER LESS GREQ LSEQ
 %left PLUS MINUS
-%left MULTIPLY DIVIDE MODULO
+%left MULTIPLY DIVIDE
 %left BITAND
 %left BITOR
 %left BITSHL BITSHR
 %left EQUAL NEQUAL
-%left GREATER LESS GREQ LSEQ
 %right EXCLAMATION
 
 %%
@@ -458,76 +452,80 @@ lvalue:
 	| addrof
 
 rvalue:
-	rvalue_shift
+	rvalue_namelater
 	| EXCLAMATION rvalue {
 		auto* op = new blang::AstUnot();
 		op->value = $2;
 		$$ = op;
 	}
-	| rvalue PLUS rvalue_shift {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "add";
-		$$ = op;
-	}
-	| rvalue MINUS rvalue_shift {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "sub";
-		$$ = op;
-	}
-	| rvalue EQUAL rvalue_shift {
+	| rvalue EQUAL rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "equal";
 		$$ = op;
 	}
-	| rvalue NEQUAL rvalue_shift {
+	| rvalue NEQUAL rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "nequal";
 		$$ = op;
 	}
-	| rvalue GREATER rvalue_shift {
+	| rvalue GREATER rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "greater";
 		$$ = op;
 	}
-	| rvalue LESS rvalue_shift {
+	| rvalue LESS rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "less";
 		$$ = op;
 	}
-	| rvalue GREQ rvalue_shift {
+	| rvalue GREQ rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "greq";
 		$$ = op;
 	}
-	| rvalue LSEQ rvalue_shift {
+	| rvalue LSEQ rvalue_namelater {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "lseq";
 		$$ = op;
 	}
-	| rvalue BITAND rvalue_shift {
+	;
+
+rvalue_namelater:
+	rvalue_shift
+	| rvalue_namelater PLUS rvalue_shift {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "add";
+		$$ = op;
+	}
+	| rvalue_namelater MINUS rvalue_shift {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "sub";
+		$$ = op;
+	}
+	| rvalue_namelater BITAND rvalue_shift {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "bitand";
 		$$ = op;
 	}
-	| rvalue BITOR rvalue_shift {
+	| rvalue_namelater BITOR rvalue_shift {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
