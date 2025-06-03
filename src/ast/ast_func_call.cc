@@ -55,5 +55,9 @@ bool AstFuncCall::compile(Blang *blang) {
 
   blang->values.push(blang->builder.CreateCall(func, arg_values));
 
+  if (!blang->expr_types.empty()) {
+    blang->expr_types.pop();
+  }
+
   return true;
 }

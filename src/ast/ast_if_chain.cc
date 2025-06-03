@@ -17,31 +17,18 @@ AstIfChain::~AstIfChain() {
 }
 
 bool AstIfChain::compile(Blang *blang) {
-  auto id = ++blang->ifID;
-
-  blang->ifs.push({});
-  If &i = blang->ifs.top();
-  i.fallthrough = BasicBlock::Create(blang->context, fmt::format("cmp{}", id),
-                                     blang->current_func);
-  i.end = BasicBlock::Create(blang->context, fmt::format("end{}", id),
-                             blang->current_func);
-
-  blang->builder.CreateBr(i.fallthrough);
-
-  blang->builder.SetInsertPoint(i.fallthrough);
-
   for (AstNode *n : ifs) {
     if (!n->compile(blang)) {
       return false;
     }
   }
 
-  if (!i.fallthrough->getTerminator()) {
-    blang->builder.SetInsertPoint(i.fallthrough);
-    blang->builder.CreateBr(i.end);
-    blang->builder.SetInsertPoint(i.end);
+  if (!blang->ifs.top().false_block->getTerminator()) {
+    blang->builder.SetInsertPoint(blang->ifs.top().false_block);
+    blang->builder.CreateBr(blang->ifs.top().merge_block);
   }
 
+  blang->builder.SetInsertPoint(blang->ifs.top().merge_block);
   blang->ifs.pop();
 
   return true;

@@ -23,9 +23,10 @@ typedef struct Scope {
 } Scope;
 
 typedef struct If {
-  llvm::BasicBlock *fallthrough;
-  std::vector<llvm::BasicBlock *> parts;
-  llvm::BasicBlock *end;
+  llvm::BasicBlock *true_block;
+  llvm::BasicBlock *false_block;
+  llvm::BasicBlock *merge_block;
+  bool elif = false;
 } If;
 
 class Blang {
@@ -48,7 +49,9 @@ public:
   std::map<std::string, ExternSymbol> extern_symbols;
 
   std::stack<If> ifs;
+  std::stack<llvm::BasicBlock *> if_blocks;
   unsigned long ifID;
+
   unsigned long whileID;
 
   llvm::Function *current_func;
