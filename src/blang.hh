@@ -63,6 +63,9 @@ public:
 
   llvm::Function *current_func;
 
+  std::vector<std::string> link_libraries;
+  std::string link_path;
+
   enum ExprType {
     LVALUE,
     RVALUE,

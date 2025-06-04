@@ -161,19 +161,16 @@ Result<NoSuccess, std::string> Blang::emit(std::string filename,
     dest.flush();
 
     if (level == EmitLevel::EMIT_EXE) {
-      std::string clang_path;
-      if (auto Path = sys::findProgramByName("clang")) {
-        clang_path = *Path;
-      } else {
-        ERROR("clang not found in path");
-      }
+      std::string cmd = fmt::format("clang -o {} ", filename);
 
-      std::vector<StringRef> linker_args = {clang_path, obj_filename, "-o",
-                                            filename};
-      std::string linker_error;
-      sys::ExecuteAndWait(linker_args[0], linker_args,
-                          std::optional<ArrayRef<StringRef>>(), {}, 0, 0,
-                          &linker_error);
+      for (std::string lib : link_libraries)
+        cmd += "-l" + lib + " ";
+
+      if (!link_path.empty())
+        cmd += "-L" + link_path + " ";
+      cmd += obj_filename;
+
+      std::system(cmd.data());
 
       std::error_code err = sys::fs::remove(obj_filename);
       (void)err;

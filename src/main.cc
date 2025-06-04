@@ -23,6 +23,10 @@ int main(int argc, char **argv) {
         emit_level = Blang::EMIT_OBJ;
       } else if (arg == "-emit-llvm") {
         emit_level = Blang::EMIT_IR;
+      } else if (arg == "-l") {
+        blang.link_libraries.push_back(argsShift());
+      } else if (arg == "-L") {
+        blang.link_path = argsShift();
       } else if (arg == "--help") {
         fmt::printf(R"(OVERVIEW: blang LLVM compiler
 
@@ -30,9 +34,11 @@ USAGE: blang [options] file...
 
 OPTIONS:
   --help              Print this message
-  -o                  Set an output filename
-  -c                  Output object file
+  -o <file>           Write output to <file>
+  -c                  Only run compile, and assemble steps
   -emit-llvm          Output LLVM IR
+  -L <dir>            Add directory to library search path
+  -l <lib>           	Link libraries 
 )");
         return 0;
       } else {

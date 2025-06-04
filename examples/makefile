@@ -1,9 +1,12 @@
 B = $$(find .. -name blang)
 
-all: calc hello
+all: calc hello curses
+
+calc: calc.b
+	$(B) $< -o $@
 
 hello: hello.b
 	$(B) $< -o $@
 
-calc: calc.b
-	$(B) $< -o $@
+curses: curses.b
+	$(B) $< -o $@ -l ncurses
