@@ -49,7 +49,7 @@ blang::Parser* yyget_extra(void*);
 %token <number> NUMBER
 %token <string> IDENTIFIER
 %token <string> STRING_LITERAL
-%token RETURN AUTO EXTRN IF ELSE WHILE
+%token RETURN AUTO EXTRN IF ELSE WHILE BREAK
 %token INCREMENT DECREMENT
 %token PLUSASSIGN MINUSASSIGN MULTASSIGN DIVASSIGN
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
@@ -57,7 +57,8 @@ blang::Parser* yyget_extra(void*);
 
 %type <node> program function_definition global_declaration
 %type <node> lvalue rvalue rvalue_bitand rvalue_shift rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor
-%type <node> statement_no_if statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
+%type <node> if elif else if_chain
+%type <node> statement_no_if statement declaration assignment return_statement func_call extrn deref addrof while break
 %type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <stmt_list> statement_list
 %type <node> topstatement
@@ -179,6 +180,7 @@ statement_no_if:
 	| bitshr_assign
 	| bitand_assign
 	| bitor_assign
+	| break
 	;
 
 statement:
@@ -282,6 +284,12 @@ while:
 	| WHILE LPAREN rvalue RPAREN LBRACE RBRACE {
 		auto* node = new blang::AstWhile();
 		node->expr = $3;
+		$$ = node;
+	}
+
+break:
+	BREAK SEMICOLON {
+		auto* node = new blang::AstBreak();
 		$$ = node;
 	}
 

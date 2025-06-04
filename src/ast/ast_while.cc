@@ -21,15 +21,18 @@ AstWhile::~AstWhile() {
 
 bool AstWhile::compile(Blang *blang) {
   unsigned int id = ++blang->whileID;
-  BasicBlock *cmp = BasicBlock::Create(
-      blang->context, fmt::format("wcmp{}", id), blang->current_func);
-  BasicBlock *body_block = BasicBlock::Create(
-      blang->context, fmt::format("wbody{}", id), blang->current_func);
-  BasicBlock *end = BasicBlock::Create(
-      blang->context, fmt::format("wend{}", id), blang->current_func);
 
-  blang->builder.CreateBr(cmp);
-  blang->builder.SetInsertPoint(cmp);
+  blang->whiles.push({});
+  While &w = blang->whiles.top();
+  w.cmp = BasicBlock::Create(blang->context, fmt::format("wcmp{}", id),
+                             blang->current_func);
+  w.body = BasicBlock::Create(blang->context, fmt::format("wbody{}", id),
+                              blang->current_func);
+  w.end = BasicBlock::Create(blang->context, fmt::format("wend{}", id),
+                             blang->current_func);
+
+  blang->builder.CreateBr(w.cmp);
+  blang->builder.SetInsertPoint(w.cmp);
   blang->expr_types.push(Blang::RVALUE);
   if (!expr->compile(blang))
     return false;
@@ -39,22 +42,23 @@ bool AstWhile::compile(Blang *blang) {
   cmpValue = blang->builder.CreateICmpNE(
       cmpValue, ConstantInt::get(blang->getBWordTy(), 0));
 
-  blang->builder.CreateCondBr(cmpValue, body_block, end);
+  blang->builder.CreateCondBr(cmpValue, w.body, w.end);
 
-  blang->builder.SetInsertPoint(body_block);
+  blang->builder.SetInsertPoint(w.body);
   for (AstNode *n : body) {
     if (!n->compile(blang)) {
       return false;
     }
   }
 
-  end->moveAfter(blang->builder.GetInsertBlock());
+  w.end->moveAfter(blang->builder.GetInsertBlock());
 
   if (!blang->builder.GetInsertBlock()->getTerminator()) {
-    blang->builder.CreateBr(cmp);
+    blang->builder.CreateBr(w.cmp);
   }
 
-  blang->builder.SetInsertPoint(end);
+  blang->builder.SetInsertPoint(w.end);
+  blang->whiles.pop();
 
   return true;
 }

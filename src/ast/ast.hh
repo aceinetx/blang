@@ -234,4 +234,10 @@ public:
   void print(int indent = 0) const override;
   bool compile(Blang *blang) override;
 };
+
+class AstBreak : public AstNode {
+public:
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+};
 } // namespace blang

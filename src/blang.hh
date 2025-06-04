@@ -29,6 +29,12 @@ typedef struct If {
   bool elif = false;
 } If;
 
+typedef struct While {
+  llvm::BasicBlock *cmp;
+  llvm::BasicBlock *body;
+  llvm::BasicBlock *end;
+} While;
+
 class Blang {
 public:
   Parser *parser;
@@ -52,6 +58,7 @@ public:
   std::stack<llvm::BasicBlock *> if_blocks;
   unsigned long ifID;
 
+  std::stack<While> whiles;
   unsigned long whileID;
 
   llvm::Function *current_func;

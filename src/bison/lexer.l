@@ -23,6 +23,7 @@ typedef void* yyscan_t;
 "if"			 			{ return IF; }
 "else"			 		{ return ELSE; }
 "while"			 		{ return WHILE; }
+"break"			 		{ return BREAK; }
 [0-9]+					{ yylval->number = std::stol(yytext); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval->string = new std::string(yytext);
