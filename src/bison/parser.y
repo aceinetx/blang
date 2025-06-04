@@ -2,6 +2,7 @@
 %lex-param { yyscan_t scanner }
 %parse-param { void *scanner }
 %parse-param { blang::Parser *ctx }
+%define lr.type lalr
 
 %{
 #include <pch.hh>
@@ -55,7 +56,7 @@ blang::Parser* yyget_extra(void*);
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON EXCLAMATION COMMA
 
 %type <node> program function_definition global_declaration
-%type <node> rvalue lvalue rvalue_term rvalue_factor rvalue_shift rvalue_aftercmp
+%type <node> lvalue rvalue rvalue_bitand rvalue_shift rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor
 %type <node> statement_no_if statement declaration assignment return_statement func_call extrn deref addrof if elif else if_chain while
 %type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <stmt_list> statement_list
@@ -64,13 +65,13 @@ blang::Parser* yyget_extra(void*);
 %type <identifier_list> identifier_list
 %type <rvalue_commalist> rvalue_commalist 
 
-%left GREATER LESS GREQ LSEQ
-%left PLUS MINUS
-%left MULTIPLY DIVIDE
-%left BITAND
 %left BITOR
+%left BITAND
 %left BITSHL BITSHR
 %left EQUAL NEQUAL
+%left GREATER LESS GREQ LSEQ
+%left PLUS MINUS
+%left MULTIPLY DIVIDE /* modulo */
 %right EXCLAMATION
 
 %%
@@ -468,7 +469,7 @@ lvalue:
 	| addrof
 
 rvalue:
-	rvalue_aftercmp
+	rvalue_bitand
 	| EXCLAMATION rvalue {
 		auto* op = new blang::AstUnot();
 		op->value = $2;
@@ -479,74 +480,7 @@ rvalue:
 		op->value = $2;
 		$$ = op;
 	}
-	| rvalue EQUAL rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "equal";
-		$$ = op;
-	}
-	| rvalue NEQUAL rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "nequal";
-		$$ = op;
-	}
-	| rvalue GREATER rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "greater";
-		$$ = op;
-	}
-	| rvalue LESS rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "less";
-		$$ = op;
-	}
-	| rvalue GREQ rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "greq";
-		$$ = op;
-	}
-	| rvalue LSEQ rvalue_aftercmp {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "lseq";
-		$$ = op;
-	}
-	;
-
-rvalue_aftercmp:
-	rvalue_shift
-	| rvalue_aftercmp PLUS rvalue_shift {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "add";
-		$$ = op;
-	}
-	| rvalue_aftercmp MINUS rvalue_shift {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "sub";
-		$$ = op;
-	}
-	| rvalue_aftercmp BITAND rvalue_shift {
-		auto* op = new blang::AstBinaryOp();
-		op->left = $1;
-		op->right = $3;
-		op->op = "bitand";
-		$$ = op;
-	}
-	| rvalue_aftercmp BITOR rvalue_shift {
+	| rvalue BITOR rvalue_bitand {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
@@ -555,22 +489,102 @@ rvalue_aftercmp:
 	}
 	;
 
+rvalue_bitand:
+	| rvalue_shift
+	| rvalue_bitand BITAND rvalue_shift {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "bitand";
+		$$ = op;
+	}
+	;
+
 rvalue_shift:
-	rvalue_term
-	| rvalue_shift BITSHL rvalue_term {
+	rvalue_eq
+	| rvalue_shift BITSHL rvalue_eq {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "bitshl";
 		$$ = op;
 	}
-	| rvalue_shift BITSHR rvalue_term {
+	| rvalue_shift BITSHR rvalue_eq {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;
 		op->right = $3;
 		op->op = "bitshr";
 		$$ = op;
 	}
+	;
+
+rvalue_eq:
+	rvalue_cmp
+	| rvalue_eq EQUAL rvalue_cmp {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "equal";
+		$$ = op;
+	}
+	| rvalue_eq NEQUAL rvalue_cmp {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "nequal";
+		$$ = op;
+	}
+	;
+
+rvalue_cmp:
+	rvalue_pm
+	| rvalue_cmp GREATER rvalue_pm {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "greater";
+		$$ = op;
+	}
+	| rvalue_cmp LESS rvalue_pm {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "less";
+		$$ = op;
+	}
+	| rvalue_cmp GREQ rvalue_pm {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "greq";
+		$$ = op;
+	}
+	| rvalue_cmp LSEQ rvalue_pm {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "lseq";
+		$$ = op;
+	}
+	;
+
+rvalue_pm:
+	rvalue_term
+	| rvalue_pm PLUS rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "add";
+		$$ = op;
+	}
+	| rvalue_pm MINUS rvalue_term {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "sub";
+		$$ = op;
+	}
+	;
 
 rvalue_term:
 	rvalue_factor
