@@ -1,5 +1,4 @@
-hello
-calc
-*.o
-*.s
-*.ll
+*
+!*.b
+!Makefile
+!makefile
