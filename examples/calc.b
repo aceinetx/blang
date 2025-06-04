@@ -63,19 +63,15 @@ is_expr_op(token){
 
 do_number(){
 	auto end;
-	end = 0;
+	while(1){
+		if(pos >= input + input_size) break;
 
-	while(!end){
-		if(pos >= input + input_size) end = 1;
+		if(is_digit(*pos)){
+			number *= 10;
+			number += (*pos & 255) - '0';
+		} else break;
 
-		if(!end){
-			if(is_digit(*pos)){
-				number *= 10;
-				number += (*pos & 255) - '0';
-			} else return 0;
-
-			pos += 1;
-		}
+		pos += 1;
 	}
 }
 
@@ -88,39 +84,32 @@ next(){
 	number = 0;
 	token = 0;
 
-	while(!end){
-		if(pos >= input + input_size) end = 1;
-		if((*pos & 255) == 0) end = 1;
+	while(1){
+		if(pos >= input + input_size) break;
+		if((*pos & 255) == 0) break;
 
-		if(!end){
-			if(is_digit(*pos)){
-				do_number();
-				return 0;
-			}
-
-			ch = *pos & 255;
-			if(ch == '+'){
-				token = PLUS;
-				end = 1;
-			} else if(ch == '-'){
-				token = MINUS;
-				end = 1;
-			} else if(ch == '*'){
-				token = MULT;
-				end = 1;
-			} else if(ch == '/'){
-				token = DIV;
-				end = 1;
-			} else if(ch == '('){
-				token = LPAREN;
-				end = 1;
-			} else if(ch == ')'){
-				token = RPAREN;
-				end = 1;
-			}
-
-			pos += 1;
+		if(is_digit(*pos)){
+			do_number();
+			break;
 		}
+
+		ch = *pos & 255;
+		if(ch == '+'){
+			token = PLUS;
+		} else if(ch == '-'){
+			token = MINUS;
+		} else if(ch == '*'){
+			token = MULT;
+		} else if(ch == '/'){
+			token = DIV;
+		} else if(ch == '('){
+			token = LPAREN;
+		} else if(ch == ')'){
+			token = RPAREN;
+		}
+
+		pos += 1;
+		if(token != 0) break;
 	}
 }
 
@@ -147,7 +136,6 @@ factor(){
 
 		if(token != RPAREN)
 			syntax();
-		
 
 		next();
 		return v;
@@ -173,7 +161,7 @@ term(){
 		}
 		op = token;
 		if(op == 0) 
-			return left;
+			break;
 	}
 	return left;
 }
@@ -196,7 +184,7 @@ expr(){
 		}
 		op = token;
 		if(op == 0) 
-			return left;
+			break;
 	}
 	return left;
 }
