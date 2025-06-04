@@ -488,6 +488,34 @@ rvalue:
 		op->value = $2;
 		$$ = op;
 	}
+	| rvalue DECREMENT {
+		auto* op = new blang::AstIncDec();
+		op->expr = $1;
+		op->type = blang::AstIncDec::POST;
+		op->op = blang::AstIncDec::DEC;
+		$$ = op;
+	}
+	| DECREMENT rvalue {
+		auto* op = new blang::AstIncDec();
+		op->expr = $2;
+		op->type = blang::AstIncDec::PRE;
+		op->op = blang::AstIncDec::DEC;
+		$$ = op;
+	}
+	| rvalue INCREMENT {
+		auto* op = new blang::AstIncDec();
+		op->expr = $1;
+		op->type = blang::AstIncDec::POST;
+		op->op = blang::AstIncDec::INC;
+		$$ = op;
+	}
+	| INCREMENT rvalue {
+		auto* op = new blang::AstIncDec();
+		op->expr = $2;
+		op->type = blang::AstIncDec::PRE;
+		op->op = blang::AstIncDec::INC;
+		$$ = op;
+	}
 	| rvalue BITOR rvalue_bitand {
 		auto* op = new blang::AstBinaryOp();
 		op->left = $1;

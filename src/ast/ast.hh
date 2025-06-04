@@ -240,4 +240,24 @@ public:
   void print(int indent = 0) const override;
   bool compile(Blang *blang) override;
 };
+
+class AstIncDec : public AstNode {
+public:
+  enum {
+    POST,
+    PRE,
+  } type;
+
+  enum {
+    INC,
+    DEC,
+  } op;
+
+  AstNode *expr;
+
+  void print(int indent = 0) const override;
+  bool compile(Blang *blang) override;
+
+  ~AstIncDec();
+};
 } // namespace blang

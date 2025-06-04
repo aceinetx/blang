@@ -37,6 +37,8 @@ typedef void* yyscan_t;
 	yylval->number = static_cast<int>(yytext[1]); // Get ASCII value of the character
 	return NUMBER; 
 }
+"++"						{ return INCREMENT; }
+"--"						{ return DECREMENT; }
 "+="						{ return PLUSASSIGN; }
 "-="						{ return MINUSASSIGN; }
 "*="						{ return MULTASSIGN; }
