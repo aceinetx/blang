@@ -253,7 +253,7 @@ return:
 
 lvalue:
 	lvalue_factor
-	| MULTIPLY lvalue_factor {
+	| MULTIPLY lvalue {
 		auto* node = new blang::AstDeref();
 		node->expr = $2;
 		node->times = 1;
@@ -265,12 +265,24 @@ lvalue:
 		node->times = 1;
 		$$ = node;
 	}
+	| rvalue_factor_no_lvalue LBRACKET rvalue RBRACKET {
+		auto* var = new blang::AstArrIndex();
+		var->expr = $1;
+		var->index = $3;
+		$$ = var;
+	}
 
 lvalue_factor:
 	IDENTIFIER {
 		auto* var = new blang::AstVarRef();
 		var->name = *$1;
 		delete $1;
+		$$ = var;
+	}
+	| lvalue_factor LBRACKET rvalue RBRACKET {
+		auto* var = new blang::AstArrIndex();
+		var->expr = $1;
+		var->index = $3;
 		$$ = var;
 	}
 
@@ -434,6 +446,12 @@ rvalue_factor_no_lvalue:
 rvalue_factor:
 	rvalue_factor_no_lvalue
 	| lvalue
+	| BITAND lvalue {
+		auto* node = new blang::AstAddrof();
+		node->expr = $2;
+		node->times = 1;
+		$$ = node;
+	}
 	;
 
 %%
