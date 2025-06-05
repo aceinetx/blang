@@ -293,6 +293,12 @@ rvalue:
 		op->value = $2;
 		$$ = op;
 	}
+	| lvalue ASSIGN rvalue_bitand {
+		auto* assign = new blang::AstVarAssign();
+		assign->lexpr = $1;
+		assign->rexpr = $3;
+		$$ = assign;
+	}
 	;
 
 rvalue_bitand:
