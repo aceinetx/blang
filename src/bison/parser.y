@@ -57,24 +57,16 @@ blang::Parser* yyget_extra(void*);
 
 %type <node> top_statement 
 %type <node_list> top_statements
-%type <node> function_definition
-%type <node> statement 
+%type <node> function_definition global_declaration
+%type <node> statement statement_no_cs
+%type <node> if_chain if else elif
 %type <node_list> statement_list 
 %type <identifier_list> identifier_list 
-%type <node> return extrn func_call declaration assignment
+%type <node> return extrn func_call declaration assignment while break
+%type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <node_list> rvalue_commalist
 %type <node> rvalue rvalue_bitand rvalue_shift rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor_no_lvalue rvalue_factor
 %type <node> lvalue lvalue_factor
-
-/*
-%left BITOR
-%left BITAND
-%left BITSHL BITSHR
-%left EQUAL NEQUAL
-%left GREATER LESS GREQ LSEQ
-%left PLUS MINUS
-%left MULTIPLY DIVIDE 
-%precedence EXCLAMATION */
 
 %left BITOR
 %left BITAND
@@ -173,7 +165,16 @@ top_statements:
 
 top_statement:
 	function_definition
+	| global_declaration
 	;
+
+global_declaration:
+	IDENTIFIER SEMICOLON {
+		auto* node = new blang::AstGvarDeclare();
+		node->name = *$1;
+		delete $1;
+		$$ = node;
+	}
 
 statement_list:
 	statement {
@@ -186,12 +187,202 @@ statement_list:
 	}
 	;
 
-statement:
+statement_no_cs:
 	return
 	| extrn
 	| func_call SEMICOLON
 	| declaration
 	| assignment
+	| break
+	| plus_assign
+	| minus_assign
+	| mult_assign
+	| div_assign
+	| bitshl_assign
+	| bitshr_assign
+	| bitand_assign
+	| bitor_assign
+	;
+
+statement:
+	statement_no_cs
+	| if_chain
+	| while
+	;
+
+bitshl_assign:
+	lvalue BITSHL ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitshl";
+		$$ = assign;
+	}
+
+bitshr_assign:
+	lvalue BITSHR ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitshr";
+		$$ = assign;
+	}
+
+bitand_assign:
+	lvalue BITAND ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitand";
+		$$ = assign;
+	}
+
+bitor_assign:
+	lvalue BITOR ASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $4;
+		assign->op = "bitor";
+		$$ = assign;
+	}
+
+plus_assign:
+	lvalue PLUSASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "add";
+		$$ = assign;
+	}
+
+minus_assign:
+	lvalue MINUSASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "sub";
+		$$ = assign;
+	}
+
+mult_assign:
+	lvalue MULTASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "mul";
+		$$ = assign;
+	}
+
+div_assign:
+	lvalue DIVASSIGN rvalue SEMICOLON {
+		auto* assign = new blang::AstAssignBinop();
+		assign->var = $1;
+		assign->value = $3;
+		assign->op = "div";
+		$$ = assign;
+	}
+
+if_chain:
+	if {
+		auto* node = new blang::AstIfChain();
+		node->ifs.push_back($1);
+		$$ = node;
+	}
+	| if_chain elif {
+		((blang::AstIfChain*)$1)->ifs.push_back($2);
+		((blang::AstIfChain*)$$)->ifs = ((blang::AstIfChain*)$1)->ifs;
+	}
+	| if_chain else {
+		((blang::AstIfChain*)$1)->ifs.push_back($2);
+		((blang::AstIfChain*)$$)->ifs = ((blang::AstIfChain*)$1)->ifs;
+	}
+	;
+
+if:
+	IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		node->body = *$6;
+		delete $6;
+		$$ = node;
+	} | IF LPAREN rvalue RPAREN statement_no_cs {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		node->body.push_back($5);
+		$$ = node;
+	}
+	| IF LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstIf();
+		node->expr = $3;
+		$$ = node;
+	}
+	;
+
+elif:
+	ELSE IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		node->body = *$7;
+		delete $7;
+		$$ = node;
+	} 
+	| ELSE IF LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		$$ = node;
+	}
+	| ELSE IF LPAREN rvalue RPAREN statement_no_cs {
+		auto* node = new blang::AstElif();
+		node->expr = $4;
+		node->body.push_back($6);
+		$$ = node;
+	}
+	;
+
+else:
+	ELSE LBRACE statement_list RBRACE {
+		auto* node = new blang::AstElse();
+		node->body = *$3;
+		delete $3;
+		$$ = node;
+	}
+	| ELSE LBRACE RBRACE {
+		auto* node = new blang::AstElse();
+		$$ = node;
+	}
+	| ELSE statement_no_cs {
+		auto* node = new blang::AstElse();
+		node->body.push_back($2);
+		$$ = node;
+	}
+	;
+
+while:
+	WHILE LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
+		node->body = *$6;
+		delete $6;
+		$$ = node;
+	}
+	| WHILE LPAREN rvalue RPAREN LBRACE RBRACE {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
+		$$ = node;
+	}
+	| WHILE LPAREN rvalue RPAREN statement {
+		auto* node = new blang::AstWhile();
+		node->expr = $3;
+		node->body.push_back($5);
+		$$ = node;
+	}
+	;
+
+break:
+	BREAK SEMICOLON {
+		auto* node = new blang::AstBreak();
+		$$ = node;
+	}
 	;
 
 assignment:
@@ -201,6 +392,7 @@ assignment:
 		assign->rexpr = $3;
 		$$ = assign;
 	}
+	;
 
 declaration:
 	AUTO identifier_list SEMICOLON {
@@ -293,11 +485,6 @@ rvalue:
 		op->left = $1;
 		op->right = $3;
 		op->op = "bitor";
-		$$ = op;
-	}
-	| EXCLAMATION rvalue_bitand {
-		auto* op = new blang::AstUnot();
-		op->value = $2;
 		$$ = op;
 	}
 	| MINUS rvalue_bitand {
@@ -426,6 +613,11 @@ rvalue_term:
 		op->op = "div";
 		$$ = op;
 	}
+	| EXCLAMATION rvalue_factor {
+		auto* op = new blang::AstUnot();
+		op->value = $2;
+		$$ = op;
+	}
 	;
 
 rvalue_factor_no_lvalue:
@@ -452,6 +644,7 @@ rvalue_factor:
 		node->times = 1;
 		$$ = node;
 	}
+	| func_call
 	;
 
 %%
