@@ -670,6 +670,7 @@ rvalue_factor_no_lvalue:
 	| LPAREN rvalue RPAREN {
 		$$ = $2;
 	}
+	| func_call
 	;
 
 rvalue_factor:
@@ -681,7 +682,6 @@ rvalue_factor:
 		node->times = 1;
 		$$ = node;
 	}
-	| func_call
 	;
 
 %%
