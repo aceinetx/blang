@@ -25,6 +25,7 @@ typedef void* yyscan_t;
 "while"			 		{ return WHILE; }
 "break"			 		{ return BREAK; }
 [0-9]+					{ yylval->number = std::stol(yytext); return NUMBER; }
+0[xX][0-9a-fA-F]+	{ yylval->number = std::stol(yytext, nullptr, 16); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
 	yylval->string = new std::string(yytext);
 	return IDENTIFIER;
