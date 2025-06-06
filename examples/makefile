@@ -3,7 +3,7 @@ B = $$(find .. -name blang)
 all: calc hello curses
 
 calc: calc.b
-	$(B) $< -o $@
+	$(B) $< -o $@ -b
 
 hello: hello.b
 	$(B) $< -o $@
