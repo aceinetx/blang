@@ -34,8 +34,7 @@ get_input(){
 	memset(input, 0, input_size);
 
 	fgets(input, input_size, stdin);
-	//*(input + strcspn(input, "\n")) = 0;
-	lchar(input, strcspn(input, "\n"), 0);
+	lchar(input, strcspn(input, "*n"), 0);
 
 	pos = input;
 }
@@ -207,7 +206,7 @@ main(argc, argv){
 
 	next();
 
-	printf("%ld\n", expr());
+	printf("%ld*n", expr());
 
 	free(input);
 }

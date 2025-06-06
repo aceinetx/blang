@@ -8,7 +8,7 @@ using namespace llvm;
 static std::string ParseEscapeSequences(const std::string &input) {
   std::string output;
   for (size_t i = 0; i < input.length(); ++i) {
-    if (input[i] == '\\') {
+    if (input[i] == '*') {
       // Check the next character for escape sequences
       if (i + 1 < input.length()) {
         switch (input[i + 1]) {
@@ -24,11 +24,11 @@ static std::string ParseEscapeSequences(const std::string &input) {
         case 'b':
           output += '\b'; // Backspace
           break;
+        case '*':
+          output += '*'; // Asterisk
+          break;
         case 'f':
           output += '\f'; // Form feed
-          break;
-        case '\\':
-          output += '\\'; // Backslash
           break;
         case '\"':
           output += '\"'; // Double quote
