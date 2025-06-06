@@ -618,6 +618,34 @@ rvalue_term:
 		op->value = $2;
 		$$ = op;
 	}
+	| INCREMENT rvalue_factor {
+		auto* op = new blang::AstIncDec();
+		op->expr = $2;
+		op->type = blang::AstIncDec::PRE;
+		op->op = blang::AstIncDec::INC;
+		$$ = op;
+	}
+	| rvalue_factor INCREMENT {
+		auto* op = new blang::AstIncDec();
+		op->expr = $1;
+		op->type = blang::AstIncDec::POST;
+		op->op = blang::AstIncDec::INC;
+		$$ = op;
+	}
+	| DECREMENT rvalue_factor {
+		auto* op = new blang::AstIncDec();
+		op->expr = $2;
+		op->type = blang::AstIncDec::PRE;
+		op->op = blang::AstIncDec::DEC;
+		$$ = op;
+	}
+	| rvalue_factor DECREMENT {
+		auto* op = new blang::AstIncDec();
+		op->expr = $1;
+		op->type = blang::AstIncDec::POST;
+		op->op = blang::AstIncDec::DEC;
+		$$ = op;
+	}
 	;
 
 rvalue_factor_no_lvalue:
