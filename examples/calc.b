@@ -28,13 +28,14 @@ syntax(){
 }
 
 get_input(){
-	extrn malloc, memset, fgets, stdin, strcspn;
+	extrn malloc, memset, fgets, stdin, strcspn, lchar;
 
 	input = malloc(input_size);
 	memset(input, 0, input_size);
 
 	fgets(input, input_size, stdin);
-	*(input + strcspn(input, "\n")) = 0;
+	//*(input + strcspn(input, "\n")) = 0;
+	lchar(input, strcspn(input, "\n"), 0);
 
 	pos = input;
 }

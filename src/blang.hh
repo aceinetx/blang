@@ -66,6 +66,8 @@ public:
   std::vector<std::string> link_libraries;
   std::string link_path;
 
+  bool libb;
+
   enum ExprType {
     LVALUE,
     RVALUE,

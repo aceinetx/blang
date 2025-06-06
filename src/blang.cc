@@ -161,14 +161,15 @@ Result<NoSuccess, std::string> Blang::emit(std::string filename,
     dest.flush();
 
     if (level == EmitLevel::EMIT_EXE) {
-      std::string cmd = fmt::format("clang -o {} ", filename);
+      std::string cmd = fmt::format("clang {} -o {} ", obj_filename, filename);
 
       for (std::string lib : link_libraries)
         cmd += "-l" + lib + " ";
 
       if (!link_path.empty())
         cmd += "-L" + link_path + " ";
-      cmd += obj_filename;
+      if (libb)
+        cmd += "-lb -nostdlib -lc /usr/lib/brt.o ";
 
       std::system(cmd.data());
 

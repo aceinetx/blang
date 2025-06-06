@@ -27,6 +27,8 @@ int main(int argc, char **argv) {
         blang.link_libraries.push_back(argsShift());
       } else if (arg == "-L") {
         blang.link_path = argsShift();
+      } else if (arg == "-b") {
+        blang.libb = true;
       } else if (arg == "--help") {
         fmt::printf(R"(OVERVIEW: blang LLVM compiler
 
@@ -38,7 +40,8 @@ OPTIONS:
   -c                  Only run compile, and assemble steps
   -emit-llvm          Output LLVM IR
   -L <dir>            Add directory to library search path
-  -l <lib>           	Link libraries 
+  -l <lib>            Link libraries 
+  -b                  Link with B runtime and B standard library
 )");
         return 0;
       } else {
