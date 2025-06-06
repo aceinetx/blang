@@ -32,8 +32,12 @@ bool AstUnot::compile(Blang *blang) {
   v = blang->values.top();
   blang->values.pop();
 
-  result =
-      blang->builder.CreateXor(v, ConstantInt::get(blang->getBWordTy(), 1));
+  Value *isZero = blang->builder.CreateICmpEQ(
+      v, ConstantInt::get(blang->builder.getInt32Ty(), 0), "is_zero");
+
+  result = blang->builder.CreateSelect(
+      isZero, ConstantInt::get(blang->getBWordTy(), 1),
+      ConstantInt::get(blang->getBWordTy(), 0));
 
   blang->values.push(result);
 
