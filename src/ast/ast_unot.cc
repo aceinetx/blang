@@ -33,7 +33,7 @@ bool AstUnot::compile(Blang *blang) {
   blang->values.pop();
 
   Value *isZero = blang->builder.CreateICmpEQ(
-      v, ConstantInt::get(blang->builder.getInt32Ty(), 0), "is_zero");
+      v, ConstantInt::get(v->getType(), 0), "is_zero");
 
   result = blang->builder.CreateSelect(
       isZero, ConstantInt::get(blang->getBWordTy(), 1),
