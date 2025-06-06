@@ -64,6 +64,7 @@ typedef void* yyscan_t;
 ";"						 { return SEMICOLON; }
 "!"						 { return EXCLAMATION; }
 ","						 { return COMMA; }
+"%"						 { return PERCENT; }
 "<<"						{ return BITSHL; }
 ">>"						{ return BITSHR; }
 "&"						 { return BITAND; }

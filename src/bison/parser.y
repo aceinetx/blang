@@ -74,7 +74,7 @@ blang::Parser* yyget_extra(void*);
 %left EQUAL NEQUAL
 %left GREATER LESS GREQ LSEQ
 %left PLUS MINUS
-%left MULTIPLY DIVIDE /* modulo */
+%left MULTIPLY DIVIDE PERCENT
 %right ASSIGN
 %precedence EXCLAMATION
 
@@ -613,11 +613,20 @@ rvalue_term:
 		op->op = "div";
 		$$ = op;
 	}
+	| rvalue_term PERCENT rvalue_factor {
+		auto* op = new blang::AstBinaryOp();
+		op->left = $1;
+		op->right = $3;
+		op->op = "mod";
+		$$ = op;
+	}
+
 	| EXCLAMATION rvalue_factor {
 		auto* op = new blang::AstUnot();
 		op->value = $2;
 		$$ = op;
 	}
+
 	| INCREMENT rvalue_factor {
 		auto* op = new blang::AstIncDec();
 		op->expr = $2;

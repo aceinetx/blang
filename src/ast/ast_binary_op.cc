@@ -75,6 +75,8 @@ bool AstBinaryOp::compile(Blang *blang) {
     result = blang->builder.CreateAnd(LHS, RHS);
   } else if (op == "bitor") {
     result = blang->builder.CreateOr(LHS, RHS);
+  } else if (op == "mod") {
+    result = blang->builder.CreateURem(LHS, RHS);
   }
   blang->values.push(result);
 
