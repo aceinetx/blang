@@ -51,7 +51,7 @@ blang::Parser* yyget_extra(void*);
 %token <string> STRING_LITERAL
 %token RETURN AUTO EXTRN IF ELSE WHILE BREAK
 %token INCREMENT DECREMENT
-%token PLUSASSIGN MINUSASSIGN MULTASSIGN DIVASSIGN
+%token BITSHLASSIGN BITSHRASSIGN BITANDASSIGN BITORASSIGN PLUSASSIGN MINUSASSIGN MULTASSIGN DIVASSIGN
 %token ASSIGN EQUAL NEQUAL GREATER LESS GREQ LSEQ PLUS MINUS MULTIPLY DIVIDE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET SEMICOLON EXCLAMATION COMMA
 
@@ -211,37 +211,37 @@ statement:
 	;
 
 bitshl_assign:
-	lvalue BITSHL ASSIGN rvalue SEMICOLON {
+	lvalue BITSHLASSIGN rvalue SEMICOLON {
 		auto* assign = new blang::AstAssignBinop();
 		assign->var = $1;
-		assign->value = $4;
+		assign->value = $3;
 		assign->op = "bitshl";
 		$$ = assign;
 	}
 
 bitshr_assign:
-	lvalue BITSHR ASSIGN rvalue SEMICOLON {
+	lvalue BITSHRASSIGN rvalue SEMICOLON {
 		auto* assign = new blang::AstAssignBinop();
 		assign->var = $1;
-		assign->value = $4;
+		assign->value = $3;
 		assign->op = "bitshr";
 		$$ = assign;
 	}
 
 bitand_assign:
-	lvalue BITAND ASSIGN rvalue SEMICOLON {
+	lvalue BITANDASSIGN rvalue SEMICOLON {
 		auto* assign = new blang::AstAssignBinop();
 		assign->var = $1;
-		assign->value = $4;
+		assign->value = $3;
 		assign->op = "bitand";
 		$$ = assign;
 	}
 
 bitor_assign:
-	lvalue BITOR ASSIGN rvalue SEMICOLON {
+	lvalue BITORASSIGN rvalue SEMICOLON {
 		auto* assign = new blang::AstAssignBinop();
 		assign->var = $1;
-		assign->value = $4;
+		assign->value = $3;
 		assign->op = "bitor";
 		$$ = assign;
 	}

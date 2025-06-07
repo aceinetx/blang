@@ -39,10 +39,14 @@ typedef void* yyscan_t;
 }
 "++"						{ return INCREMENT; }
 "--"						{ return DECREMENT; }
-"+="						{ return PLUSASSIGN; }
-"-="						{ return MINUSASSIGN; }
-"*="						{ return MULTASSIGN; }
-"/="						{ return DIVASSIGN; }
+"=<<"						{ return BITSHLASSIGN; }
+"=>>"						{ return BITSHRASSIGN; }
+"=&"						{ return BITANDASSIGN; }
+"=|"						{ return BITORASSIGN; }
+"=+"						{ return PLUSASSIGN; }
+"=-"						{ return MINUSASSIGN; }
+"=*"						{ return MULTASSIGN; }
+"=/"						{ return DIVASSIGN; }
 "=="						{ return EQUAL; }
 "!="						{ return NEQUAL; }
 ">"						 { return GREATER; }

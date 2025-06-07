@@ -40,7 +40,7 @@ get_input(){
 }
 
 is_digit(c){
-	c &= 255;
+	c =& 255;
 	if(c >= '0'){
 		if(c <= '9'){
 			return 1;
@@ -67,11 +67,11 @@ do_number(){
 		if(pos >= input + input_size) break;
 
 		if(is_digit(*pos)){
-			number *= 10;
-			number += (*pos & 255) - '0';
+			number =* 10;
+			number =+ (*pos & 255) - '0';
 		} else break;
 
-		pos += 1;
+		pos =+ 1;
 	}
 }
 
@@ -108,7 +108,7 @@ next(){
 			token = RPAREN;
 		}
 
-		pos += 1;
+		pos =+ 1;
 		if(token != 0) break;
 	}
 }
@@ -155,9 +155,9 @@ term(){
 		right = factor();
 
 		if(op == MULT){
-			left *= right;
+			left =* right;
 		} else if(op == DIV){
-			left /= right;
+			left =/ right;
 		}
 		op = token;
 		if(op == 0) 
@@ -178,9 +178,9 @@ expr(){
 		right = term();
 
 		if(op == PLUS){
-			left += right;
+			left =+ right;
 		} else if(op == MINUS){
-			left -= right;
+			left =- right;
 		}
 		op = token;
 		if(op == 0) 
