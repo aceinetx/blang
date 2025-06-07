@@ -18,8 +18,8 @@ https://github.com/tsoding/b
 - examples/05_rule110.b
  Works perfectly
 
-How to compile blang and test programs
---------------------------------------
+How to compile blang and example programs
+-----------------------------------------
 mkdir build -p && cd build
 cmake .. -GNinja
 ninja -j$(nproc)
