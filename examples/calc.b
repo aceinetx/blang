@@ -43,22 +43,22 @@ is_digit(c){
 	c =& 255;
 	if(c >= '0'){
 		if(c <= '9'){
-			return 1;
+			return(1);
 		}
 	}
-	return 0;
+	return(0);
 }
 
 is_term_op(token){
-	if(token == MULT) return 1;
-	if(token == DIV) return 1;
-	return 0;
+	if(token == MULT) return(1);
+	if(token == DIV) return(1);
+	return(0);
 }
 
 is_expr_op(token){
-	if(token == PLUS) return 1;
-	if(token == MINUS) return 1;
-	return 0;
+	if(token == PLUS) return(1);
+	if(token == MINUS) return(1);
+	return(0);
 }
 
 do_number(){
@@ -122,7 +122,7 @@ lit(){
 
 	v = number;
 	next();
-	return v;
+	return(v);
 }
 
 factor(){
@@ -138,9 +138,9 @@ factor(){
 			syntax();
 
 		next();
-		return v;
+		return(v);
 	}
-	return lit();
+	return(lit());
 }
 
 term(){
@@ -163,7 +163,7 @@ term(){
 		if(op == 0) 
 			break;
 	}
-	return left;
+	return(left);
 }
 
 expr(){
@@ -186,7 +186,7 @@ expr(){
 		if(op == 0) 
 			break;
 	}
-	return left;
+	return(left);
 }
 
 main(argc, argv){
