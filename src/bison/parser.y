@@ -65,7 +65,7 @@ blang::Parser* yyget_extra(void*);
 %type <node> return extrn func_call declaration assignment while break
 %type <node> plus_assign minus_assign mult_assign div_assign bitshl_assign bitshr_assign bitand_assign bitor_assign
 %type <node_list> rvalue_commalist
-%type <node> rvalue rvalue_bitand rvalue_shift rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor_no_lvalue rvalue_factor
+%type <node> rvalue rvalue_bitand rvalue_shift rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_incdec rvalue_factor_no_lvalue rvalue_factor
 %type <node> lvalue lvalue_factor
 
 %left BITOR
@@ -202,6 +202,7 @@ statement_no_cs:
 	| bitshr_assign
 	| bitand_assign
 	| bitor_assign
+	| rvalue_incdec SEMICOLON
 	;
 
 statement:
@@ -437,7 +438,11 @@ extrn:
 	}
 
 return:
-	RETURN rvalue SEMICOLON {
+	RETURN SEMICOLON {
+		auto *node = new blang::AstReturn();
+		$$ = node;
+	}
+	| RETURN rvalue SEMICOLON {
 		auto *node = new blang::AstReturn();
 		node->expr = $2;
 		$$ = node;
@@ -626,8 +631,11 @@ rvalue_term:
 		op->value = $2;
 		$$ = op;
 	}
+	| rvalue_incdec
+	;
 
-	| INCREMENT rvalue_factor {
+rvalue_incdec:
+	INCREMENT rvalue_factor {
 		auto* op = new blang::AstIncDec();
 		op->expr = $2;
 		op->type = blang::AstIncDec::PRE;
