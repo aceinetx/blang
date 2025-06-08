@@ -442,9 +442,9 @@ return:
 		auto *node = new blang::AstReturn();
 		$$ = node;
 	}
-	| RETURN rvalue SEMICOLON {
+	| RETURN LPAREN rvalue RPAREN SEMICOLON {
 		auto *node = new blang::AstReturn();
-		node->expr = $2;
+		node->expr = $3;
 		$$ = node;
 	}
 
