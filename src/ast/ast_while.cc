@@ -45,11 +45,14 @@ bool AstWhile::compile(Blang *blang) {
   blang->builder.CreateCondBr(cmpValue, w.body, w.end);
 
   blang->builder.SetInsertPoint(w.body);
+
+  blang->scopes.push_back({});
   for (AstNode *n : body) {
     if (!n->compile(blang)) {
       return false;
     }
   }
+  blang->scopes.pop_back();
 
   w.end->moveAfter(blang->builder.GetInsertBlock());
 

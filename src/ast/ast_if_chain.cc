@@ -18,9 +18,11 @@ AstIfChain::~AstIfChain() {
 
 bool AstIfChain::compile(Blang *blang) {
   for (AstNode *n : ifs) {
+    blang->scopes.push_back({});
     if (!n->compile(blang)) {
       return false;
     }
+    blang->scopes.pop_back();
   }
 
   if (!blang->ifs.top().false_block->getTerminator()) {
