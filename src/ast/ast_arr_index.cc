@@ -21,12 +21,14 @@ AstArrIndex::~AstArrIndex() {
 }
 
 bool AstArrIndex::compile(Blang *blang) {
-  blang->expr_types.push(Blang::LVALUE);
+  blang->expr_types.push(Blang::RVALUE);
   if (!expr->compile(blang))
     return false;
 
-  Value *array =
-      blang->builder.CreateLoad(blang->builder.getPtrTy(), blang->values.top());
+  // Value *array =
+  // blang->builder.CreateLoad(blang->builder.getPtrTy(), blang->values.top());
+  Value *array = blang->builder.CreatePtrToInt(blang->values.top(),
+                                               blang->builder.getPtrTy());
   blang->values.pop();
 
   blang->expr_types.push(Blang::RVALUE);
