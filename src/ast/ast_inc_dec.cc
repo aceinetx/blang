@@ -18,10 +18,13 @@ AstIncDec::~AstIncDec() {
 }
 
 bool AstIncDec::compile(Blang *blang) {
-  if (blang->expr_types.top() == Blang::LVALUE) {
-    blang->compile_error =
-        "post/pre increment/decrement doesn't yet support lvalues";
-    return false;
+  if (!blang->expr_types.empty()) {
+    if (blang->expr_types.top() == Blang::LVALUE) {
+      blang->compile_error =
+          "post/pre increment/decrement doesn't yet support lvalues";
+      return false;
+    }
+    blang->expr_types.pop();
   }
 
   blang->expr_types.push(Blang::LVALUE);

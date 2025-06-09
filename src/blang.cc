@@ -112,11 +112,11 @@ Variable *Blang::getVariable(std::string name) {
       auto var = std::make_unique<Variable>();
       var->value = GV;
       var->name = name;
-      scopes.back().variables.push_back(std::move(var));
+      scopes.begin()->variables.push_back(std::move(var));
 
       ext.isExterned = true;
 
-      return scopes.back().variables.back().get();
+      return scopes.begin()->variables.back().get();
     }
   }
 
