@@ -1,7 +1,7 @@
 /* Functions that are not implemented in the cstd, but are in the b standard library */
 
 char(string, i){
-	return *(string + i) & 0xFF;
+	return(*(string + i) & 0xFF);
 }
 
 lchar(string, i, char){
