@@ -51,7 +51,9 @@ public:
 
   Scope global_scope;
   std::vector<Scope> scopes;
+
   std::stack<llvm::Value *> values;
+
   std::map<std::string, ExternSymbol> extern_symbols;
 
   std::stack<If> ifs;
