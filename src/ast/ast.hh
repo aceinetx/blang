@@ -105,6 +105,7 @@ class AstStrRef : public AstNode {
 public:
   std::string str;
 
+  static std::string ParseEscapeSequences(const std::string &input);
   void print(int indent = 0) const override;
   bool compile(Blang *blang) override;
 };
@@ -229,7 +230,14 @@ public:
 
 class AstGvarDeclare : public AstNode {
 public:
+  typedef std::variant<std::monostate, long, std::string> value_single_t;
+  typedef std::variant<std::monostate, long, std::string,
+                       std::vector<value_single_t>>
+      value_t;
+
   std::string name;
+  value_t value;
+  bool isArray = false;
 
   void print(int indent = 0) const override;
   bool compile(Blang *blang) override;

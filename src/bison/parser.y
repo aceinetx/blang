@@ -44,6 +44,7 @@ blang::Parser* yyget_extra(void*);
 	
 	std::vector<std::string>* identifier_list;
 	std::vector<blang::AstNode*>* rvalue_commalist;
+	std::vector<blang::AstGvarDeclare::value_single_t>* gvar_value_single_vec;
 }
 
 %token <number> NUMBER
@@ -58,6 +59,7 @@ blang::Parser* yyget_extra(void*);
 %type <node> top_statement 
 %type <node_list> top_statements
 %type <node> function_definition global_declaration
+%type <gvar_value_single_vec> global_declaration_array_list
 %type <node> statement statement_no_cs
 %type <node> if_chain if else elif
 %type <node_list> statement_list 
@@ -172,9 +174,52 @@ global_declaration:
 	IDENTIFIER SEMICOLON {
 		auto* node = new blang::AstGvarDeclare();
 		node->name = *$1;
+		node->value = 0;
 		delete $1;
 		$$ = node;
+	} | IDENTIFIER NUMBER SEMICOLON {
+		auto* node = new blang::AstGvarDeclare();
+		node->name = *$1;
+		node->value = $2;
+		delete $1;
+		$$ = node;
+	} | IDENTIFIER STRING_LITERAL SEMICOLON {
+		auto* node = new blang::AstGvarDeclare();
+		node->name = *$1;
+		node->value = *$2;
+		delete $1;
+		delete $2;
+		$$ = node;
+	} | IDENTIFIER LBRACKET NUMBER RBRACKET global_declaration_array_list SEMICOLON {
+		auto* node = new blang::AstGvarDeclare();
+		node->name = *$1;
+		node->value = *$5;
+		delete $1;
+		delete $5;
+		$$ = node;
 	}
+	;
+
+global_declaration_array_list:
+	NUMBER {
+		$$ = new std::vector<blang::AstGvarDeclare::value_single_t>();
+		$$->push_back($1);
+	}
+	| STRING_LITERAL {
+		$$ = new std::vector<blang::AstGvarDeclare::value_single_t>();
+		$$->push_back(*$1);
+		delete $1;
+	}
+	| global_declaration_array_list COMMA NUMBER {
+		$1->push_back($3);
+		$$ = $1;
+	}
+	| global_declaration_array_list COMMA STRING_LITERAL {
+		$1->push_back(*$3);
+		$$ = $1;
+		delete $3;
+	}
+	;
 
 statement_list:
 	statement {

@@ -5,7 +5,7 @@
 using namespace blang;
 using namespace llvm;
 
-static std::string ParseEscapeSequences(const std::string &input) {
+std::string AstStrRef::ParseEscapeSequences(const std::string &input) {
   std::string output;
   for (size_t i = 0; i < input.length(); ++i) {
     if (input[i] == '*') {
