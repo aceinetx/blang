@@ -1,0 +1,21 @@
+Todo:
+- Default values in global variables: `W 80;`
+- Arrays in global variables: `ARRAY[1] 0, 1;`
+- Gotos (if i can figure it out)
+- Proper scoped function extrn's
+	Currently, this is valid (it shouldn't)
+	```
+	f(){
+		extrn printf;
+	}
+	main(){
+		printf("Hello, World*n");
+	}
+	```
+	Additionally, top level extrns
+	```
+	extrn printf;
+	main(){
+		printf("Hello, World*n");
+	}
+	```
