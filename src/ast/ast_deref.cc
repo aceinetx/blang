@@ -11,6 +11,7 @@ void AstDeref::print(int indent) const {
   printIndent(indent + 1);
   std::cout << "expr:" << "\n";
   expr->print(indent + 2);
+  printIndent(indent + 1);
   std::cout << "times: " << times << "\n";
 }
 
@@ -19,12 +20,11 @@ AstDeref::~AstDeref() {
 }
 
 bool AstDeref::compile(Blang *blang) {
-  blang->expr_types.push(Blang::RVALUE);
+  blang->expr_types.push(blang->expr_types.top());
   if (!expr->compile(blang))
     return false;
 
   Value *value = blang->values.top();
-  blang->values.pop();
 
   if (blang->expr_types.top() == Blang::LVALUE) {
     for (int i = 0; i < times - 1; i++) {

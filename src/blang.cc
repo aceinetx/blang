@@ -70,6 +70,8 @@ Result<NoSuccess, std::string> Blang::parseAndCompile() {
   yy_delete_buffer(buffer, scanner);
   yylex_destroy(scanner);
 
+  parser->root->print();
+
   if (!parser->root->compile(this)) {
     delete parser->root;
     return Result<NoSuccess, std::string>::error(

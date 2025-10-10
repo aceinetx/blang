@@ -11,6 +11,7 @@ void AstAddrof::print(int indent) const {
   printIndent(indent + 1);
   std::cout << "expr:" << "\n";
   expr->print(indent + 2);
+  printIndent(indent + 1);
   std::cout << "times: " << times << "\n";
 }
 
