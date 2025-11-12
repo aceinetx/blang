@@ -32,11 +32,13 @@ Blang::Blang(std::string moduleName)
     return;
   }
 
-  TargetOptions opt;
-  targetMachine = target->createTargetMachine(TargetTriple, "generic", "", opt,
-                                              Reloc::PIC_);
+  Triple triple = Triple(TargetTriple);
+  fmodule.setTargetTriple(triple);
 
-  fmodule.setTargetTriple(TargetTriple);
+  TargetOptions opt;
+  targetMachine =
+      target->createTargetMachine(triple, "generic", "", opt, Reloc::PIC_);
+
   fmodule.setDataLayout(targetMachine->createDataLayout());
 
   parser = new Parser();
