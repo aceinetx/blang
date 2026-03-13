@@ -10,8 +10,10 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 if(LINUX)
-	add_compile_options("-Wall" "-Wextra" "-Wpedantic")
+	add_compile_options("-Wall" "-Wextra" "-Wpedantic" "-fsanitize=address")
+	add_link_options("-fsanitize=address")
 endif()
+
 add_definitions(${LLVM_DEFINITIONS})
 
 bison_target(Parser src/bison/parser.y ${CMAKE_CURRENT_BINARY_DIR}/parser.cc DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.hh)
