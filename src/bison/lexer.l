@@ -1,14 +1,13 @@
-%option reentrant bison-bridge
+%option c++
 %option noyywrap
 %option extra-type="blang::Parser*"
 
 %{
 #include "parser.hh"
+#include "bison/lexer.hh"
 #include <string>
 
-typedef void* yyscan_t;
-
-#define PARSER (yyget_extra(yyscanner))
+using namespace yy;
 %}
 
 %%
@@ -26,7 +25,7 @@ typedef void* yyscan_t;
 [0-9]+					{ yylval->number = std::stol(yytext); return NUMBER; }
 0[xX][0-9a-fA-F]+	{ yylval->number = std::stol(yytext, nullptr, 16); return NUMBER; }
 [a-zA-Z_][a-zA-Z0-9_]* {
-	yylval->string = new std::string(yytext);
+	yylval->string = std::string(yytext);
 	return IDENTIFIER;
 }
 \"([^\\\"\n]|\\.)*\" {
