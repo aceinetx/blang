@@ -1,17 +1,28 @@
 #pragma once
-#include <istream>
-#include <memory>
+
+#if !defined(yyFlexLexerOnce)
+#include <FlexLexer.h>
+#endif
+
+#include "parser.tab.hh"
 
 namespace yy {
-class parser;
-}
-
-class Lexer {
+class Lexer : public yyFlexLexer {
 public:
-  explicit Lexer(std::istream &in);
+  using yyFlexLexer::yyFlexLexer;
 
-  int yylex(yy::parser::semantic_type *yylval);
+  void initialize_location(yy::location::filename_type &f,
+                           yy::location::counter_type l = 1,
+                           yy::location::counter_type c = 1) {
+    loc.initialize(&f, l, c);
+  }
+
+  yy::Parser::symbol_type scan();
 
 private:
-  std::istream &input;
+  yy::location loc;
 };
+} // namespace yy
+
+#undef YY_DECL
+#define YY_DECL yy::Parser::symbol_type yy::Scanner::scan()

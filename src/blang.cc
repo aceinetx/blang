@@ -1,10 +1,5 @@
 #include "blang.hh"
-#include <parser.hh>
-
-typedef void *yyscan_t;
-void yylex_init(yyscan_t *);
-void yylex_destroy(yyscan_t);
-void yyset_extra(blang::Parser *user_defined, void *yyscanner);
+#include "bison/lexer.hh"
 
 using namespace blang;
 using namespace llvm;
@@ -40,13 +35,9 @@ Blang::Blang(std::string moduleName)
       target->createTargetMachine(triple, "generic", "", opt, Reloc::PIC_);
 
   fmodule.setDataLayout(targetMachine->createDataLayout());
-
-  parser = new Parser();
 }
 
 Blang::~Blang() {
-  if (parser)
-    delete parser;
   if (targetMachine)
     delete targetMachine;
 }
@@ -55,30 +46,26 @@ Result<NoSuccess, std::string> Blang::parseAndCompile() {
   scopes.clear();
   scopes.push_back({});
 
-  yyscan_t scanner;
-  YY_BUFFER_STATE buffer;
+  std::stringstream ss(input);
+  std::stringstream os;
 
-  yylex_init(&scanner);
-  yyset_extra(this->parser, scanner);
+  yy::Lexer lexer;
+  lexer.switch_streams(ss, os);
+  auto root = std::make_shared<AstRootNode>();
+  parser = std::make_unique<yy::Parser>(lexer, root);
 
-  buffer = yy_scan_string(input.c_str(), scanner);
-  yyparse(scanner, this->parser);
+  // TODO: handle errors here
+  /*
+if (!parser->root) {
+return Result<NoSuccess, std::string>::error(
+  fmt::format("parse error: {}", parser->error));
+}
 
-  if (!parser->root) {
-    return Result<NoSuccess, std::string>::error(
-        fmt::format("parse error: {}", parser->error));
-  }
-
-  yy_delete_buffer(buffer, scanner);
-  yylex_destroy(scanner);
-
-  if (!parser->root->compile(this)) {
-    delete parser->root;
-    return Result<NoSuccess, std::string>::error(
-        fmt::format("compile error: {}", compile_error));
-  }
-
-  delete parser->root;
+if (!parser->root->compile(this)) {
+return Result<NoSuccess, std::string>::error(
+  fmt::format("compile error: {}", compile_error));
+}
+  */
 
   {
     Metadata *textnode = MDString::get(

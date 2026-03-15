@@ -1,6 +1,6 @@
 #pragma once
+#include "parser.tab.hh"
 #include "result.hh"
-#include "yy.hh"
 #include <pch.hh>
 
 namespace blang {
@@ -37,7 +37,7 @@ typedef struct While {
 
 class Blang {
 public:
-  Parser *parser;
+  std::unique_ptr<yy::Parser> parser;
   std::string input;
   std::string compile_error;
 

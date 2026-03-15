@@ -16,12 +16,12 @@ endif()
 
 add_definitions(${LLVM_DEFINITIONS})
 
-bison_target(Parser src/bison/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cc DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.hh)
-flex_target(Lexer src/bison/lexer.ll ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
+bison_target(Parser src/bison/parser.yy ${CMAKE_CURRENT_BINARY_DIR}/parser.cc DEFINES_FILE ${CMAKE_CURRENT_BINARY_DIR}/parser.tab.hh)
+flex_target(Lexer src/bison/lexer.l ${CMAKE_CURRENT_BINARY_DIR}/lexer.cc)
 add_flex_bison_dependency(Lexer Parser)
 file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cc")
 
-include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_CURRENT_LIST_DIR} ${CMAKE_CURRENT_BINARY_DIR} src)
 
 add_executable(blang ${SOURCES} ${BISON_Parser_OUTPUTS} ${FLEX_Lexer_OUTPUTS})
 target_link_libraries(blang LLVM fmt::fmt-header-only)
