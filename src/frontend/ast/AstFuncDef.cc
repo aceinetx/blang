@@ -16,16 +16,21 @@ void AstFuncDef::print(int indent) {
 
 llvm::Value *AstFuncDef::compile(Blang *blang) {
   auto type =
-      FunctionType::get(blang->getWordTy(), std::vector<Type *>(), false);
+      FunctionType::get(blang->get_word_ty(), std::vector<Type *>(), false);
   auto func =
       Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
   auto block = BasicBlock::Create(blang->context, "_" + name, func);
   blang->builder.SetInsertPoint(block);
 
+  blang->push_scope();
+
   llvm::Value *last = nullptr;
   for (auto child : statements) {
     last = child->compile(blang);
   }
+
+  blang->pop_scope();
+
   return last;
 }
 } // namespace blang

@@ -6,7 +6,6 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/TargetParser/Host.h>
-#include <sstream>
 
 using namespace llvm;
 
@@ -40,7 +39,7 @@ Blang::Blang(std::string moduleName)
 
 Blang::~Blang() = default;
 
-llvm::Type *Blang::getWordTy() {
+llvm::Type *Blang::get_word_ty() {
   llvm::DataLayout DL = fmodule.getDataLayout();
   unsigned maxIntSize = DL.getLargestLegalIntTypeSizeInBits();
   llvm::Type *maxIntType = llvm::IntegerType::get(context, maxIntSize);
@@ -69,4 +68,33 @@ void Blang::compile(std::string code) {
 
   fmodule.print(llvm::outs(), nullptr);
 }
+
+void Blang::push_scope() {
+  scopes.insert(scopes.begin(), Scope());
+}
+
+void Blang::pop_scope() {
+  scopes.erase(scopes.begin());
+}
+
+Scope &Blang::get_scope() {
+  return scopes[0];
+}
+
+llvm::Value *Blang::get_scope_var(std::string name) {
+  for (auto &scope : scopes) {
+    if (scope.contains(name))
+      return scope[name];
+  }
+  throw std::runtime_error("undeclared variable " + name);
+}
+
+void Blang::add_scope_var(std::string name, llvm::Value *value) {
+  auto &scope = get_scope();
+  if (scope.contains(name)) {
+    throw std::runtime_error("redefinition of " + name);
+  }
+  scope[name] = value;
+}
+
 } // namespace blang

@@ -11,7 +11,7 @@ void AstNumber::print(int indent) {
 }
 
 llvm::Value *AstNumber::compile(Blang *blang) {
-  return ConstantInt::get(blang->getWordTy(), number);
+  return ConstantInt::get(blang->get_word_ty(), number);
 }
 
 } // namespace blang

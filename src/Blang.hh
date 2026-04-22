@@ -1,4 +1,5 @@
 #pragma once
+#include "Scope.hh"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Metadata.h>
@@ -18,15 +19,28 @@ struct Blang {
   Blang &operator=(Blang &&) = delete;
   ~Blang();
 
-  llvm::Type *getWordTy();
+  llvm::Type *get_word_ty();
   void compile(std::string code);
 
-  std::string targetTriple;
-  const llvm::Target *target;
-  std::unique_ptr<llvm::TargetMachine> targetMachine;
+  void push_scope();
+
+  void pop_scope();
+
+  Scope &get_scope();
+
+  llvm::Value *get_scope_var(std::string name);
+
+  void add_scope_var(std::string name, llvm::Value *value);
 
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   llvm::Module fmodule;
+
+private:
+  std::string targetTriple;
+  const llvm::Target *target;
+  std::unique_ptr<llvm::TargetMachine> targetMachine;
+
+  std::vector<Scope> scopes;
 };
 } // namespace blang

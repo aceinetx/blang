@@ -17,6 +17,9 @@
 #include "frontend/ast/AstReturn.hh"
 #include "frontend/ast/AstNumber.hh"
 #include "frontend/ast/AstAutoVar.hh"
+#include "frontend/ast/AstVarRefLv.hh"
+#include "frontend/ast/AstVarRefRv.hh"
+#include "frontend/ast/AstAssign.hh"
 
 namespace blang { class Driver; }
 }
@@ -34,7 +37,7 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN
 %token RETURN AUTO
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -42,7 +45,7 @@ namespace blang { class Driver; }
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
-%type <std::shared_ptr<blang::AstNode>> rvalue
+%type <std::shared_ptr<blang::AstNode>> rvalue lvalue
 %type <std::shared_ptr<blang::AstNode>> constant
 
 %%
@@ -67,6 +70,9 @@ statement:
 		$$ = $1;
 	}
 	| auto {
+		$$ = $1;
+	}
+	| rvalue SEMICOLON {
 		$$ = $1;
 	}
 
@@ -98,12 +104,28 @@ auto:
 rvalue:
 	constant {
 		$$ = $1;
+	} | lvalue ASSIGN rvalue {
+		auto node = std::make_shared<blang::AstAssign>();
+		node->lvalue = $1;
+		node->rvalue = $3;
+		$$ = node;
+	} | IDENTIFIER {
+		auto node = std::make_shared<blang::AstVarRefRv>();
+		node->name = $1;
+		$$ = node;
 	}
 
 constant:
 	NUMBER {
 		auto node = std::make_shared<blang::AstNumber>();
 		node->number = $1;
+		$$ = node;
+	}
+
+lvalue:
+	IDENTIFIER {
+		auto node = std::make_shared<blang::AstVarRefLv>();
+		node->name = $1;
 		$$ = node;
 	}
 

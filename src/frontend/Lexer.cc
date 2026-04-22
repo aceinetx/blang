@@ -65,6 +65,9 @@ Parser::symbol_type yylex(Driver &driver) {
     case ';':
       state.pos++;
       return Parser::make_SEMICOLON(loc);
+    case '=':
+      state.pos++;
+      return Parser::make_ASSIGN(loc);
     }
 
     if (!std::isspace(c)) {
