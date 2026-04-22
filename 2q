@@ -1,0 +1,26 @@
+auto statement, rvalue, lvalue
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch rewrite
+# Your branch is up to date with 'origin/rewrite'.
+#
+# Changes to be committed:
+#	modified:   .clang-tidy
+#	modified:   .gitignore
+#	modified:   src/Blang.cc
+#	modified:   src/Blang.hh
+#	new file:   src/Scope.hh
+#	modified:   src/frontend/Lexer.cc
+#	new file:   src/frontend/ast/AstAssign.cc
+#	new file:   src/frontend/ast/AstAssign.hh
+#	modified:   src/frontend/ast/AstAutoVar.cc
+#	modified:   src/frontend/ast/AstFuncDef.cc
+#	modified:   src/frontend/ast/AstNumber.cc
+#	new file:   src/frontend/ast/AstVarRefLv.cc
+#	new file:   src/frontend/ast/AstVarRefLv.hh
+#	new file:   src/frontend/ast/AstVarRefRv.cc
+#	new file:   src/frontend/ast/AstVarRefRv.hh
+#	modified:   src/frontend/parser.yy
+#	modified:   src/main.cc
+#

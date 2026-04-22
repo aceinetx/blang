@@ -8,11 +8,7 @@ void AstAssign::print(int indent) {
   fmt::println("- AstAssign");
 
   lvalue->print(indent + 1);
-
-  printIndent(indent);
-  fmt::println("=");
-
-  rvalue->print(indent + 2);
+  rvalue->print(indent + 1);
 }
 
 llvm::Value *AstAssign::compile(Blang *blang) {

@@ -20,6 +20,7 @@
 #include "frontend/ast/AstVarRefLv.hh"
 #include "frontend/ast/AstVarRefRv.hh"
 #include "frontend/ast/AstAssign.hh"
+#include "frontend/ast/AstBinop.hh"
 
 namespace blang { class Driver; }
 }
@@ -37,7 +38,7 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV
 %token RETURN AUTO
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -45,8 +46,12 @@ namespace blang { class Driver; }
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
-%type <std::shared_ptr<blang::AstNode>> rvalue lvalue
+%type <std::shared_ptr<blang::AstNode>> rvalue rvalue_pm rvalue_term rvalue_factor lvalue
 %type <std::shared_ptr<blang::AstNode>> constant
+
+%left PLUS MINUS
+%left MUL DIV
+%right ASSIGN
 
 %%
 
@@ -56,6 +61,7 @@ program:
 		root->children.push_back($1);
 		driver.set_root(root);
 	}
+	;
 
 function_definition:
 	IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
@@ -64,6 +70,7 @@ function_definition:
 		node->statements = $5;
 		$$ = node;
 	}
+	;
 
 statement:
 	return {
@@ -75,6 +82,7 @@ statement:
 	| rvalue SEMICOLON {
 		$$ = $1;
 	}
+	;
 
 statement_list:
 	statement {
@@ -93,6 +101,7 @@ return:
 		node->expression = $3;
 		$$ = node;
 	}
+	;
 
 auto:
 	AUTO IDENTIFIER SEMICOLON {
@@ -100,20 +109,65 @@ auto:
 		node->name = $2;
 		$$ = node;
 	}
+	;
 
 rvalue:
-	constant {
+	rvalue_pm {
 		$$ = $1;
 	} | lvalue ASSIGN rvalue {
 		auto node = std::make_shared<blang::AstAssign>();
 		node->lvalue = $1;
 		node->rvalue = $3;
 		$$ = node;
+	} 
+	;
+
+rvalue_pm:
+	rvalue_term {
+		$$ = $1;
+	} | rvalue_pm PLUS rvalue_term {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::PLUS;
+		$$ = node;
+	} | rvalue_pm PLUS rvalue_term {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::PLUS;
+		$$ = node;
+	}
+	;
+
+rvalue_term:
+	rvalue_factor {
+		$$ = $1;
+	} | rvalue_term MUL rvalue_factor {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::MUL;
+		$$ = node;
+	} | rvalue_term DIV rvalue_factor {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::DIV;
+		$$ = node;
+	}
+
+rvalue_factor:
+	constant {
+		$$ = $1;
 	} | IDENTIFIER {
 		auto node = std::make_shared<blang::AstVarRefRv>();
 		node->name = $1;
 		$$ = node;
+	} | LPAREN rvalue RPAREN {
+		$$ = $2;
 	}
+	;
 
 constant:
 	NUMBER {
@@ -121,6 +175,7 @@ constant:
 		node->number = $1;
 		$$ = node;
 	}
+	;
 
 lvalue:
 	IDENTIFIER {
@@ -128,6 +183,7 @@ lvalue:
 		node->name = $1;
 		$$ = node;
 	}
+	;
 
 %%
 

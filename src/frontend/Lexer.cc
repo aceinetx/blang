@@ -68,6 +68,18 @@ Parser::symbol_type yylex(Driver &driver) {
     case '=':
       state.pos++;
       return Parser::make_ASSIGN(loc);
+    case '+':
+      state.pos++;
+      return Parser::make_PLUS(loc);
+    case '-':
+      state.pos++;
+      return Parser::make_MINUS(loc);
+    case '*':
+      state.pos++;
+      return Parser::make_MUL(loc);
+    case '/':
+      state.pos++;
+      return Parser::make_DIV(loc);
     }
 
     if (!std::isspace(c)) {
