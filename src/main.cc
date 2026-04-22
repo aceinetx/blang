@@ -6,10 +6,8 @@ int main(int argc, char **argv) {
   Blang blang = Blang("b");
   blang.compile(R"(
 main() { 
-	auto x; 
-	auto y; 
-	x = y = 2; 
-	return (x * y); 
+	*0 = 1;
+	return(0); 
 }
 )");
 }

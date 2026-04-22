@@ -80,6 +80,9 @@ Parser::symbol_type yylex(Driver &driver) {
     case '/':
       state.pos++;
       return Parser::make_DIV(loc);
+    case '&':
+      state.pos++;
+      return Parser::make_AMPERSAND(loc);
     }
 
     if (c == '\n') {

@@ -21,6 +21,8 @@
 #include "frontend/ast/AstVarRefRv.hh"
 #include "frontend/ast/AstAssign.hh"
 #include "frontend/ast/AstBinop.hh"
+#include "frontend/ast/AstDerefRv.hh"
+#include "frontend/ast/AstDerefLv.hh"
 
 namespace blang { class Driver; }
 }
@@ -38,7 +40,7 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND
 %token RETURN AUTO
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -119,7 +121,7 @@ rvalue:
 		node->lvalue = $1;
 		node->rvalue = $3;
 		$$ = node;
-	} 
+	}
 	;
 
 rvalue_pm:
@@ -166,6 +168,10 @@ rvalue_factor:
 		$$ = node;
 	} | LPAREN rvalue RPAREN {
 		$$ = $2;
+	} | MUL rvalue {
+		auto node = std::make_shared<blang::AstDerefRv>();
+		node->expression = $2;
+		$$ = node;
 	}
 	;
 
@@ -181,6 +187,10 @@ lvalue:
 	IDENTIFIER {
 		auto node = std::make_shared<blang::AstVarRefLv>();
 		node->name = $1;
+		$$ = node;
+	} | MUL rvalue {
+		auto node = std::make_shared<blang::AstDerefLv>();
+		node->expression = $2;
 		$$ = node;
 	}
 	;
