@@ -118,6 +118,8 @@ Parser::symbol_type yylex(Driver &driver) {
       return Parser::make_GREATER(loc);
     case '<':
       return Parser::make_LESS(loc);
+    case '!':
+      return Parser::make_EXCLAMATION(loc);
     }
     state.pos--;
 

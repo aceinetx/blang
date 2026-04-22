@@ -27,6 +27,7 @@
 #include "frontend/ast/AstStringLit.hh"
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstFuncCall.hh"
+#include "frontend/ast/AstUnot.hh"
 
 namespace blang { class Driver; }
 }
@@ -44,7 +45,7 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION
 %token RETURN AUTO EXTRN
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -66,6 +67,7 @@ namespace blang { class Driver; }
 %left PLUS MINUS
 %left MUL DIV
 %right ASSIGN
+%precedence EXCLAMATION
 
 %%
 
@@ -263,6 +265,10 @@ rvalue_term:
 		node->left = $1;
 		node->right = $3;
 		node->op = blang::AstBinop::DIV;
+		$$ = node;
+	} | EXCLAMATION rvalue {
+		auto node = std::make_shared<blang::AstUnot>();
+		node->expression = $2;
 		$$ = node;
 	}
 	;
