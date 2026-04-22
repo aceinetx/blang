@@ -55,6 +55,7 @@ program:
 function_definition:
 	IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
 		auto node = std::make_shared<blang::AstFuncDef>();
+		node->name = $1;
 		node->statements = $5;
 		$$ = node;
 	}

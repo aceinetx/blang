@@ -19,6 +19,7 @@ target("blang")
 
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
+	add_links("LLVM-22")
 
 	add_packages("fmt", "pacman::llvm")
 target_end()

@@ -1,4 +1,5 @@
 #include "frontend/ast/AstReturn.hh"
+#include "Blang.hh"
 #include <fmt/base.h>
 
 namespace blang {
@@ -7,7 +8,9 @@ void AstReturn::print(int indent) {
   fmt::println("- AstReturn");
   expression->print(indent + 1);
 }
-llvm::Value *AstReturn::compile() {
-  return expression->compile();
+
+llvm::Value *AstReturn::compile(Blang *blang) {
+  blang->builder.CreateRet(expression->compile(blang));
+  return nullptr;
 }
 } // namespace blang

@@ -2,6 +2,8 @@
 #include <llvm/IR/Value.h>
 
 namespace blang {
+class Blang;
+
 class AstNode {
 public:
   AstNode() = default;
@@ -12,7 +14,7 @@ public:
   virtual ~AstNode();
 
   virtual void print(int indent = 0);
-  virtual llvm::Value *compile() = 0;
+  virtual llvm::Value *compile(Blang *blang) = 0;
 
 protected:
   void printIndent(int indent);

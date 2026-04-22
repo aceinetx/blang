@@ -10,10 +10,10 @@ void AstRoot::print(int indent) {
   }
 }
 
-llvm::Value *AstRoot::compile() {
+llvm::Value *AstRoot::compile(Blang *blang) {
   llvm::Value *last = nullptr;
   for (auto child : children) {
-    last = child->compile();
+    last = child->compile(blang);
   }
   return last;
 }
