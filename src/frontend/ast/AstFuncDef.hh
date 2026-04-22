@@ -10,5 +10,6 @@ struct AstFuncDef : public AstNode {
 
   std::vector<std::shared_ptr<AstNode>> statements;
   std::string name;
+  std::vector<std::string> args;
 };
 } // namespace blang

@@ -15,8 +15,11 @@ void AstFuncDef::print(int indent) {
 }
 
 llvm::Value *AstFuncDef::compile(Blang *blang) {
-  auto type =
-      FunctionType::get(blang->get_word_ty(), std::vector<Type *>(), false);
+  std::vector<Type *> arg_types = {};
+  for (size_t i = 0; i < args.size(); i++)
+    arg_types.push_back(blang->get_word_ty());
+
+  auto type = FunctionType::get(blang->get_word_ty(), arg_types, false);
   auto func =
       Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
   auto block = BasicBlock::Create(blang->context, "_" + name, func);
@@ -26,6 +29,20 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   blang->current_function = func;
   blang->goto_blocks.clear();
 
+  /* Initialize arguments */
+  auto fnArgs = func->arg_begin();
+  Value *arg = fnArgs++;
+  for (const auto &i : args) {
+    {
+      auto var = blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, i);
+      blang->builder.CreateStore(arg, var);
+      blang->add_scope_var(i, var);
+    }
+
+    arg = fnArgs++;
+  }
+
+  /* Compile body */
   llvm::Value *last = nullptr;
   for (auto child : statements) {
     last = child->compile(blang);

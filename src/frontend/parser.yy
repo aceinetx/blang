@@ -66,6 +66,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstNode>> constant
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstGoto>> goto
+%type <std::vector<std::string>> identifier_list
 
 %left EQUAL NEQUAL
 %left GREATER LESS GREQ LSEQ
@@ -105,7 +106,13 @@ top_statement_list:
 	;
 
 function_definition:
-	IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
+	IDENTIFIER LPAREN identifier_list RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstFuncDef>();
+		node->name = $1;
+		node->statements = $6;
+		node->args = $3;
+		$$ = node;
+	} | IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
 		auto node = std::make_shared<blang::AstFuncDef>();
 		node->name = $1;
 		node->statements = $5;
@@ -141,6 +148,17 @@ statement_list:
 		$$ = $1;
 	}
 	;
+
+identifier_list:
+	IDENTIFIER {
+		$$.clear();
+		$$.push_back($1);
+	}
+	| identifier_list COMMA IDENTIFIER {
+		$1.push_back($3);
+		$$ = $1;
+	}
+	;
 	
 return:
 	RETURN LPAREN rvalue RPAREN SEMICOLON {
@@ -159,9 +177,9 @@ auto:
 	;
 
 extrn:
-	EXTRN IDENTIFIER SEMICOLON {
+	EXTRN identifier_list SEMICOLON {
 		auto node = std::make_shared<blang::AstExtern>();
-		node->names = {$2};
+		node->names = $2;
 		$$ = node;
 	}
 	;
