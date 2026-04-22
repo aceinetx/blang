@@ -12,8 +12,6 @@ void AstAssign::print(int indent) {
 }
 
 llvm::Value *AstAssign::compile(Blang *blang) {
-  assert(name != "");
-
   auto lv = lvalue->compile(blang);
   auto rv = rvalue->compile(blang);
 

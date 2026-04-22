@@ -12,8 +12,6 @@ void AstBinop::print(int indent) {
 }
 
 llvm::Value *AstBinop::compile(Blang *blang) {
-  assert(name != "");
-
   auto lhs = left->compile(blang);
   auto rhs = right->compile(blang);
   llvm::Value *result = nullptr;

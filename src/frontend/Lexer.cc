@@ -4,12 +4,12 @@
 
 namespace blang {
 Parser::symbol_type yylex(Driver &driver) {
-  // TODO: actual values in the locations
   auto &state = driver.get_lexer_state();
   auto &code = driver.get_code();
 
   while (state.pos < code.length()) {
-    Parser::location_type loc(nullptr, 0, 0);
+    Parser::location_type loc(nullptr, (int)state.line,
+                              (int)(state.pos - state.line_start_pos));
     char c = code[state.pos];
 
     if (std::isalpha(c)) {
@@ -82,13 +82,21 @@ Parser::symbol_type yylex(Driver &driver) {
       return Parser::make_DIV(loc);
     }
 
+    if (c == '\n') {
+      state.line++;
+      state.line_start_pos = state.pos;
+    }
+
     if (!std::isspace(c)) {
-      throw std::runtime_error(fmt::format("lexer error: illegal char {}", c));
+      throw std::runtime_error(
+          fmt::format("lexer error: illegal char '{}' at line {} column {}", c,
+                      loc.begin.line, loc.begin.column));
     }
     state.pos++;
   }
 
-  Parser::location_type loc(nullptr, 0, 0);
+  Parser::location_type loc(nullptr, (int)state.line,
+                            (int)(state.line_start_pos - state.pos));
   return Parser::make_END(loc);
 }
 } // namespace blang
