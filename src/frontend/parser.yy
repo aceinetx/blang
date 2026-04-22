@@ -50,6 +50,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstNode>> rvalue rvalue_pm rvalue_term rvalue_factor lvalue
+%type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
 %type <std::shared_ptr<blang::AstNode>> constant
 
 %left AMPERSAND
@@ -135,7 +136,7 @@ rvalue_pm:
 		node->right = $3;
 		node->op = blang::AstBinop::PLUS;
 		$$ = node;
-	} | rvalue_pm PLUS rvalue_term {
+	} | rvalue_pm MINUS rvalue_term {
 		auto node = std::make_shared<blang::AstBinop>();
 		node->left = $1;
 		node->right = $3;
@@ -170,13 +171,13 @@ rvalue_factor:
 		$$ = node;
 	} | LPAREN rvalue RPAREN {
 		$$ = $2;
-	} | MUL rvalue_pm {
-		auto node = std::make_shared<blang::AstDerefRv>();
-		node->expression = $2;
-		$$ = node;
 	} | AMPERSAND lvalue {
 		auto node = std::make_shared<blang::AstAddrof>();
 		node->expression = $2;
+		$$ = node;
+	} | lvalue_deref {
+		auto node = std::make_shared<blang::AstDerefRv>();
+		node->expression = $1->expression;
 		$$ = node;
 	}
 	;
@@ -194,7 +195,13 @@ lvalue:
 		auto node = std::make_shared<blang::AstVarRefLv>();
 		node->name = $1;
 		$$ = node;
-	} | MUL rvalue_pm {
+	} | lvalue_deref {
+		$$ = $1;
+	}
+	;
+
+lvalue_deref:
+	MUL rvalue_factor {
 		auto node = std::make_shared<blang::AstDerefLv>();
 		node->expression = $2;
 		$$ = node;

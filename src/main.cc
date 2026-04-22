@@ -7,9 +7,9 @@ int main(int argc, char **argv) {
   blang.compile(R"(
 main() { 
 	auto x;
-	*&x = 2;
-	*&x = *&x + *&x;
-	return(*&x); 
+	auto y;
+	x = 2 * (y = 2);
+	return(x); 
 }
 )");
 }
