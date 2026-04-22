@@ -8,7 +8,9 @@ Parser::symbol_type yylex(Driver &driver) {
   auto &state = driver.get_lexer_state();
   auto &code = driver.get_code();
 
-  while (state.pos < code.length()) {
+#define bounds (state.pos < code.length())
+
+  while (bounds) {
     Parser::location_type loc(nullptr, (int)state.line,
                               (int)(state.pos - state.line_start_pos));
     char c = code[state.pos];
@@ -16,7 +18,7 @@ Parser::symbol_type yylex(Driver &driver) {
     if (std::isalpha(c)) {
       std::string identifier;
 
-      while (state.pos < code.length()) {
+      while (bounds) {
         char c = code[state.pos];
         if (!(std::isalnum(c) or c == '$')) {
           break;
@@ -31,16 +33,22 @@ Parser::symbol_type yylex(Driver &driver) {
         return Parser::make_AUTO(loc);
       if (identifier == "extrn")
         return Parser::make_EXTRN(loc);
+      if (identifier == "while")
+        return Parser::make_WHILE(loc);
 
       return Parser::make_IDENTIFIER(identifier, loc);
     } else if (std::isdigit(c) || c == '-') {
       long number = 0;
       constexpr long base = 10;
       const bool negative = c == '-';
-      if (negative)
+      if (negative) {
         state.pos++;
+        if (bounds and !std::isdigit(code[state.pos])) {
+          return Parser::make_MINUS(loc);
+        }
+      }
 
-      while (state.pos < code.length()) {
+      while (bounds) {
         char c = code[state.pos];
         if (!std::isdigit(c))
           break;
@@ -54,7 +62,7 @@ Parser::symbol_type yylex(Driver &driver) {
       std::string s = "";
       state.pos++;
 
-      while (state.pos < code.length()) {
+      while (bounds) {
         char c = code[state.pos];
         if (c == '"')
           break;

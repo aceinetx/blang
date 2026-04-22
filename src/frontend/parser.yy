@@ -28,6 +28,7 @@
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstFuncCall.hh"
 #include "frontend/ast/AstUnot.hh"
+#include "frontend/ast/AstWhile.hh"
 
 namespace blang { class Driver; }
 }
@@ -46,7 +47,7 @@ namespace blang { class Driver; }
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
 %token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION
-%token RETURN AUTO EXTRN
+%token RETURN AUTO EXTRN WHILE
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -56,6 +57,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
+%type <std::shared_ptr<blang::AstWhile>> while
 %type <std::shared_ptr<blang::AstNode>> rvalue rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor lvalue
 %type <std::vector<std::shared_ptr<blang::AstNode>>> rvalue_list
 %type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
@@ -114,6 +116,8 @@ statement:
 		$$ = $1;
 	} | extrn {
 		$$ = $1;
+	} | while {
+		$$ = $1;
 	} | rvalue SEMICOLON {
 		$$ = $1;
 	}
@@ -150,6 +154,16 @@ extrn:
 	EXTRN IDENTIFIER SEMICOLON {
 		auto node = std::make_shared<blang::AstExtern>();
 		node->names = {$2};
+		$$ = node;
+	}
+	;
+
+// TODO: break
+while:
+	WHILE LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstWhile>();
+		node->expression = $3;
+		node->statements = $6;
 		$$ = node;
 	}
 	;
@@ -246,7 +260,7 @@ rvalue_pm:
 		auto node = std::make_shared<blang::AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::PLUS;
+		node->op = blang::AstBinop::MINUS;
 		$$ = node;
 	}
 	;

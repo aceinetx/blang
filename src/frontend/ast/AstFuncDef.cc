@@ -23,6 +23,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   blang->builder.SetInsertPoint(block);
 
   blang->push_scope();
+  blang->current_function = func;
 
   llvm::Value *last = nullptr;
   for (auto child : statements) {
@@ -30,6 +31,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   }
 
   blang->pop_scope();
+  blang->current_function = nullptr;
 
   return last;
 }

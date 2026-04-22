@@ -37,6 +37,7 @@ struct Blang {
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   llvm::Module fmodule;
+  llvm::Function *current_function;
 
   std::unordered_map<std::string, llvm::Value *> extern_values;
 
