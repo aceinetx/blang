@@ -78,6 +78,8 @@ program:
 top_statement:
 	function_definition {
 		$$ = $1;
+	} | extrn {
+		$$ = $1;
 	}
 	;
 
