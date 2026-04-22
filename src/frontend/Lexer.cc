@@ -73,44 +73,53 @@ Parser::symbol_type yylex(Driver &driver) {
       return Parser::make_STRING_LIT(s, loc);
     }
 
+    state.pos++;
     switch (c) {
     case '(':
-      state.pos++;
       return Parser::make_LPAREN(loc);
     case ')':
-      state.pos++;
       return Parser::make_RPAREN(loc);
     case '{':
-      state.pos++;
       return Parser::make_LBRACE(loc);
     case '}':
-      state.pos++;
       return Parser::make_RBRACE(loc);
     case ';':
-      state.pos++;
       return Parser::make_SEMICOLON(loc);
     case '=':
-      state.pos++;
+      if (state.pos < code.size()) {
+        char c = code[state.pos];
+        state.pos++;
+        switch (c) {
+        case '=':
+          return Parser::make_EQUAL(loc);
+        case '!':
+          return Parser::make_NEQUAL(loc);
+        case '>':
+          return Parser::make_GREQ(loc);
+        case '<':
+          return Parser::make_LSEQ(loc);
+        }
+        state.pos--;
+      }
       return Parser::make_ASSIGN(loc);
     case '+':
-      state.pos++;
       return Parser::make_PLUS(loc);
     case '-':
-      state.pos++;
       return Parser::make_MINUS(loc);
     case '*':
-      state.pos++;
       return Parser::make_MUL(loc);
     case '/':
-      state.pos++;
       return Parser::make_DIV(loc);
     case '&':
-      state.pos++;
       return Parser::make_AMPERSAND(loc);
     case ',':
-      state.pos++;
       return Parser::make_COMMA(loc);
+    case '>':
+      return Parser::make_GREATER(loc);
+    case '<':
+      return Parser::make_LESS(loc);
     }
+    state.pos--;
 
     if (c == '\n') {
       state.line++;

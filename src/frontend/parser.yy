@@ -44,7 +44,7 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ
 %token RETURN AUTO EXTRN
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -55,11 +55,13 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
-%type <std::shared_ptr<blang::AstNode>> rvalue rvalue_pm rvalue_term rvalue_factor lvalue
+%type <std::shared_ptr<blang::AstNode>> rvalue rvalue_eq rvalue_cmp rvalue_pm rvalue_term rvalue_factor lvalue
 %type <std::vector<std::shared_ptr<blang::AstNode>>> rvalue_list
 %type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
 %type <std::shared_ptr<blang::AstNode>> constant
 
+%left EQUAL NEQUAL
+%left GREATER LESS GREQ LSEQ
 %left AMPERSAND
 %left PLUS MINUS
 %left MUL DIV
@@ -162,7 +164,7 @@ rvalue_list:
 	;
 
 rvalue:
-	rvalue_pm {
+	rvalue_eq {
 		$$ = $1;
 	} | lvalue ASSIGN rvalue {
 		auto node = std::make_shared<blang::AstAssign>();
@@ -177,6 +179,54 @@ rvalue:
 	} | lvalue LPAREN RPAREN {
 		auto node = std::make_shared<blang::AstFuncCall>();
 		node->expression = $1;
+		$$ = node;
+	}
+	;
+
+rvalue_eq:
+	rvalue_cmp {
+		$$ = $1;
+	} | rvalue_eq EQUAL rvalue_cmp {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::EQUAL;
+		$$ = node;
+	} | rvalue_eq NEQUAL rvalue_cmp {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::NEQUAL;
+		$$ = node;
+	}
+	;
+
+rvalue_cmp:
+	rvalue_pm {
+		$$ = $1;
+	} | rvalue_cmp GREATER rvalue_pm {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::GREATER;
+		$$ = node;
+	} | rvalue_cmp LESS rvalue_pm {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::LESS;
+		$$ = node;
+	} | rvalue_cmp GREQ rvalue_pm {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::GREQ;
+		$$ = node;
+	} | rvalue_cmp LSEQ rvalue_pm {
+		auto node = std::make_shared<blang::AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = blang::AstBinop::LSEQ;
 		$$ = node;
 	}
 	;

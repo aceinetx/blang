@@ -29,6 +29,30 @@ llvm::Value *AstBinop::compile(Blang *blang) {
   case DIV:
     result = blang->builder.CreateSDiv(lhs, rhs);
     break;
+  case EQUAL:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpEQ(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
+  case NEQUAL:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpNE(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
+  case GREATER:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGT(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
+  case LESS:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLT(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
+  case GREQ:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGE(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
+  case LSEQ:
+    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLE(lhs, rhs),
+                                       blang->get_word_ty());
+    break;
   }
 
   return result;
