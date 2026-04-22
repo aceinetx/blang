@@ -16,6 +16,7 @@
 #include "frontend/ast/AstFuncDef.hh"
 #include "frontend/ast/AstReturn.hh"
 #include "frontend/ast/AstNumber.hh"
+#include "frontend/ast/AstAutoVar.hh"
 
 namespace blang { class Driver; }
 }
@@ -34,12 +35,13 @@ namespace blang { class Driver; }
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
 %token LPAREN RPAREN LBRACE RBRACE SEMICOLON
-%token RETURN
+%token RETURN AUTO
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
+%type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstNode>> rvalue
 %type <std::shared_ptr<blang::AstNode>> constant
 
@@ -64,6 +66,9 @@ statement:
 	return {
 		$$ = $1;
 	}
+	| auto {
+		$$ = $1;
+	}
 
 statement_list:
 	statement {
@@ -80,6 +85,13 @@ return:
 	RETURN LPAREN rvalue RPAREN SEMICOLON {
 		auto node = std::make_shared<blang::AstReturn>();
 		node->expression = $3;
+		$$ = node;
+	}
+
+auto:
+	AUTO IDENTIFIER SEMICOLON {
+		auto node = std::make_shared<blang::AstAutoVar>();
+		node->name = $2;
 		$$ = node;
 	}
 

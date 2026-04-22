@@ -26,6 +26,8 @@ Parser::symbol_type yylex(Driver &driver) {
 
       if (identifier == "return")
         return Parser::make_RETURN(loc);
+      if (identifier == "auto")
+        return Parser::make_AUTO(loc);
 
       return Parser::make_IDENTIFIER(identifier, loc);
     } else if (std::isdigit(c) || c == '-') {
