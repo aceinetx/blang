@@ -40,6 +40,7 @@ struct Blang {
   llvm::Function *current_function;
 
   std::unordered_map<std::string, llvm::Value *> extern_values;
+  std::unordered_map<std::string, llvm::BasicBlock *> goto_blocks;
 
 private:
   std::string targetTriple;

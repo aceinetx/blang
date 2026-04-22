@@ -24,6 +24,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
 
   blang->push_scope();
   blang->current_function = func;
+  blang->goto_blocks.clear();
 
   llvm::Value *last = nullptr;
   for (auto child : statements) {

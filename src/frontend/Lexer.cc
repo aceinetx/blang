@@ -27,6 +27,7 @@ Parser::symbol_type yylex(Driver &driver) {
         state.pos++;
       }
 
+      /* Keywords */
       if (identifier == "return")
         return Parser::make_RETURN(loc);
       if (identifier == "auto")
@@ -35,6 +36,8 @@ Parser::symbol_type yylex(Driver &driver) {
         return Parser::make_EXTRN(loc);
       if (identifier == "while")
         return Parser::make_WHILE(loc);
+      if (identifier == "goto")
+        return Parser::make_GOTO(loc);
 
       return Parser::make_IDENTIFIER(identifier, loc);
     } else if (std::isdigit(c) || c == '-') {
@@ -79,6 +82,21 @@ Parser::symbol_type yylex(Driver &driver) {
       state.pos++;
 
       return Parser::make_STRING_LIT(s, loc);
+    } else if (c == '\'') {
+      state.pos++;
+      if (!bounds) {
+        throw LexerException(loc, "incomplete character literal");
+      }
+
+      char c = code[state.pos];
+
+      state.pos++;
+      if (!bounds or (bounds and code[state.pos] != '\'')) {
+        throw LexerException(loc, "unterminated character literal");
+      }
+      state.pos++;
+
+      return Parser::make_NUMBER((long)c, loc);
     }
 
     state.pos++;
@@ -128,6 +146,8 @@ Parser::symbol_type yylex(Driver &driver) {
       return Parser::make_LESS(loc);
     case '!':
       return Parser::make_EXCLAMATION(loc);
+    case ':':
+      return Parser::make_COLON(loc);
     }
     state.pos--;
 

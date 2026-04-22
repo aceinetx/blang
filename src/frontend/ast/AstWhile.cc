@@ -31,7 +31,9 @@ llvm::Value *AstWhile::compile(Blang *blang) {
   for (auto statement : statements) {
     statement->compile(blang);
   }
-  blang->builder.CreateBr(comparison_block);
+  if (!blang->builder.GetInsertBlock()->getTerminator()) {
+    blang->builder.CreateBr(comparison_block);
+  }
   blang->builder.SetInsertPoint(end_block);
 
   return nullptr;

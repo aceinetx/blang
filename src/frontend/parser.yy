@@ -29,6 +29,8 @@
 #include "frontend/ast/AstFuncCall.hh"
 #include "frontend/ast/AstUnot.hh"
 #include "frontend/ast/AstWhile.hh"
+#include "frontend/ast/AstLabel.hh"
+#include "frontend/ast/AstGoto.hh"
 
 namespace blang { class Driver; }
 }
@@ -46,8 +48,8 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION
-%token RETURN AUTO EXTRN WHILE
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON COLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION
+%token RETURN AUTO EXTRN WHILE GOTO
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -62,6 +64,8 @@ namespace blang { class Driver; }
 %type <std::vector<std::shared_ptr<blang::AstNode>>> rvalue_list
 %type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
 %type <std::shared_ptr<blang::AstNode>> constant
+%type <std::shared_ptr<blang::AstLabel>> label
+%type <std::shared_ptr<blang::AstGoto>> goto
 
 %left EQUAL NEQUAL
 %left GREATER LESS GREQ LSEQ
@@ -118,6 +122,10 @@ statement:
 		$$ = $1;
 	} | while {
 		$$ = $1;
+	} | label {
+		$$ = $1;
+	} | goto {
+		$$ = $1;
 	} | rvalue SEMICOLON {
 		$$ = $1;
 	}
@@ -154,6 +162,22 @@ extrn:
 	EXTRN IDENTIFIER SEMICOLON {
 		auto node = std::make_shared<blang::AstExtern>();
 		node->names = {$2};
+		$$ = node;
+	}
+	;
+
+label:
+	IDENTIFIER COLON {
+		auto node = std::make_shared<blang::AstLabel>();
+		node->name = $1;
+		$$ = node;
+	}
+	;
+
+goto:
+	GOTO IDENTIFIER SEMICOLON {
+		auto node = std::make_shared<blang::AstGoto>();
+		node->name = $2;
 		$$ = node;
 	}
 	;
