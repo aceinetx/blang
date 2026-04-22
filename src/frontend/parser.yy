@@ -23,6 +23,7 @@
 #include "frontend/ast/AstBinop.hh"
 #include "frontend/ast/AstDerefRv.hh"
 #include "frontend/ast/AstDerefLv.hh"
+#include "frontend/ast/AstAddrof.hh"
 
 namespace blang { class Driver; }
 }
@@ -51,6 +52,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstNode>> rvalue rvalue_pm rvalue_term rvalue_factor lvalue
 %type <std::shared_ptr<blang::AstNode>> constant
 
+%left AMPERSAND
 %left PLUS MINUS
 %left MUL DIV
 %right ASSIGN
@@ -168,8 +170,12 @@ rvalue_factor:
 		$$ = node;
 	} | LPAREN rvalue RPAREN {
 		$$ = $2;
-	} | MUL rvalue {
+	} | MUL rvalue_pm {
 		auto node = std::make_shared<blang::AstDerefRv>();
+		node->expression = $2;
+		$$ = node;
+	} | AMPERSAND lvalue {
+		auto node = std::make_shared<blang::AstAddrof>();
 		node->expression = $2;
 		$$ = node;
 	}
@@ -188,7 +194,7 @@ lvalue:
 		auto node = std::make_shared<blang::AstVarRefLv>();
 		node->name = $1;
 		$$ = node;
-	} | MUL rvalue {
+	} | MUL rvalue_pm {
 		auto node = std::make_shared<blang::AstDerefLv>();
 		node->expression = $2;
 		$$ = node;
