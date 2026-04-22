@@ -24,6 +24,9 @@
 #include "frontend/ast/AstDerefRv.hh"
 #include "frontend/ast/AstDerefLv.hh"
 #include "frontend/ast/AstAddrof.hh"
+#include "frontend/ast/AstStringLit.hh"
+#include "frontend/ast/AstExtern.hh"
+#include "frontend/ast/AstFuncCall.hh"
 
 namespace blang { class Driver; }
 }
@@ -41,15 +44,19 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND
-%token RETURN AUTO
+%token LPAREN RPAREN LBRACE RBRACE SEMICOLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA
+%token RETURN AUTO EXTRN
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
+%type <std::shared_ptr<blang::AstNode>> top_statement
+%type <std::vector<std::shared_ptr<blang::AstNode>>> top_statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
+%type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstNode>> rvalue rvalue_pm rvalue_term rvalue_factor lvalue
+%type <std::vector<std::shared_ptr<blang::AstNode>>> rvalue_list
 %type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
 %type <std::shared_ptr<blang::AstNode>> constant
 
@@ -61,10 +68,27 @@ namespace blang { class Driver; }
 %%
 
 program:
-	function_definition {
+	top_statement_list {
 		auto root = std::make_shared<blang::AstRoot>();
-		root->children.push_back($1);
+		root->children = std::move($1);
 		driver.set_root(root);
+	}
+	;
+
+top_statement:
+	function_definition {
+		$$ = $1;
+	}
+	;
+
+top_statement_list:
+	top_statement {
+		$$.clear();
+		$$.push_back($1);
+	}
+	| top_statement_list top_statement {
+		$1.push_back($2);
+		$$ = $1;
 	}
 	;
 
@@ -80,11 +104,11 @@ function_definition:
 statement:
 	return {
 		$$ = $1;
-	}
-	| auto {
+	} | auto {
 		$$ = $1;
-	}
-	| rvalue SEMICOLON {
+	} | extrn {
+		$$ = $1;
+	} | rvalue SEMICOLON {
 		$$ = $1;
 	}
 	;
@@ -116,6 +140,25 @@ auto:
 	}
 	;
 
+extrn:
+	EXTRN IDENTIFIER SEMICOLON {
+		auto node = std::make_shared<blang::AstExtern>();
+		node->names = {$2};
+		$$ = node;
+	}
+	;
+
+rvalue_list:
+	rvalue {
+		$$.clear();
+		$$.push_back($1);
+	}
+	| rvalue_list COMMA rvalue {
+		$1.push_back($3);
+		$$ = $1;
+	}
+	;
+
 rvalue:
 	rvalue_pm {
 		$$ = $1;
@@ -123,6 +166,15 @@ rvalue:
 		auto node = std::make_shared<blang::AstAssign>();
 		node->lvalue = $1;
 		node->rvalue = $3;
+		$$ = node;
+	} | lvalue LPAREN rvalue_list RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
+		node->args = $3;
+		$$ = node;
+	} | lvalue LPAREN RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
 		$$ = node;
 	}
 	;
@@ -161,6 +213,7 @@ rvalue_term:
 		node->op = blang::AstBinop::DIV;
 		$$ = node;
 	}
+	;
 
 rvalue_factor:
 	constant {
@@ -186,6 +239,10 @@ constant:
 	NUMBER {
 		auto node = std::make_shared<blang::AstNumber>();
 		node->number = $1;
+		$$ = node;
+	} | STRING_LIT {
+		auto node = std::make_shared<blang::AstStringLit>();
+		node->str = $1;
 		$$ = node;
 	}
 	;

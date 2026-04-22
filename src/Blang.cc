@@ -35,6 +35,8 @@ Blang::Blang(std::string moduleName)
       targetTriple, "generic", "", opt, Reloc::PIC_));
 
   fmodule.setDataLayout(targetMachine->createDataLayout());
+
+  push_scope();
 }
 
 Blang::~Blang() = default;
@@ -93,6 +95,14 @@ void Blang::add_scope_var(std::string name, llvm::Value *value) {
   auto &scope = get_scope();
   if (scope.contains(name)) {
     throw std::runtime_error("redefinition of " + name);
+  }
+  scope[name] = value;
+}
+
+void Blang::add_global_scope_var(std::string name, llvm::Value *value) {
+  auto &scope = scopes.back();
+  if (scope.contains(name)) {
+    throw std::runtime_error("global redefinition of " + name);
   }
   scope[name] = value;
 }

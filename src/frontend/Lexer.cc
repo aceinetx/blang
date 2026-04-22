@@ -1,3 +1,4 @@
+#include "frontend/LexerException.hh"
 #include "parser.tab.hpp"
 #include <cctype>
 #include <fmt/format.h>
@@ -28,6 +29,8 @@ Parser::symbol_type yylex(Driver &driver) {
         return Parser::make_RETURN(loc);
       if (identifier == "auto")
         return Parser::make_AUTO(loc);
+      if (identifier == "extrn")
+        return Parser::make_EXTRN(loc);
 
       return Parser::make_IDENTIFIER(identifier, loc);
     } else if (std::isdigit(c) || c == '-') {
@@ -47,6 +50,27 @@ Parser::symbol_type yylex(Driver &driver) {
       }
 
       return Parser::make_NUMBER(negative ? -number : number, loc);
+    } else if (c == '"') {
+      std::string s = "";
+      state.pos++;
+
+      while (state.pos < code.length()) {
+        char c = code[state.pos];
+        if (c == '"')
+          break;
+        if (c == '\n')
+          throw LexerException(loc, "newline in string");
+        s.push_back(c);
+        state.pos++;
+      }
+
+      if (state.pos >= code.length()) {
+        throw LexerException(loc, "unterminated string");
+      }
+
+      state.pos++;
+
+      return Parser::make_STRING_LIT(s, loc);
     }
 
     switch (c) {
@@ -83,6 +107,9 @@ Parser::symbol_type yylex(Driver &driver) {
     case '&':
       state.pos++;
       return Parser::make_AMPERSAND(loc);
+    case ',':
+      state.pos++;
+      return Parser::make_COMMA(loc);
     }
 
     if (c == '\n') {
@@ -91,9 +118,7 @@ Parser::symbol_type yylex(Driver &driver) {
     }
 
     if (!std::isspace(c)) {
-      throw std::runtime_error(
-          fmt::format("lexer error: illegal char '{}' at line {} column {}", c,
-                      loc.begin.line, loc.begin.column));
+      throw LexerException(loc, fmt::format("illegal char '{}'", c));
     }
     state.pos++;
   }

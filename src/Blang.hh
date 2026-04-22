@@ -32,9 +32,13 @@ struct Blang {
 
   void add_scope_var(std::string name, llvm::Value *value);
 
+  void add_global_scope_var(std::string name, llvm::Value *value);
+
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   llvm::Module fmodule;
+
+  std::unordered_map<std::string, llvm::Value *> extern_values;
 
 private:
   std::string targetTriple;
