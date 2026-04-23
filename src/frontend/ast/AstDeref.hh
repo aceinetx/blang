@@ -2,9 +2,11 @@
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
-struct AstDerefLv : public AstNode {
+struct AstDeref : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue = false) override;
+
+  bool is_rvalue() override;
 
   std::shared_ptr<AstNode> expression;
 };

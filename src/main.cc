@@ -7,8 +7,8 @@ int main(int argc, char **argv) {
   blang.compile(R"(
 main(argc, argv) {
 	auto i;
-	i = 69;
-	return(i);
+	*&i = 2;
+	return(*&i);
 }
 )");
 }

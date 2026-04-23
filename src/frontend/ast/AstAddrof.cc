@@ -1,4 +1,5 @@
 #include "frontend/ast/AstAddrof.hh"
+#include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
 
@@ -9,8 +10,12 @@ void AstAddrof::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstAddrof::compile(Blang *blang) {
-  return expression->compile(blang);
+llvm::Value *AstAddrof::compile(Blang *blang, bool rvalue) {
+  blangassert(!expression->is_rvalue());
+  return expression->compile(blang, false);
 }
 
+bool AstAddrof::is_rvalue() {
+  return true;
+}
 } // namespace blang
