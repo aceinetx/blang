@@ -10,7 +10,8 @@ void AstReturn::print(int indent) {
 }
 
 llvm::Value *AstReturn::compile(Blang *blang) {
-  blang->builder.CreateRet(expression->compile(blang));
+  blang->builder.CreateRet(blang->builder.CreateLoad(
+      blang->get_word_ty(), expression->compile(blang)));
   return nullptr;
 }
 } // namespace blang

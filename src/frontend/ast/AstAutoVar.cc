@@ -8,13 +8,17 @@ void AstAutoVar::print(int indent) {
   fmt::println("- AstAutoVar {}", name);
 }
 
-llvm::Value *AstAutoVar::compile(Blang *blang) {
+llvm::Value *AstAutoVar::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
   assert(name != "");
 
   auto value = blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, name);
   blang->add_scope_var(name, value);
 
   return nullptr;
+}
+bool AstAutoVar::is_rvalue() {
+  return true;
 }
 
 } // namespace blang

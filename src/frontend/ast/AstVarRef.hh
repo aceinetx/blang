@@ -2,7 +2,7 @@
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
-struct AstVarRefRv : public AstNode {
+struct AstVarRef : public AstNode {
   void print(int indent = 0) override;
   llvm::Value *compile(Blang *blang) override;
 

@@ -8,12 +8,8 @@ int main(int argc, char **argv) {
 main(argc, argv) {
 	extrn puts;
 	auto i;
-	i = 0;
-	while(i < argc){
-		puts(argv[i]);
-		i = i + 1;
-	}
-	return(0);
+	i = 69;
+	return(i);
 }
 )");
 }
