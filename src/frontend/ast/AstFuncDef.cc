@@ -29,6 +29,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
 
   blang->push_scope();
   blang->current_function = func;
+  blang->unresolved_goto_labels.clear();
   blang->goto_blocks.clear();
 
   /* Initialize arguments */
@@ -52,6 +53,36 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
 
   blang->pop_scope();
   blang->current_function = nullptr;
+
+  /*
+   * Check for unresolved goto labels
+   */
+  for (const auto &label : blang->unresolved_goto_labels) {
+    throw std::runtime_error("unresolved label " + label);
+  }
+
+  /*
+   * When we encounter an unconditional branch we want to remove any
+   * instructions that come after it until a label is encountered. This is
+   * needed because goto can do unconditional jumps whenever the user wants to.
+   * LLVM IR doesn't really like that, it expects any block to be terminated by
+   * a control flow instruction and by one control flow instruction only; it
+   * also expects anonymous instructions to be numbered in the order of the
+   * control flow, so that also breaks */
+  for (BasicBlock &BB : *func) {
+    for (auto it = BB.begin(); it != BB.end(); ++it) {
+      if (auto *BI = dyn_cast<BranchInst>(&*it)) {
+        if (BI->isUnconditional()) {
+          ++it; // move to instruction after the branch
+          while (it != BB.end()) {
+            Instruction &I = *it++;
+            I.eraseFromParent();
+          }
+          break; // done with this block
+        }
+      }
+    }
+  }
 
   return last;
 }

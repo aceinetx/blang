@@ -38,6 +38,10 @@ Parser::symbol_type yylex(Driver &driver) {
         return Parser::make_WHILE(loc);
       if (identifier == "goto")
         return Parser::make_GOTO(loc);
+      if (identifier == "if")
+        return Parser::make_IF(loc);
+      if (identifier == "else")
+        return Parser::make_ELSE(loc);
 
       return Parser::make_IDENTIFIER(identifier, loc);
     } else if (std::isdigit(c) || c == '-') {

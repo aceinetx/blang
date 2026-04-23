@@ -24,6 +24,8 @@ llvm::Value *AstLabel::compile(Blang *blang) {
       blang->builder.CreateBr(blang->goto_blocks[name]);
     }
     blang->builder.SetInsertPoint(blang->goto_blocks[name]);
+    auto rem = std::ranges::remove(blang->unresolved_goto_labels, name);
+    blang->unresolved_goto_labels.erase(rem.begin(), rem.end());
   }
   return nullptr;
 }

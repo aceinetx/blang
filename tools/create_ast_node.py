@@ -32,6 +32,7 @@ struct Ast%NAME% : public AstNode {
 source_template = """
 #include "frontend/ast/Ast%NAME%.hh"
 #include "Blang.hh"
+#include "Assert.hh"
 #include <fmt/base.h>
 
 using namespace llvm;
@@ -43,6 +44,7 @@ void Ast%NAME%::print(int indent) {
 }
 
 llvm::Value *Ast%NAME%::compile(Blang *blang) {
+	blangassert(0 && "Ast%NAME%::compile is not implemented");
   return nullptr;
 }
 

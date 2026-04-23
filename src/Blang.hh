@@ -41,6 +41,7 @@ struct Blang {
 
   std::unordered_map<std::string, llvm::Value *> extern_values;
   std::unordered_map<std::string, llvm::BasicBlock *> goto_blocks;
+  std::vector<std::string> unresolved_goto_labels;
 
 private:
   std::string targetTriple;

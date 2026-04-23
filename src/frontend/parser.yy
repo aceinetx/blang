@@ -11,6 +11,7 @@
 #include <memory>
 #include <fmt/format.h>
 #include "frontend/Driver.hh"
+#include "Assert.hh"
 
 #include "frontend/ast/AstRoot.hh"
 #include "frontend/ast/AstFuncDef.hh"
@@ -31,6 +32,10 @@
 #include "frontend/ast/AstWhile.hh"
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstGoto.hh"
+#include "frontend/ast/AstIf.hh"
+#include "frontend/ast/AstElseIf.hh"
+#include "frontend/ast/AstElse.hh"
+#include "frontend/ast/AstIfChain.hh"
 
 namespace blang { class Driver; }
 }
@@ -49,7 +54,7 @@ namespace blang { class Driver; }
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
 %token LPAREN RPAREN LBRACE RBRACE SEMICOLON COLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION
-%token RETURN AUTO EXTRN WHILE GOTO
+%token RETURN AUTO EXTRN WHILE GOTO IF ELSE
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -66,6 +71,10 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstNode>> constant
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstGoto>> goto
+%type <std::shared_ptr<blang::AstIf>> if
+%type <std::shared_ptr<blang::AstElseIf>> elseif
+%type <std::shared_ptr<blang::AstElse>> else
+%type <std::shared_ptr<blang::AstIfChain>> if_chain
 %type <std::vector<std::string>> identifier_list
 
 %left EQUAL NEQUAL
@@ -135,8 +144,51 @@ statement:
 		$$ = $1;
 	} | rvalue SEMICOLON {
 		$$ = $1;
+	} | if_chain {
+		$$ = $1;
 	}
 	;
+
+if_chain:
+	if {
+		auto node = std::make_shared<blang::AstIfChain>();
+		node->begin_if = $1;
+		$$ = node;
+	} | if_chain elseif {
+		$1->elifs.push_back($2);
+		$$ = $1;
+	} | if_chain else {
+		$1->end_else = $2;
+		$$ = $1;
+	}
+	;
+
+if:
+	IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstIf>();
+		node->expression = $3;
+		node->body = $6;
+		$$ = node;
+	}
+	;
+
+elseif:
+	ELSE IF LPAREN rvalue RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstElseIf>();
+		node->expression = $4;
+		node->body = $7;
+		$$ = node;
+	}
+	;
+
+else:
+	ELSE LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstElse>();
+		node->body = $3;
+		$$ = node;
+	}
+	;
+
 
 statement_list:
 	statement {
