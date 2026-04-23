@@ -322,7 +322,7 @@ rvalue_term:
 		node->right = $3;
 		node->op = blang::AstBinop::DIV;
 		$$ = node;
-	} | EXCLAMATION rvalue {
+	} | EXCLAMATION rvalue_term {
 		auto node = std::make_shared<blang::AstUnot>();
 		node->expression = $2;
 		$$ = node;

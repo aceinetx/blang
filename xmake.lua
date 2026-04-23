@@ -7,7 +7,8 @@ if is_plat("linux") then
 	set_policy("build.sanitizer.leak", true)
 end
 
-add_requires("fmt")
+add_requires("fmt", {external=false})
+add_requires("apt::llvm")
 add_requires("pacman::llvm")
 add_requires("bison")
 
@@ -19,7 +20,6 @@ target("blang")
 
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
-	add_links("LLVM-22")
 
-	add_packages("fmt", "pacman::llvm")
+	add_packages("fmt", "apt::llvm", "pacman::llvm")
 target_end()
