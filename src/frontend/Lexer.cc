@@ -152,6 +152,10 @@ Parser::symbol_type yylex(Driver &driver) {
       return Parser::make_EXCLAMATION(loc);
     case ':':
       return Parser::make_COLON(loc);
+    case '[':
+      return Parser::make_LBRACKET(loc);
+    case ']':
+      return Parser::make_RBRACKET(loc);
     }
     state.pos--;
 
