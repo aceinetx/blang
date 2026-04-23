@@ -25,6 +25,8 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   auto block = BasicBlock::Create(blang->context, "_" + name, func);
   blang->builder.SetInsertPoint(block);
 
+  blang->add_global_scope_var(name, func);
+
   blang->push_scope();
   blang->current_function = func;
   blang->goto_blocks.clear();
