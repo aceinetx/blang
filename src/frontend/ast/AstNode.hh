@@ -2,7 +2,7 @@
 #include <llvm/IR/Value.h>
 
 namespace blang {
-class Blang;
+struct Blang;
 
 class AstNode {
 public:
