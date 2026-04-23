@@ -66,10 +66,9 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstWhile>> while
-%type <std::shared_ptr<blang::AstNode>> rvalue rvalue_eq rvalue_cmp rvalue_additive rvalue_multiplicative rvalue_unary rvalue_postfix rvalue_primary lvalue
+%type <std::shared_ptr<blang::AstNode>> rvalue rvalue_assign rvalue_equal rvalue_compare rvalue_additive rvalue_multiplicative rvalue_unary rvalue_postfix rvalue_primary
+%type <std::shared_ptr<blang::AstNode>> lvalue lvalue_unary lvalue_postfix lvalue_primary
 %type <std::vector<std::shared_ptr<blang::AstNode>>> rvalue_list
-%type <std::shared_ptr<blang::AstDerefLv>> lvalue_deref
-%type <std::shared_ptr<blang::AstNode>> constant
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstIf>> if
@@ -275,79 +274,78 @@ rvalue_list:
 	;
 
 rvalue:
-	rvalue_eq {
+	rvalue_assign {
 		$$ = $1;
-	} | lvalue ASSIGN rvalue {
-		auto node = std::make_shared<blang::AstAssign>();
+	}
+	;
+
+rvalue_assign:
+	rvalue_equal {
+		$$ = $1;
+	} | lvalue ASSIGN rvalue_assign {
+		auto node = std::make_shared<AstAssign>();
 		node->lvalue = $1;
 		node->rvalue = $3;
 		$$ = node;
 	}
 	;
 
-rvalue_eq:
-	rvalue_cmp {
+rvalue_equal:
+	rvalue_compare {
 		$$ = $1;
-	} | rvalue_eq EQUAL rvalue_cmp {
-		auto node = std::make_shared<blang::AstBinop>();
+	} | rvalue_equal EQUAL rvalue_compare {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::EQUAL;
-		$$ = node;
-	} | rvalue_eq NEQUAL rvalue_cmp {
-		auto node = std::make_shared<blang::AstBinop>();
+		node->op = AstBinop::EQUAL;
+	} | rvalue_equal NEQUAL rvalue_compare {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::NEQUAL;
-		$$ = node;
+		node->op = AstBinop::NEQUAL;
 	}
 	;
 
-rvalue_cmp:
+rvalue_compare:
 	rvalue_additive {
 		$$ = $1;
-	} | rvalue_cmp GREATER rvalue_additive {
-		auto node = std::make_shared<blang::AstBinop>();
+	} | rvalue_compare GREATER rvalue_additive {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::GREATER;
-		$$ = node;
-	} | rvalue_cmp LESS rvalue_additive {
-		auto node = std::make_shared<blang::AstBinop>();
+		node->op = AstBinop::GREATER;
+	} | rvalue_compare LESS rvalue_additive {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::LESS;
-		$$ = node;
-	} | rvalue_cmp GREQ rvalue_additive {
-		auto node = std::make_shared<blang::AstBinop>();
+		node->op = AstBinop::LESS;
+	} | rvalue_compare GREQ rvalue_additive {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::GREQ;
-		$$ = node;
-	} | rvalue_cmp LSEQ rvalue_additive {
-		auto node = std::make_shared<blang::AstBinop>();
+		node->op = AstBinop::GREQ;
+	} | rvalue_compare LSEQ rvalue_additive {
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::LSEQ;
-		$$ = node;
+		node->op = AstBinop::LSEQ;
 	}
 	;
+	
 
 rvalue_additive:
 	rvalue_multiplicative {
 		$$ = $1;
 	} | rvalue_additive PLUS rvalue_multiplicative {
-		auto node = std::make_shared<blang::AstBinop>();
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::PLUS;
-		$$ = node;
+		node->op = AstBinop::PLUS;
 	} | rvalue_additive MINUS rvalue_multiplicative {
-		auto node = std::make_shared<blang::AstBinop>();
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::MINUS;
-		$$ = node;
+		node->op = AstBinop::MINUS;
 	}
 	;
 
@@ -355,29 +353,31 @@ rvalue_multiplicative:
 	rvalue_unary {
 		$$ = $1;
 	} | rvalue_multiplicative MUL rvalue_unary {
-		auto node = std::make_shared<blang::AstBinop>();
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::MUL;
-		$$ = node;
+		node->op = AstBinop::MUL;
 	} | rvalue_multiplicative DIV rvalue_unary {
-		auto node = std::make_shared<blang::AstBinop>();
+		auto node = std::make_shared<AstBinop>();
 		node->left = $1;
 		node->right = $3;
-		node->op = blang::AstBinop::DIV;
-		$$ = node;
+		node->op = AstBinop::DIV;
 	}
 	;
 
 rvalue_unary:
 	rvalue_postfix {
 		$$ = $1;
-	} | lvalue_deref {
-		auto node = std::make_shared<blang::AstDerefRv>();
-		node->expression = $1->expression;
+	} | EXCLAMATION rvalue_unary {
+		auto node = std::make_shared<AstUnot>();
+		node->expression = $2;
 		$$ = node;
-	} | EXCLAMATION rvalue_multiplicative {
-		auto node = std::make_shared<blang::AstUnot>();
+	} | MUL rvalue_unary {
+		auto node = std::make_shared<AstDerefRv>();
+		node->expression = $2;
+		$$ = node;
+	} | AMPERSAND lvalue_unary {
+		auto node = std::make_shared<AstAddrof>();
 		node->expression = $2;
 		$$ = node;
 	}
@@ -386,69 +386,81 @@ rvalue_unary:
 rvalue_postfix:
 	rvalue_primary {
 		$$ = $1;
-	} | lvalue LPAREN rvalue_list RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
+	} | rvalue_postfix LPAREN RPAREN {
+		auto node = std::make_shared<AstFuncCall>();
+		node->expression = $1;
+		$$ = node;
+	} | rvalue_postfix LPAREN rvalue_list RPAREN {
+		auto node = std::make_shared<AstFuncCall>();
 		node->expression = $1;
 		node->args = $3;
-		$$ = node;
-	} | lvalue LPAREN RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
-		node->expression = $1;
 		$$ = node;
 	}
 	;
 
 rvalue_primary:
-	constant {
-		$$ = $1;
-	} | IDENTIFIER {
-		auto node = std::make_shared<blang::AstVarRefRv>();
+	IDENTIFIER {
+		auto node = std::make_shared<AstVarRefRv>();
 		node->name = $1;
+		$$ = node;
+	} | NUMBER {
+		auto node = std::make_shared<AstNumber>();
+		node->number = $1;
+		$$ = node;
+	} | STRING_LIT {
+		auto node = std::make_shared<AstStringLit>();
+		node->str = $1;
 		$$ = node;
 	} | LPAREN rvalue RPAREN {
 		$$ = $2;
-	} | AMPERSAND lvalue {
-		auto node = std::make_shared<blang::AstAddrof>();
+	}
+	;
+
+lvalue:
+	lvalue_unary {
+		$$ = $1;
+	}
+	;
+
+lvalue_unary:
+	lvalue_postfix {
+		$$ = $1;
+	} | MUL rvalue_unary {
+		auto node = std::make_shared<AstDerefLv>();
 		node->expression = $2;
 		$$ = node;
 	}
 	;
 
-constant:
-	NUMBER {
-		auto node = std::make_shared<blang::AstNumber>();
-		node->number = $1;
-		$$ = node;
-	} | STRING_LIT {
-		auto node = std::make_shared<blang::AstStringLit>();
-		node->str = $1;
-		$$ = node;
-	}
-	;
-
-lvalue:
-	IDENTIFIER {
-		auto node = std::make_shared<blang::AstVarRefLv>();
-		node->name = $1;
-		$$ = node;
-	} | lvalue_deref {
+lvalue_postfix:
+	lvalue_primary {
 		$$ = $1;
 	} | rvalue_postfix LBRACKET rvalue RBRACKET {
-		auto node = std::make_shared<blang::AstIndex>();
+		auto node = std::make_shared<AstIndex>();
 		node->expression = $1;
 		node->index = $3;
 		$$ = node;
 	}
 	;
 
-lvalue_deref:
-	MUL rvalue_unary {
-		auto node = std::make_shared<blang::AstDerefLv>();
-		node->expression = $2;
+lvalue_primary:
+	IDENTIFIER {
+		auto node = std::make_shared<AstVarRefLv>();
+		node->name = $1;
 		$$ = node;
 	}
 	;
 
+/*
+a(){a[0];}
+a(){a[0] = a = b; }
+
+a(){return (a[0]);}
+a(){return (a[0] = a = b); }
+
+a(){ return (a); }
+a(){ return (&a); }
+*/
 %%
 
 namespace blang {
