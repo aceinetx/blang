@@ -229,15 +229,6 @@ rvalue:
 		node->lvalue = $1;
 		node->rvalue = $3;
 		$$ = node;
-	} | lvalue LPAREN rvalue_list RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
-		node->expression = $1;
-		node->args = $3;
-		$$ = node;
-	} | lvalue LPAREN RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
-		node->expression = $1;
-		$$ = node;
 	}
 	;
 
@@ -325,6 +316,15 @@ rvalue_term:
 	} | EXCLAMATION rvalue_term {
 		auto node = std::make_shared<blang::AstUnot>();
 		node->expression = $2;
+		$$ = node;
+	} | lvalue LPAREN rvalue_list RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
+		node->args = $3;
+		$$ = node;
+	} | lvalue LPAREN RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
 		$$ = node;
 	}
 	;

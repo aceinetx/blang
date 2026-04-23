@@ -6,6 +6,8 @@ int main(int argc, char **argv) {
   Blang blang = Blang("b");
   blang.compile(R"(
 main(argc, argv) {
-	return(**argv);
-})");
+	extrn strcmp;
+	return(strcmp(*(argv+8), "hi") == 0);
+}
+)");
 }
