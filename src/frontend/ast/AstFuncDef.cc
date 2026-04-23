@@ -14,7 +14,9 @@ void AstFuncDef::print(int indent) {
   }
 }
 
-llvm::Value *AstFuncDef::compile(Blang *blang) {
+llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+
   std::vector<Type *> arg_types = {};
   for (size_t i = 0; i < args.size(); i++)
     arg_types.push_back(blang->get_word_ty());
@@ -48,7 +50,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   /* Compile body */
   llvm::Value *last = nullptr;
   for (auto child : statements) {
-    last = child->compile(blang);
+    last = child->compile(blang, true);
   }
 
   blang->pop_scope();
@@ -85,5 +87,8 @@ llvm::Value *AstFuncDef::compile(Blang *blang) {
   }
 
   return last;
+}
+bool AstFuncDef::is_rvalue() {
+  return false;
 }
 } // namespace blang

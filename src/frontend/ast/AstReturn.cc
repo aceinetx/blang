@@ -9,9 +9,13 @@ void AstReturn::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstReturn::compile(Blang *blang) {
-  blang->builder.CreateRet(blang->builder.CreateLoad(
-      blang->get_word_ty(), expression->compile(blang)));
+llvm::Value *AstReturn::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+  blang->builder.CreateRet(expression->compile(blang, true));
   return nullptr;
+}
+
+bool AstReturn::is_rvalue() {
+  return true;
 }
 } // namespace blang

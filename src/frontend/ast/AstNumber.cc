@@ -10,8 +10,15 @@ void AstNumber::print(int indent) {
   fmt::println("- AstNumber {}", number);
 }
 
-llvm::Value *AstNumber::compile(Blang *blang) {
+llvm::Value *AstNumber::compile(Blang *blang, bool rvalue) {
+  if (!rvalue) {
+    throw std::runtime_error("number cannot be an lvalue");
+  }
+
   return ConstantInt::get(blang->get_word_ty(), number);
 }
 
+bool AstNumber::is_rvalue() {
+  return true;
+}
 } // namespace blang

@@ -6,7 +6,9 @@ struct AstFuncDef : public AstNode {
   AstFuncDef() = default;
 
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue) override;
+
+  bool is_rvalue() override;
 
   std::vector<std::shared_ptr<AstNode>> statements;
   std::string name;

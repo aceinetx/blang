@@ -10,11 +10,16 @@ void AstRoot::print(int indent) {
   }
 }
 
-llvm::Value *AstRoot::compile(Blang *blang) {
+llvm::Value *AstRoot::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
   llvm::Value *last = nullptr;
   for (auto child : children) {
-    last = child->compile(blang);
+    last = child->compile(blang, true);
   }
   return last;
+}
+
+bool AstRoot::is_rvalue() {
+  return false;
 }
 } // namespace blang
