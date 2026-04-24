@@ -5,12 +5,9 @@ using namespace blang;
 int main(int argc, char **argv) {
   Blang blang = Blang("b");
   blang.compile(R"(
-a(){
-	return(0);
-}
-
 main(argc, argv) {
-	return(a());
+	extrn puts;
+	return(puts("Hello, World!"));
 }
 )");
 }

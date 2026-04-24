@@ -15,7 +15,8 @@ void AstExtern::print(int indent) {
   fmt::println("");
 }
 
-llvm::Value *AstExtern::compile(Blang *blang) {
+llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
   for (const auto &name : names) {
     if (!blang->extern_values.contains(name)) {
       auto *GV =

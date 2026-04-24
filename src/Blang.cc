@@ -1,4 +1,6 @@
 #include "Blang.hh"
+#include "frontend/Driver.hh"
+
 #include "parser.tab.hpp"
 #include <fmt/base.h>
 #include <llvm/IR/DataLayout.h>

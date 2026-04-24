@@ -2,10 +2,10 @@
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
-struct AstStringLit : public AstNode {
+struct AstExtern : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue) override;
 
-  std::string str;
+  std::vector<std::string> names;
 };
 } // namespace blang

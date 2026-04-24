@@ -1,5 +1,5 @@
 #pragma once
-#include "LexerState.hh"
+#include "Lexer.hh"
 #include "frontend/ast/AstRoot.hh"
 #include <memory>
 #include <string>
@@ -15,7 +15,7 @@ public:
   ~Driver();
 
   const std::string &get_code();
-  LexerState &get_lexer_state();
+  Lexer &get_lexer();
 
   void set_root(std::shared_ptr<AstRoot> new_root);
   std::shared_ptr<AstRoot> get_root();
@@ -24,7 +24,7 @@ public:
 
 private:
   std::string code;
-  LexerState lexer_state;
+  Lexer lexer;
   std::shared_ptr<AstRoot> root;
 };
 } // namespace blang

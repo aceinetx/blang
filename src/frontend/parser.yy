@@ -10,7 +10,6 @@
 %code requires {
 #include <memory>
 #include <fmt/format.h>
-#include "frontend/Driver.hh"
 #include "Assert.hh"
 
 #include "frontend/ast/AstRoot.hh"
@@ -25,6 +24,8 @@
 #include "frontend/ast/AstIndex.hh"
 #include "frontend/ast/AstBinop.hh"
 #include "frontend/ast/AstFuncCall.hh"
+#include "frontend/ast/AstExtern.hh"
+#include "frontend/ast/AstStringLit.hh"
 
 namespace blang { class Driver; }
 }
@@ -33,6 +34,7 @@ namespace blang { class Driver; }
 %lex-param { blang::Driver& driver }
 
 %code {
+	#include "frontend/Driver.hh"
 	namespace blang {
 		Parser::symbol_type yylex(Driver& driver);
 	}
@@ -52,6 +54,7 @@ namespace blang { class Driver; }
 %type <std::vector<std::shared_ptr<blang::AstNode>>> top_statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
+%type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
@@ -111,6 +114,8 @@ statement:
 		$$ = $1;
 	} | auto {
 		$$ = $1;
+	} | extrn {
+		$$ = $1;
 	} | expression SEMICOLON {
 		$$ = $1;
 	}
@@ -142,6 +147,14 @@ return:
 	RETURN LPAREN expression RPAREN SEMICOLON {
 		auto node = std::make_shared<blang::AstReturn>();
 		node->expression = $3;
+		$$ = node;
+	}
+	;
+
+extrn:
+	EXTRN identifier_list SEMICOLON {
+		auto node = std::make_shared<blang::AstExtern>();
+		node->names = std::move($2);
 		$$ = node;
 	}
 	;
@@ -308,6 +321,10 @@ expression_primary:
 	} | NUMBER {
 		auto node = std::make_shared<blang::AstNumber>();
 		node->number = $1;
+		$$ = node;
+	} | STRING_LIT {
+		auto node = std::make_shared<blang::AstStringLit>();
+		node->str = $1;
 		$$ = node;
 	}
 	;

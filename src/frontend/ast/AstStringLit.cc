@@ -1,4 +1,5 @@
 #include "frontend/ast/AstStringLit.hh"
+#include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
 
@@ -10,7 +11,8 @@ void AstStringLit::print(int indent) {
   fmt::println("- AstStringLit {}", str);
 }
 
-llvm::Value *AstStringLit::compile(Blang *blang) {
+llvm::Value *AstStringLit::compile(Blang *blang, bool rvalue) {
+  blangassert(rvalue);
   return blang->builder.CreatePtrToInt(blang->builder.CreateGlobalString(str),
                                        blang->get_word_ty());
 }
