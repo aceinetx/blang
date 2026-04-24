@@ -3,9 +3,9 @@
 #include <exception>
 
 namespace blang {
-class LexerException : public std::exception {
+class ParserException : public std::exception {
 public:
-  LexerException(Parser::location_type loc, std::string message);
+  ParserException(Parser::location_type loc, std::string message);
 
   [[nodiscard]] const char *what() const noexcept override;
 

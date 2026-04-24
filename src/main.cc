@@ -1,20 +1,46 @@
 #include "Blang.hh"
+#include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
 
 using namespace blang;
 
 int main(int argc, char **argv) {
-  Blang blang = Blang("b");
-  blang.compile(R"(
-extrn printf, putchar;
+  const std::string code = R"(
 main(argc, argv) {
-	auto i;
-	i = 0;
-	while(i < argc){
-		printf("%s ", argv[i]);
-		i = i + 1;
-	}
-	putchar(10);
-	return(0);
+	auto x;
+	return(x);
 }
-)");
+  )";
+
+  std::vector<std::string> srcs = {
+    R"(
+main(argc, argv) {
+	auto x;
+	return(x a);
+}
+    )",
+    R"(
+main(argc argv) {
+	auto x;
+	return(x);
+}
+    )",
+    R"(
+main(argc .argv) {
+	auto x;
+	return(x);
+}
+    )",
+  };
+  
+  for(auto& code : srcs){
+    Blang blang = Blang("b");
+    DiagnosticPrinter diag_printer = DiagnosticPrinter("b", code);
+    try {
+      blang.compile(code);
+    } catch (LexerException& exc){
+      diag_printer.printDiagnostic(exc);
+    } catch (ParserException& exc){
+      diag_printer.printDiagnostic(exc);
+    }
+  }
 }

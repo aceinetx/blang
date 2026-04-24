@@ -40,6 +40,8 @@ namespace blang { class Driver; }
 
 %code {
 	#include "frontend/Driver.hh"
+	#include "frontend/ParserException.hh"
+
 	namespace blang {
 		Parser::symbol_type yylex(Driver& driver);
 	}
@@ -422,6 +424,6 @@ expression_primary:
 
 namespace blang {
 	void Parser::error(const Parser::location_type& loc, const std::string& msg){
-		throw std::runtime_error(fmt::format("{} at line {} column {}", msg, loc.begin.line, loc.begin.column));
+		throw ParserException(loc, msg);
 	}
 }

@@ -1,0 +1,98 @@
+#include <fmt/base.h>
+#include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
+
+#define WHITE_BOLD "\e[1;37m"
+#define RED_BOLD "\e[1;31m"
+#define GREEN_BOLD "\e[1;32m"
+#define PURPLE_BOLD "\e[1;35m"
+#define CYAN_BOLD "\e[1;36m"
+#define GREEN "\e[0;92m"
+#define RESET "\e[0m"
+
+static std::string replace_all(const std::string& str, const std::string& from, const std::string& to) {
+  if (from.empty())
+    return str;
+
+  std::string result = str;
+  size_t start_pos = 0;
+  while ((start_pos = result.find(from, start_pos)) != std::string::npos) {
+    result.replace(start_pos, from.length(), to);
+    start_pos += to.length();
+  }
+  return result;
+}
+
+
+static std::vector<std::string> string_split(std::string s, const std::string &delimiter) {
+  std::vector<std::string> tokens;
+  size_t pos = 0;
+  std::string token;
+  while ((pos = s.find(delimiter)) != std::string::npos) {
+    token = s.substr(0, pos);
+    tokens.push_back(token);
+    s.erase(0, pos + delimiter.length());
+  }
+  tokens.push_back(s);
+
+  return tokens;
+}
+
+namespace blang {
+DiagnosticPrinter::DiagnosticPrinter(std::string filename, std::string source) : filename(filename), source(source) {
+}
+
+DiagnosticPrinter::~DiagnosticPrinter(){
+}
+
+void DiagnosticPrinter::printSourceWithMessage(Parser::location_type location, std::string message, int type){
+  std::string diagnostic_type_string = getDiagnosticTypeStringForType(type);
+
+  // Print the message at the top
+  fmt::println(WHITE_BOLD "{}:{}:{}: {} " WHITE_BOLD "{}" RESET, filename, location.begin.line, location.begin.column, diagnostic_type_string, message);
+  
+  // Print the source code line
+  auto lines = string_split(source, "\n");
+
+  if(lines.size() < location.begin.line){
+    fmt::println("(no source available)"); 
+    return;
+  }
+
+  /* print the source code */
+  std::string tab = "  ";
+  auto line = lines[location.begin.line - 1];
+
+  fmt::println("{: 5} | {}", location.begin.line, replace_all(line, "\t", tab));
+  fmt::print("      | ");
+  
+  for(int i=0; i<location.begin.column; i++){
+    if(line[i] == '\t'){
+      fmt::print("{}", tab);
+    } else {
+      fmt::print(" ");
+    }
+  }
+  fmt::print(GREEN "^\n" RESET);
+}
+
+void DiagnosticPrinter::printDiagnostic(LexerException &exc){
+  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), ERROR);
+}
+
+void DiagnosticPrinter::printDiagnostic(ParserException &exc){
+  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), ERROR);
+}
+
+std::string DiagnosticPrinter::getDiagnosticTypeStringForType(int type){
+  type = type % __DIAG_TYPE_END;
+  switch(type){
+    case ERROR:
+      return RED_BOLD "error:" RESET;
+    case WARNING:
+      return PURPLE_BOLD "warning:" RESET;
+    case NOTE:
+      return CYAN_BOLD "note:" RESET;
+  }
+  return "";
+}
+}
