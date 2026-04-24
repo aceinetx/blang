@@ -13,10 +13,6 @@ llvm::Value *AstVarRef::compile(Blang *blang, bool rvalue) {
 
   auto *value = blang->get_scope_var(name);
   return rvalue ? blang->builder.CreateLoad(blang->get_word_ty(), value)
-                : value;
-}
-
-bool AstVarRef::is_rvalue() {
-  return false;
+                : blang->builder.CreatePtrToInt(value, blang->get_word_ty());
 }
 } // namespace blang

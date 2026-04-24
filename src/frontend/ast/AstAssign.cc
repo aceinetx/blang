@@ -14,22 +14,13 @@ void AstAssign::print(int indent) {
 llvm::Value *AstAssign::compile(Blang *blang, bool rvalue) {
   (void)rvalue;
 
-  if (dest->is_rvalue()) {
-    throw std::runtime_error("expected lvalue in lhs assignment");
-  }
-  if (!src->is_rvalue()) {
-    throw std::runtime_error("expected rvalue in rhs assignment");
-  }
-  auto lv = dest->compile(blang, false);
+  auto lv = blang->builder.CreateIntToPtr(dest->compile(blang, false),
+                                          blang->builder.getPtrTy());
   auto rv = src->compile(blang, true);
 
   blang->builder.CreateStore(rv, lv);
 
   return rv;
-}
-
-bool AstAssign::is_rvalue() {
-  return true;
 }
 
 } // namespace blang

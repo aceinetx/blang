@@ -11,11 +11,7 @@ void AstAddrof::print(int indent) {
 }
 
 llvm::Value *AstAddrof::compile(Blang *blang, bool rvalue) {
-  blangassert(!expression->is_rvalue());
+  blangassert(rvalue);
   return expression->compile(blang, false);
-}
-
-bool AstAddrof::is_rvalue() {
-  return true;
 }
 } // namespace blang

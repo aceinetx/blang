@@ -14,8 +14,4 @@ llvm::Value *AstReturn::compile(Blang *blang, bool rvalue) {
   blang->builder.CreateRet(expression->compile(blang, true));
   return nullptr;
 }
-
-bool AstReturn::is_rvalue() {
-  return true;
-}
 } // namespace blang

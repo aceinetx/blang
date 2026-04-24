@@ -18,8 +18,4 @@ llvm::Value *AstRoot::compile(Blang *blang, bool rvalue) {
   }
   return last;
 }
-
-bool AstRoot::is_rvalue() {
-  return false;
-}
 } // namespace blang

@@ -17,8 +17,5 @@ llvm::Value *AstAutoVar::compile(Blang *blang, bool rvalue) {
 
   return nullptr;
 }
-bool AstAutoVar::is_rvalue() {
-  return true;
-}
 
 } // namespace blang

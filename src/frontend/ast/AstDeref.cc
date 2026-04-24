@@ -17,8 +17,4 @@ llvm::Value *AstDeref::compile(Blang *blang, bool rvalue) {
 
   return ptr;
 }
-
-bool AstDeref::is_rvalue() {
-  return false;
-}
 } // namespace blang

@@ -6,8 +6,6 @@ struct AstDeref : public AstNode {
   void print(int indent = 0) override;
   llvm::Value *compile(Blang *blang, bool rvalue = false) override;
 
-  bool is_rvalue() override;
-
   std::shared_ptr<AstNode> expression;
 };
 } // namespace blang

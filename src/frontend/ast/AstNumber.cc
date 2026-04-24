@@ -17,8 +17,4 @@ llvm::Value *AstNumber::compile(Blang *blang, bool rvalue) {
 
   return ConstantInt::get(blang->get_word_ty(), number);
 }
-
-bool AstNumber::is_rvalue() {
-  return true;
-}
 } // namespace blang

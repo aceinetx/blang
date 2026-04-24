@@ -88,7 +88,4 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
 
   return last;
 }
-bool AstFuncDef::is_rvalue() {
-  return false;
-}
 } // namespace blang

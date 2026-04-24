@@ -22,6 +22,7 @@
 #include "frontend/ast/AstAssign.hh"
 #include "frontend/ast/AstDeref.hh"
 #include "frontend/ast/AstAddrof.hh"
+#include "frontend/ast/AstIndex.hh"
 
 namespace blang { class Driver; }
 }
@@ -50,7 +51,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
-%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_unary expression_primary
+%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
 
 %left EQUAL NEQUAL
@@ -180,7 +181,7 @@ expression_assign:
 	;
 
 expression_unary:
-	expression_primary {
+	expression_postfix {
 		$$ = $1;
 	} | MUL expression_unary {
 		auto node = std::make_shared<blang::AstDeref>();
@@ -189,6 +190,17 @@ expression_unary:
 	} | AMPERSAND expression_unary {
 		auto node = std::make_shared<blang::AstAddrof>();
 		node->expression = $2;
+		$$ = node;
+	}
+	;
+
+expression_postfix:
+	expression_primary {
+		$$ = $1;
+	} | expression_postfix LBRACKET expression RBRACKET {
+		auto node = std::make_shared<blang::AstIndex>();
+		node->expression = $1;
+		node->index = $3;
 		$$ = node;
 	}
 	;
