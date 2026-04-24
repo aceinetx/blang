@@ -26,6 +26,7 @@
 #include "frontend/ast/AstFuncCall.hh"
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstStringLit.hh"
+#include "frontend/ast/AstWhile.hh"
 
 namespace blang { class Driver; }
 }
@@ -55,6 +56,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
+%type <std::shared_ptr<blang::AstWhile>> while
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
@@ -116,6 +118,8 @@ statement:
 		$$ = $1;
 	} | extrn {
 		$$ = $1;
+	} | while {
+		$$ = $1;
 	} | expression SEMICOLON {
 		$$ = $1;
 	}
@@ -163,6 +167,15 @@ auto:
 	AUTO IDENTIFIER SEMICOLON {
 		auto node = std::make_shared<blang::AstAutoVar>();
 		node->name = $2;
+		$$ = node;
+	}
+	;
+
+while:
+	WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<AstWhile>();
+		node->expression = $3;
+		node->statements = $6;
 		$$ = node;
 	}
 	;
