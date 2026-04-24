@@ -1,5 +1,5 @@
 #pragma once
-#include "frontend/LocationException.hh"
+#include "frontend/exceptions/LocationException/LocationException.hh"
 #include "parser.tab.hpp"
 
 namespace blang {

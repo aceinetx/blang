@@ -1,5 +1,6 @@
 #pragma once
 #include <llvm/IR/Value.h>
+#include <location.hh>
 
 namespace blang {
 struct Blang;
@@ -15,6 +16,8 @@ public:
 
   virtual void print(int indent = 0);
   virtual llvm::Value *compile(Blang *blang, bool rvalue) = 0;
+
+  location location;
 
 protected:
   void printIndent(int indent);

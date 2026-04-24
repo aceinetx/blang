@@ -1,5 +1,6 @@
 #pragma once
 #include "Scope.hh"
+#include "frontend/ast/AstGoto.hh"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Metadata.h>
@@ -30,9 +31,12 @@ struct Blang {
 
   llvm::Value *get_scope_var(std::string name);
 
-  void add_scope_var(std::string name, llvm::Value *value);
+  void add_scope_var(std::string name, llvm::Value *value,
+                     std::optional<class location> diagnostic_location = {});
 
-  void add_global_scope_var(std::string name, llvm::Value *value);
+  void
+  add_global_scope_var(std::string name, llvm::Value *value,
+                       std::optional<class location> diagnostic_location = {});
 
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
@@ -41,7 +45,7 @@ struct Blang {
 
   std::unordered_map<std::string, llvm::Value *> extern_values;
   std::unordered_map<std::string, llvm::BasicBlock *> goto_blocks;
-  std::vector<std::string> unresolved_goto_labels;
+  std::vector<std::pair<std::string, class location>> unresolved_goto_labels;
 
 private:
   std::string targetTriple;

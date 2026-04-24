@@ -30,7 +30,7 @@ blang->goto_blocks[name] = unresolved_block;
         BasicBlock::Create(blang->context, name, blang->current_function);
     blang->builder.CreateBr(unresolved_block);
     blang->goto_blocks[name] = unresolved_block;
-    blang->unresolved_goto_labels.push_back(name);
+    blang->unresolved_goto_labels.emplace_back(name, label_symbol_location);
   }
   return nullptr;
 }

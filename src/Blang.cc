@@ -1,6 +1,7 @@
 #include "Blang.hh"
 #include "frontend/Driver.hh"
 
+#include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
 #include "parser.tab.hpp"
 #include <fmt/base.h>
 #include <llvm/IR/DataLayout.h>
@@ -44,8 +45,8 @@ Blang::Blang(std::string moduleName)
   std::string err;
   target = TargetRegistry::lookupTarget(targetTriple, err);
   if (!target) {
-    throw std::runtime_error(fmt::format("failed to lookup target {}: {}",
-                                         targetTriple, err));
+    throw std::runtime_error(
+        fmt::format("failed to lookup target {}: {}", targetTriple, err));
   }
 
   fmodule.setTargetTriple(targetTriple);
@@ -109,21 +110,28 @@ llvm::Value *Blang::get_scope_var(std::string name) {
     if (scope.contains(name))
       return scope[name];
   }
-  throw std::runtime_error("undeclared variable " + name);
+  return nullptr;
 }
 
-void Blang::add_scope_var(std::string name, llvm::Value *value) {
+void Blang::add_scope_var(std::string name, llvm::Value *value,
+                          std::optional<class location> diagnostic_location) {
   auto &scope = get_scope();
   if (scope.contains(name)) {
+    if (diagnostic_location)
+      throw RedefinitionException(*diagnostic_location, name);
     throw std::runtime_error("redefinition of " + name);
   }
   scope[name] = value;
 }
 
-void Blang::add_global_scope_var(std::string name, llvm::Value *value) {
+void Blang::add_global_scope_var(
+    std::string name, llvm::Value *value,
+    std::optional<class location> diagnostic_location) {
   auto &scope = scopes.back();
   if (scope.contains(name)) {
-    throw std::runtime_error("global redefinition of " + name);
+    if (diagnostic_location)
+      throw RedefinitionException(*diagnostic_location, "global " + name);
+    throw std::runtime_error("redefinition of global " + name);
   }
   scope[name] = value;
 }

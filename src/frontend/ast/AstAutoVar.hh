@@ -7,5 +7,6 @@ struct AstAutoVar : public AstNode {
   llvm::Value *compile(Blang *blang, bool rvalue) override;
 
   std::string name = "";
+  class location identifier_location;
 };
 } // namespace blang

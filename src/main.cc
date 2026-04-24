@@ -11,36 +11,15 @@ main(argc, argv) {
 }
   )";
 
-  std::vector<std::string> srcs = {
-    R"(
-main(argc, argv) {
-	auto x;
-	return(x a);
-}
-    )",
-    R"(
-main(argc argv) {
-	auto x;
-	return(x);
-}
-    )",
-    R"(
-main(argc .argv) {
-	auto x;
-	return(x);
-}
-    )",
-  };
-  
-  for(auto& code : srcs){
-    Blang blang = Blang("b");
-    DiagnosticPrinter diag_printer = DiagnosticPrinter("b", code);
-    try {
-      blang.compile(code);
-    } catch (LexerException& exc){
-      diag_printer.printDiagnostic(exc);
-    } catch (ParserException& exc){
-      diag_printer.printDiagnostic(exc);
-    }
+  Blang blang = Blang("b");
+  DiagnosticPrinter diag_printer = DiagnosticPrinter("b", code);
+  try {
+    blang.compile(code);
+  } catch (LexerException &exc) {
+    diag_printer.printDiagnostic(exc);
+  } catch (ParserException &exc) {
+    diag_printer.printDiagnostic(exc);
+  } catch (LocationException &exc) {
+    diag_printer.printDiagnostic(exc);
   }
 }

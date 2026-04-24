@@ -1,6 +1,6 @@
 #include "frontend/ast/AstUnot.hh"
-#include "Assert.hh"
 #include "Blang.hh"
+#include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/base.h>
 
 using namespace llvm;
@@ -13,7 +13,8 @@ void AstUnot::print(int indent) {
 }
 
 llvm::Value *AstUnot::compile(Blang *blang, bool rvalue) {
-  blangassert(rvalue);
+  if (!rvalue)
+    throw LvalueException(location, "unary not");
 
   Value *v = expression->compile(blang, true);
 

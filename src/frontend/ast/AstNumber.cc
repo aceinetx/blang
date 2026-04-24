@@ -1,5 +1,6 @@
 #include "frontend/ast/AstNumber.hh"
 #include "Blang.hh"
+#include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/base.h>
 
 using namespace llvm;
@@ -12,7 +13,7 @@ void AstNumber::print(int indent) {
 
 llvm::Value *AstNumber::compile(Blang *blang, bool rvalue) {
   if (!rvalue) {
-    throw std::runtime_error("number cannot be an lvalue");
+    throw LvalueException(location, "number");
   }
 
   return ConstantInt::get(blang->get_word_ty(), number);

@@ -23,9 +23,9 @@ llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {
           new GlobalVariable(blang->fmodule, blang->get_word_ty(), false,
                              GlobalValue::ExternalLinkage, nullptr, name);
       blang->extern_values[name] = GV;
-      blang->add_scope_var(name, GV);
+      blang->add_scope_var(name, GV, location);
     } else {
-      blang->add_scope_var(name, blang->extern_values[name]);
+      blang->add_scope_var(name, blang->extern_values[name], location);
     }
   }
 

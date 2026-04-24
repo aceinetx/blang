@@ -1,4 +1,4 @@
-#include "frontend/LocationException.hh"
+#include "frontend/exceptions/LocationException/LocationException.hh"
 #include <fmt/base.h>
 
 namespace blang {

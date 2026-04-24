@@ -1,5 +1,7 @@
 #include "frontend/ast/AstFuncDef.hh"
 #include "Blang.hh"
+#include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
+#include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/base.h>
 #include <llvm/IR/DerivedTypes.h>
 
@@ -41,7 +43,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
     {
       auto var = blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, i);
       blang->builder.CreateStore(arg, var);
-      blang->add_scope_var(i, var);
+      blang->add_scope_var(i, var, location);
     }
 
     arg = fnArgs++;
@@ -60,7 +62,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
    * Check for unresolved goto labels
    */
   for (const auto &label : blang->unresolved_goto_labels) {
-    throw std::runtime_error("unresolved label " + label);
+    throw UnresolvedLabelException(label.second, label.first);
   }
 
   /*

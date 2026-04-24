@@ -13,7 +13,7 @@ llvm::Value *AstAutoVar::compile(Blang *blang, bool rvalue) {
   assert(name != "");
 
   auto value = blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, name);
-  blang->add_scope_var(name, value);
+  blang->add_scope_var(name, value, identifier_location);
 
   return nullptr;
 }

@@ -7,5 +7,6 @@ struct AstGoto : public AstNode {
   llvm::Value *compile(Blang *blang, bool rvalue) override;
 
   std::string name = "";
+  class location label_symbol_location;
 };
 } // namespace blang

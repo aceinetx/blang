@@ -1,5 +1,5 @@
 #include "frontend/Driver.hh"
-#include "frontend/LexerException.hh"
+#include "frontend/exceptions/LexerException/LexerException.hh"
 #include "parser.tab.hpp"
 #include <cctype>
 #include <fmt/format.h>
@@ -196,7 +196,8 @@ Parser::symbol_type Lexer::read_character() {
 
 Parser::location_type Lexer::get_location() {
   Parser::location_type loc(nullptr, (int)line, (int)(pos - line_start_pos));
-  if(line > 0) loc.begin.column--;
+  if (line > 0)
+    loc.begin.column--;
   return loc;
 }
 

@@ -1,7 +1,7 @@
 #pragma once
-#include "frontend/LexerException.hh"
-#include "frontend/LocationException.hh"
-#include "frontend/ParserException.hh"
+#include "frontend/exceptions/LexerException/LexerException.hh"
+#include "frontend/exceptions/LocationException/LocationException.hh"
+#include "frontend/exceptions/ParserException/ParserException.hh"
 
 namespace blang {
 class DiagnosticPrinter {

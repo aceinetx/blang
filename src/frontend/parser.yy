@@ -40,7 +40,8 @@ namespace blang { class Driver; }
 
 %code {
 	#include "frontend/Driver.hh"
-	#include "frontend/ParserException.hh"
+	#include "frontend/exceptions/ParserException/ParserException.hh"
+	#define mknode(type, name, loc) auto name = std::make_shared<type>(); name->location = loc;
 
 	namespace blang {
 		Parser::symbol_type yylex(Driver& driver);
@@ -85,7 +86,7 @@ namespace blang { class Driver; }
 
 program:
 	top_statement_list {
-		auto root = std::make_shared<blang::AstRoot>();
+		mknode(AstRoot, root, @1);
 		root->children = std::move($1);
 		driver.set_root(root);
 	}
@@ -110,13 +111,13 @@ top_statement_list:
 
 function_definition:
 	IDENTIFIER LPAREN identifier_list RPAREN LBRACE statement_list RBRACE {
-		auto node = std::make_shared<blang::AstFuncDef>();
+		mknode(AstFuncDef, node, @1);
 		node->name = $1;
 		node->statements = $6;
 		node->args = $3;
 		$$ = node;
 	} | IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
-		auto node = std::make_shared<blang::AstFuncDef>();
+		mknode(AstFuncDef, node, @1);
 		node->name = $1;
 		node->statements = $5;
 		$$ = node;
@@ -167,7 +168,7 @@ identifier_list:
 
 if_chain:
 	if {
-		auto node = std::make_shared<blang::AstIfChain>();
+		mknode(AstIfChain, node, @1);
 		node->begin_if = $1;
 		$$ = node;
 	} | if_chain elseif {
@@ -181,7 +182,7 @@ if_chain:
 
 if:
 	IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
-		auto node = std::make_shared<blang::AstIf>();
+		mknode(AstIf, node, @1);
 		node->expression = $3;
 		node->body = $6;
 		$$ = node;
@@ -190,7 +191,7 @@ if:
 
 elseif:
 	ELSE IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
-		auto node = std::make_shared<blang::AstElseIf>();
+		mknode(AstElseIf, node, @1);
 		node->expression = $4;
 		node->body = $7;
 		$$ = node;
@@ -199,7 +200,7 @@ elseif:
 
 else:
 	ELSE LBRACE statement_list RBRACE {
-		auto node = std::make_shared<blang::AstElse>();
+		mknode(AstElse, node, @1);
 		node->body = $3;
 		$$ = node;
 	}
@@ -207,7 +208,7 @@ else:
 	
 return:
 	RETURN LPAREN expression RPAREN SEMICOLON {
-		auto node = std::make_shared<blang::AstReturn>();
+		mknode(AstReturn, node, @1);
 		node->expression = $3;
 		$$ = node;
 	}
@@ -215,7 +216,7 @@ return:
 
 extrn:
 	EXTRN identifier_list SEMICOLON {
-		auto node = std::make_shared<blang::AstExtern>();
+		mknode(AstExtern, node, @1);
 		node->names = std::move($2);
 		$$ = node;
 	}
@@ -223,7 +224,8 @@ extrn:
 
 auto:
 	AUTO IDENTIFIER SEMICOLON {
-		auto node = std::make_shared<blang::AstAutoVar>();
+		mknode(blang::AstAutoVar, node, @1);
+		node->identifier_location = @2;
 		node->name = $2;
 		$$ = node;
 	}
@@ -231,7 +233,7 @@ auto:
 
 while:
 	WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE {
-		auto node = std::make_shared<AstWhile>();
+		mknode(AstWhile, node, @1);
 		node->expression = $3;
 		node->statements = $6;
 		$$ = node;
@@ -240,15 +242,16 @@ while:
 
 goto:
 	GOTO IDENTIFIER SEMICOLON {
-		auto node = std::make_shared<AstGoto>();
+		mknode(AstGoto, node, @1);
 		node->name = $2;
+		node->label_symbol_location = @2;
 		$$ = node;
 	}
 	;
 
 label:
 	IDENTIFIER COLON {
-		auto node = std::make_shared<AstLabel>();
+		mknode(AstLabel, node, @1);
 		node->name = $1;
 		$$ = node;
 	}
@@ -275,7 +278,7 @@ expression_assign:
 	expression_equality {
 		$$ = $1;
 	} | expression_equality ASSIGN expression_assign {
-		auto node = std::make_shared<blang::AstAssign>();
+		mknode(blang::AstAssign, node, @1);
 		node->dest = $1;
 		node->src = $3;
 		$$ = node;
@@ -286,13 +289,13 @@ expression_equality:
 	expression_compare {
 		$$ = $1;
 	} | expression_equality EQUAL expression_compare {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::EQUAL;
 		$$ = node;
 	} | expression_equality NEQUAL expression_compare {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::NEQUAL;
@@ -304,25 +307,25 @@ expression_compare:
 	expression_additive { 
 		$$ = $1;
 	} | expression_compare GREATER expression_additive {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::GREATER;
 		$$ = node;
 	} | expression_compare LESS expression_additive {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::LESS;
 		$$ = node;
 	} | expression_compare GREQ expression_additive {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::GREQ;
 		$$ = node;
 	} | expression_compare LSEQ expression_additive {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::LSEQ;
@@ -334,13 +337,13 @@ expression_additive:
 	expression_multiplicative {
 		$$ = $1;
 	} | expression_additive PLUS expression_multiplicative {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::PLUS;
 		$$ = node;
 	} | expression_additive MINUS expression_multiplicative {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::MINUS;
@@ -352,13 +355,13 @@ expression_multiplicative:
 	expression_unary {
 		$$ = $1;
 	} | expression_multiplicative MUL expression_unary {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::MUL;
 		$$ = node;
 	} | expression_multiplicative DIV expression_unary {
-		auto node = std::make_shared<AstBinop>();
+		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::DIV;
@@ -370,15 +373,15 @@ expression_unary:
 	expression_postfix {
 		$$ = $1;
 	} | MUL expression_unary {
-		auto node = std::make_shared<blang::AstDeref>();
+		mknode(blang::AstDeref, node, @1);
 		node->expression = $2;
 		$$ = node;
 	} | EXCLAMATION expression_unary {
-		auto node = std::make_shared<blang::AstUnot>();
+		mknode(blang::AstUnot, node, @1);
 		node->expression = $2;
 		$$ = node;
 	} | AMPERSAND expression_unary {
-		auto node = std::make_shared<blang::AstAddrof>();
+		mknode(blang::AstAddrof, node, @1);
 		node->expression = $2;
 		$$ = node;
 	}
@@ -388,17 +391,17 @@ expression_postfix:
 	expression_primary {
 		$$ = $1;
 	} | expression_postfix LBRACKET expression RBRACKET {
-		auto node = std::make_shared<blang::AstIndex>();
+		mknode(blang::AstIndex, node, @1);
 		node->expression = $1;
 		node->index = $3;
 		$$ = node;
 	} | expression_postfix LPAREN expression_list RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
+		mknode(blang::AstFuncCall, node, @1);
 		node->expression = $1;
 		node->args = $3;
 		$$ = node;
 	} | expression_postfix LPAREN RPAREN {
-		auto node = std::make_shared<blang::AstFuncCall>();
+		mknode(blang::AstFuncCall, node, @1);
 		node->expression = $1;
 		$$ = node;
 	}
@@ -406,15 +409,15 @@ expression_postfix:
 
 expression_primary:
 	IDENTIFIER {
-		auto node = std::make_shared<blang::AstVarRef>();
+		mknode(blang::AstVarRef, node, @1);
 		node->name = $1;
 		$$ = node;
 	} | NUMBER {
-		auto node = std::make_shared<blang::AstNumber>();
+		mknode(blang::AstNumber, node, @1);
 		node->number = $1;
 		$$ = node;
 	} | STRING_LIT {
-		auto node = std::make_shared<blang::AstStringLit>();
+		mknode(blang::AstStringLit, node, @1);
 		node->str = $1;
 		$$ = node;
 	}
