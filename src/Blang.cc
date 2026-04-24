@@ -21,6 +21,7 @@ Blang::Blang(std::string moduleName)
   InitializeAllAsmParsers();
   InitializeAllAsmPrinters();
 
+#if LLVM_VERSION_MAJOR > 20
   auto targetTriple = Triple(sys::getDefaultTargetTriple());
 
   std::string err;
@@ -37,6 +38,24 @@ Blang::Blang(std::string moduleName)
       targetTriple, "generic", "", opt, Reloc::PIC_));
 
   fmodule.setDataLayout(targetMachine->createDataLayout());
+#else
+  auto targetTriple = sys::getDefaultTargetTriple();
+
+  std::string err;
+  target = TargetRegistry::lookupTarget(targetTriple, err);
+  if (!target) {
+    throw std::runtime_error(fmt::format("failed to lookup target {}: {}",
+                                         targetTriple, err));
+  }
+
+  fmodule.setTargetTriple(targetTriple);
+
+  TargetOptions opt;
+  targetMachine = std::unique_ptr<TargetMachine>(target->createTargetMachine(
+      targetTriple, "generic", "", opt, Reloc::PIC_));
+
+  fmodule.setDataLayout(targetMachine->createDataLayout());
+#endif
 
   push_scope();
 }
