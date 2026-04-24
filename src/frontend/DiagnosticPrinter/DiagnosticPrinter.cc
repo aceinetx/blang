@@ -75,7 +75,7 @@ void DiagnosticPrinter::printSourceWithMessage(Parser::location_type location,
                replace_all(line, "\t", tab_strip));
   fmt::print("      | ");
 
-  for (int i = 0; i < location.begin.column; i++) {
+  for (int i = 0; i < location.begin.column - 1; i++) {
     if (line[i] == '\t') {
       fmt::print("{}", tab);
     } else {

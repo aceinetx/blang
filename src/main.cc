@@ -6,8 +6,7 @@ using namespace blang;
 int main(int argc, char **argv) {
   const std::string code = R"(
 main(argc, argv) {
-	auto x;
-	return(x);
+	return(0 + y);
 }
   )";
 
