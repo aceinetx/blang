@@ -59,10 +59,13 @@ void DiagnosticPrinter::printSourceWithMessage(Parser::location_type location, s
   }
 
   /* print the source code */
-  std::string tab = "  ";
+  std::string tab = "        ";
+  std::string tab_strip = tab;
+  tab_strip[0] = '|';
+
   auto line = lines[location.begin.line - 1];
 
-  fmt::println("{: 5} | {}", location.begin.line, replace_all(line, "\t", tab));
+  fmt::println("{: 5} | {}", location.begin.line, replace_all(line, "\t", tab_strip));
   fmt::print("      | ");
   
   for(int i=0; i<location.begin.column; i++){
