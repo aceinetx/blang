@@ -1,4 +1,5 @@
 #include "frontend/ast/AstUnot.hh"
+#include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
 
@@ -11,8 +12,10 @@ void AstUnot::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstUnot::compile(Blang *blang) {
-  Value *v = expression->compile(blang);
+llvm::Value *AstUnot::compile(Blang *blang, bool rvalue) {
+  blangassert(rvalue);
+
+  Value *v = expression->compile(blang, true);
 
   Value *isZero = blang->builder.CreateICmpEQ(
       v, ConstantInt::get(blang->get_word_ty(), 0), "is_zero");

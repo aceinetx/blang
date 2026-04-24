@@ -29,6 +29,7 @@
 #include "frontend/ast/AstWhile.hh"
 #include "frontend/ast/AstGoto.hh"
 #include "frontend/ast/AstLabel.hh"
+#include "frontend/ast/AstUnot.hh"
 
 namespace blang { class Driver; }
 }
@@ -321,6 +322,10 @@ expression_unary:
 		$$ = $1;
 	} | MUL expression_unary {
 		auto node = std::make_shared<blang::AstDeref>();
+		node->expression = $2;
+		$$ = node;
+	} | EXCLAMATION expression_unary {
+		auto node = std::make_shared<blang::AstUnot>();
 		node->expression = $2;
 		$$ = node;
 	} | AMPERSAND expression_unary {
