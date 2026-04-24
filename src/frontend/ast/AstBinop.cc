@@ -1,4 +1,5 @@
 #include "AstBinop.hh"
+#include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
 
@@ -11,9 +12,10 @@ void AstBinop::print(int indent) {
   right->print(indent + 1);
 }
 
-llvm::Value *AstBinop::compile(Blang *blang) {
-  auto lhs = left->compile(blang);
-  auto rhs = right->compile(blang);
+llvm::Value *AstBinop::compile(Blang *blang, bool rvalue) {
+  blangassert(rvalue);
+  auto lhs = left->compile(blang, true);
+  auto rhs = right->compile(blang, true);
   llvm::Value *result = nullptr;
 
   switch (op) {

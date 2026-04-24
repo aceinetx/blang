@@ -23,6 +23,7 @@
 #include "frontend/ast/AstDeref.hh"
 #include "frontend/ast/AstAddrof.hh"
 #include "frontend/ast/AstIndex.hh"
+#include "frontend/ast/AstBinop.hh"
 
 namespace blang { class Driver; }
 }
@@ -51,15 +52,15 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstReturn>> return
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
-%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_unary expression_postfix expression_primary
+%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
 
+%right ASSIGN
 %left EQUAL NEQUAL
 %left GREATER LESS GREQ LSEQ
 %left AMPERSAND
 %left PLUS MINUS
 %left MUL DIV
-%right ASSIGN
 %precedence EXCLAMATION
 
 %%
@@ -170,12 +171,96 @@ expression:
 	;
 
 expression_assign:
-	expression_unary {
+	expression_equality {
 		$$ = $1;
-	} | expression_unary ASSIGN expression_assign {
+	} | expression_equality ASSIGN expression_assign {
 		auto node = std::make_shared<blang::AstAssign>();
 		node->dest = $1;
 		node->src = $3;
+		$$ = node;
+	}
+	;
+
+expression_equality:
+	expression_compare {
+		$$ = $1;
+	} | expression_equality EQUAL expression_compare {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::EQUAL;
+		$$ = node;
+	} | expression_equality NEQUAL expression_compare {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::NEQUAL;
+		$$ = node;
+	}
+	;
+
+expression_compare:
+	expression_additive { 
+		$$ = $1;
+	} | expression_compare GREATER expression_additive {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::GREATER;
+		$$ = node;
+	} | expression_compare LESS expression_additive {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::LESS;
+		$$ = node;
+	} | expression_compare GREQ expression_additive {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::GREQ;
+		$$ = node;
+	} | expression_compare LSEQ expression_additive {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::LSEQ;
+		$$ = node;
+	}
+	;
+
+expression_additive:
+	expression_multiplicative {
+		$$ = $1;
+	} | expression_additive PLUS expression_multiplicative {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::PLUS;
+		$$ = node;
+	} | expression_additive MINUS expression_multiplicative {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::MINUS;
+		$$ = node;
+	}
+	;
+
+expression_multiplicative:
+	expression_unary {
+		$$ = $1;
+	} | expression_multiplicative MUL expression_unary {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::MUL;
+		$$ = node;
+	} | expression_multiplicative DIV expression_unary {
+		auto node = std::make_shared<AstBinop>();
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::DIV;
 		$$ = node;
 	}
 	;
