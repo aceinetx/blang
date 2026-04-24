@@ -1,4 +1,5 @@
 #include "frontend/ast/AstFuncCall.hh"
+#include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
 
@@ -13,12 +14,14 @@ void AstFuncCall::print(int indent) {
     arg->print(indent + 1);
 }
 
-llvm::Value *AstFuncCall::compile(Blang *blang) {
-  auto *callee_value = blang->builder.CreateIntToPtr(expression->compile(blang),
-                                                     blang->builder.getPtrTy());
+llvm::Value *AstFuncCall::compile(Blang *blang, bool rvalue) {
+  blangassert(rvalue);
+
+  auto *callee_value = blang->builder.CreateIntToPtr(
+      expression->compile(blang, false), blang->builder.getPtrTy());
   std::vector<llvm::Value *> arg_values = {};
   for (auto arg : args) {
-    arg_values.push_back(arg->compile(blang));
+    arg_values.push_back(arg->compile(blang, true));
   }
 
   auto *return_value = blang->builder.CreateCall(

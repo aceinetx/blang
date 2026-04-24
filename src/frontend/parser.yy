@@ -24,6 +24,7 @@
 #include "frontend/ast/AstAddrof.hh"
 #include "frontend/ast/AstIndex.hh"
 #include "frontend/ast/AstBinop.hh"
+#include "frontend/ast/AstFuncCall.hh"
 
 namespace blang { class Driver; }
 }
@@ -286,6 +287,15 @@ expression_postfix:
 		auto node = std::make_shared<blang::AstIndex>();
 		node->expression = $1;
 		node->index = $3;
+		$$ = node;
+	} | expression_postfix LPAREN expression_list RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
+		node->args = $3;
+		$$ = node;
+	} | expression_postfix LPAREN RPAREN {
+		auto node = std::make_shared<blang::AstFuncCall>();
+		node->expression = $1;
 		$$ = node;
 	}
 	;
