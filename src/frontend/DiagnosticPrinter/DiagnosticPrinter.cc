@@ -93,6 +93,10 @@ void DiagnosticPrinter::printDiagnostic(ParserException &exc) {
   printSourceWithMessage(exc.get_location(), exc.get_simple_message(), ERROR);
 }
 
+void DiagnosticPrinter::printDiagnostic(LocationException &exc) {
+  printSourceWithMessage(exc.get_location(), "(no message)", ERROR);
+}
+
 std::string DiagnosticPrinter::getDiagnosticTypeStringForType(int type) {
   type = type % __DIAG_TYPE_END;
   switch (type) {

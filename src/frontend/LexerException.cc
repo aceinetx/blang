@@ -2,7 +2,8 @@
 #include <fmt/base.h>
 
 namespace blang {
-LexerException::LexerException(Parser::location_type loc, std::string message) : message(message), location(loc) {
+LexerException::LexerException(Parser::location_type loc, std::string message)
+    : LocationException(loc), message(message) {
   formatted_message = fmt::format("{} at line {} column {}", message,
                                   loc.begin.line, loc.begin.column)
                           .c_str();
@@ -12,12 +13,7 @@ LexerException::LexerException(Parser::location_type loc, std::string message) :
   return formatted_message.c_str();
 }
 
-
-Parser::location_type LexerException::get_location(){
-  return location;
-}
-
-std::string LexerException::get_simple_message(){
+std::string LexerException::get_simple_message() {
   return message;
 }
 } // namespace blang
