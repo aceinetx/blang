@@ -10,7 +10,9 @@ void AstLabel::print(int indent) {
   fmt::println("- AstLabel {}", name);
 }
 
-llvm::Value *AstLabel::compile(Blang *blang) {
+llvm::Value *AstLabel::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+
   if (!blang->goto_blocks.contains(name)) {
     auto block =
         BasicBlock::Create(blang->context, name, blang->current_function);

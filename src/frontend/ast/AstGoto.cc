@@ -10,7 +10,9 @@ void AstGoto::print(int indent) {
   fmt::println("- AstGoto {}", name);
 }
 
-llvm::Value *AstGoto::compile(Blang *blang) {
+llvm::Value *AstGoto::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+
   if (blang->goto_blocks.contains(name)) {
     blang->builder.CreateBr(blang->goto_blocks[name]);
   } else {

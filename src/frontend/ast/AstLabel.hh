@@ -2,9 +2,9 @@
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
-struct AstGoto : public AstNode {
+struct AstLabel : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue) override;
 
   std::string name = "";
 };

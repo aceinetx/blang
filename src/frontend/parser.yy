@@ -27,6 +27,8 @@
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstStringLit.hh"
 #include "frontend/ast/AstWhile.hh"
+#include "frontend/ast/AstGoto.hh"
+#include "frontend/ast/AstLabel.hh"
 
 namespace blang { class Driver; }
 }
@@ -57,6 +59,8 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstWhile>> while
+%type <std::shared_ptr<blang::AstGoto>> goto
+%type <std::shared_ptr<blang::AstLabel>> label
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
@@ -120,6 +124,10 @@ statement:
 		$$ = $1;
 	} | while {
 		$$ = $1;
+	} | goto {
+		$$ = $1;
+	} | label {
+		$$ = $1;
 	} | expression SEMICOLON {
 		$$ = $1;
 	}
@@ -176,6 +184,22 @@ while:
 		auto node = std::make_shared<AstWhile>();
 		node->expression = $3;
 		node->statements = $6;
+		$$ = node;
+	}
+	;
+
+goto:
+	GOTO IDENTIFIER SEMICOLON {
+		auto node = std::make_shared<AstGoto>();
+		node->name = $2;
+		$$ = node;
+	}
+	;
+
+label:
+	IDENTIFIER COLON {
+		auto node = std::make_shared<AstLabel>();
+		node->name = $1;
 		$$ = node;
 	}
 	;
