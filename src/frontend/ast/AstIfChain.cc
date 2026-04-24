@@ -16,9 +16,11 @@ void AstIfChain::print(int indent) {
     end_else->print(indent + 1);
 }
 
-llvm::Value *AstIfChain::compile(Blang *blang) {
+llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+
   auto *value =
-      blang->builder.CreateICmpNE(begin_if->expression->compile(blang),
+      blang->builder.CreateICmpNE(begin_if->expression->compile(blang, true),
                                   ConstantInt::get(blang->get_word_ty(), 0));
 
   /* Create body blocks */
@@ -56,7 +58,7 @@ llvm::Value *AstIfChain::compile(Blang *blang) {
       auto elif = elifs[i];
       skip = BasicBlock::Create(blang->context, "", blang->current_function);
       value = blang->builder.CreateICmpNE(
-          elif->expression->compile(blang),
+          elif->expression->compile(blang, true),
           ConstantInt::get(blang->get_word_ty(), 0));
       blang->builder.CreateCondBr(value, block, skip);
       blang->builder.SetInsertPoint(skip);
@@ -69,7 +71,7 @@ llvm::Value *AstIfChain::compile(Blang *blang) {
   /* Compile if body */
   blang->builder.SetInsertPoint(begin_if_block);
   for (auto node : begin_if->body)
-    node->compile(blang);
+    node->compile(blang, true);
   if (!blang->builder.GetInsertBlock()->getTerminator())
     blang->builder.CreateBr(chain_end_block);
   blang->builder.SetInsertPoint(chain_end_block);
@@ -80,7 +82,7 @@ llvm::Value *AstIfChain::compile(Blang *blang) {
 
     blang->builder.SetInsertPoint(block);
     for (auto node : node->body)
-      node->compile(blang);
+      node->compile(blang, true);
     if (!blang->builder.GetInsertBlock()->getTerminator())
       blang->builder.CreateBr(chain_end_block);
     blang->builder.SetInsertPoint(chain_end_block);
@@ -88,7 +90,7 @@ llvm::Value *AstIfChain::compile(Blang *blang) {
   /* Compile else body */
   blang->builder.SetInsertPoint(end_else_block);
   for (auto node : end_else->body)
-    node->compile(blang);
+    node->compile(blang, true);
   if (!blang->builder.GetInsertBlock()->getTerminator())
     blang->builder.CreateBr(chain_end_block);
   blang->builder.SetInsertPoint(chain_end_block);

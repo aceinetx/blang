@@ -1,4 +1,4 @@
-#include "frontend/ast/AstElseIf.hh"
+#include "frontend/ast/AstIf.hh"
 #include "Assert.hh"
 #include "Blang.hh"
 #include <fmt/base.h>
@@ -6,17 +6,19 @@
 using namespace llvm;
 
 namespace blang {
-void AstElseIf::print(int indent) {
+void AstIf::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstElseIf");
+  fmt::println("- AstIf");
   expression->print(indent + 1);
   for (auto statement : body) {
     statement->print(indent + 1);
   }
 }
 
-llvm::Value *AstElseIf::compile(Blang *blang) {
-  blangassert(0 && "AstElseIf should never be compiled");
+llvm::Value *AstIf::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+  (void)blang;
+  blangassert(0 && "AstIf should never be compiled");
   return nullptr;
 }
 

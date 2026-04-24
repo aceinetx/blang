@@ -30,6 +30,7 @@
 #include "frontend/ast/AstGoto.hh"
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstUnot.hh"
+#include "frontend/ast/AstIfChain.hh"
 
 namespace blang { class Driver; }
 }
@@ -62,6 +63,10 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstWhile>> while
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
+%type <std::shared_ptr<blang::AstIfChain>> if_chain
+%type <std::shared_ptr<blang::AstIf>> if
+%type <std::shared_ptr<blang::AstElseIf>> elseif
+%type <std::shared_ptr<blang::AstElse>> else
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
@@ -129,6 +134,8 @@ statement:
 		$$ = $1;
 	} | label {
 		$$ = $1;
+	} | if_chain {
+		$$ = $1;
 	} | expression SEMICOLON {
 		$$ = $1;
 	}
@@ -153,6 +160,46 @@ identifier_list:
 	| identifier_list COMMA IDENTIFIER {
 		$1.push_back($3);
 		$$ = $1;
+	}
+	;
+
+if_chain:
+	if {
+		auto node = std::make_shared<blang::AstIfChain>();
+		node->begin_if = $1;
+		$$ = node;
+	} | if_chain elseif {
+		$1->elifs.push_back($2);
+		$$ = $1;
+	} | if_chain else {
+		$1->end_else = $2;
+		$$ = $1;
+	}
+	;
+
+if:
+	IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstIf>();
+		node->expression = $3;
+		node->body = $6;
+		$$ = node;
+	}
+	;
+
+elseif:
+	ELSE IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstElseIf>();
+		node->expression = $4;
+		node->body = $7;
+		$$ = node;
+	}
+	;
+
+else:
+	ELSE LBRACE statement_list RBRACE {
+		auto node = std::make_shared<blang::AstElse>();
+		node->body = $3;
+		$$ = node;
 	}
 	;
 	

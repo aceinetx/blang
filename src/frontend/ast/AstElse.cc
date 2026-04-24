@@ -14,7 +14,9 @@ void AstElse::print(int indent) {
   }
 }
 
-llvm::Value *AstElse::compile(Blang *blang) {
+llvm::Value *AstElse::compile(Blang *blang, bool rvalue) {
+  (void)rvalue;
+  (void)blang;
   blangassert(0 && "AstElse should never be compiled");
   return nullptr;
 }

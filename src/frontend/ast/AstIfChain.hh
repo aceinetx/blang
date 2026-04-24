@@ -7,7 +7,7 @@
 namespace blang {
 struct AstIfChain : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue) override;
 
   std::shared_ptr<AstIf> begin_if;
   std::vector<std::shared_ptr<AstElseIf>> elifs;
