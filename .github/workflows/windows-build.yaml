@@ -21,3 +21,10 @@ jobs:
         shell: msys2 {0}
         run: |
           xmake build
+          xmake install -o out
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blang-artifact
+          path: out/bin/blang
