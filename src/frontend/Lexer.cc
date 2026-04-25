@@ -157,16 +157,16 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     if (pos < code.size()) {
       char c = code[pos];
       pos++;
-      loc = get_loc_range(loc);
+      auto loc2 = get_loc_range(loc);
       switch (c) {
       case '=':
-        return Parser::make_EQUAL(loc);
+        return Parser::make_EQUAL(loc2);
       case '!':
-        return Parser::make_NEQUAL(loc);
+        return Parser::make_NEQUAL(loc2);
       case '>':
-        return Parser::make_GREQ(loc);
+        return Parser::make_GREQ(loc2);
       case '<':
-        return Parser::make_LSEQ(loc);
+        return Parser::make_LSEQ(loc2);
       }
       pos--;
     }
@@ -179,13 +179,31 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     return Parser::make_MUL(loc);
   case '/':
     return Parser::make_DIV(loc);
+  case '%':
+    return Parser::make_PERCENT(loc);
   case '&':
-    return Parser::make_AMPERSAND(loc);
+    return Parser::make_BITAND(loc);
   case ',':
     return Parser::make_COMMA(loc);
   case '>':
+    if (pos < code.size()) {
+      char c = code[pos];
+      pos++;
+      auto loc2 = get_loc_range(loc);
+      if (c == '>')
+        return Parser::make_BITSHL(loc2);
+      pos--;
+    }
     return Parser::make_GREATER(loc);
   case '<':
+    if (pos < code.size()) {
+      char c = code[pos];
+      pos++;
+      auto loc2 = get_loc_range(loc);
+      if (c == '<')
+        return Parser::make_BITSHL(loc2);
+      pos--;
+    }
     return Parser::make_LESS(loc);
   case '!':
     return Parser::make_EXCLAMATION(loc);
@@ -195,6 +213,8 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     return Parser::make_LBRACKET(loc);
   case ']':
     return Parser::make_RBRACKET(loc);
+  case '|':
+    return Parser::make_BITOR(loc);
   }
   pos--;
 

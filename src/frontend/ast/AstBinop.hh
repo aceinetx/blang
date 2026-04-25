@@ -9,6 +9,22 @@ struct AstBinop : public AstNode {
   std::shared_ptr<AstNode> left;
   std::shared_ptr<AstNode> right;
 
-  enum { PLUS, MINUS, MUL, DIV, EQUAL, NEQUAL, GREATER, LESS, GREQ, LSEQ } op;
+  enum {
+    PLUS,
+    MINUS,
+    MUL,
+    DIV,
+    EQUAL,
+    NEQUAL,
+    GREATER,
+    LESS,
+    GREQ,
+    LSEQ,
+    BITOR,
+    BITAND,
+    BITSHL,
+    BITSHR,
+    PERCENT,
+  } op;
 };
 } // namespace blang

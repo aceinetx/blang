@@ -55,6 +55,21 @@ llvm::Value *AstBinop::compile(Blang *blang, bool rvalue) {
     result = blang->builder.CreateZExt(blang->builder.CreateICmpSLE(lhs, rhs),
                                        blang->get_word_ty());
     break;
+  case BITOR:
+    result = blang->builder.CreateOr(lhs, rhs);
+    break;
+  case BITAND:
+    result = blang->builder.CreateAnd(lhs, rhs);
+    break;
+  case BITSHL:
+    result = blang->builder.CreateShl(lhs, rhs);
+    break;
+  case BITSHR:
+    result = blang->builder.CreateLShr(lhs, rhs);
+    break;
+  case PERCENT:
+    result = blang->builder.CreateURem(lhs, rhs);
+    break;
   }
 
   return result;

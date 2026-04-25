@@ -52,8 +52,21 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
-%token LPAREN RPAREN LBRACE RBRACE SEMICOLON COLON ASSIGN PLUS MINUS MUL DIV AMPERSAND COMMA EQUAL NEQUAL GREATER LESS GREQ LSEQ EXCLAMATION LBRACKET RBRACKET
-%token RETURN AUTO EXTRN WHILE GOTO IF ELSE
+%token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
+%token SEMICOLON COLON COMMA
+
+/* operators sorted by precedence */
+%token ASSIGN
+%token BITOR
+%token BITAND
+%token EQUAL NEQUAL 
+%token GREATER LESS GREQ LSEQ 
+%token BITSHL BITSHR
+%token PLUS MINUS
+%token MUL DIV PERCENT
+%token EXCLAMATION 
+
+%token RETURN AUTO EXTRN WHILE GOTO IF ELSE /* keywords */
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -71,16 +84,8 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstElseIf>> elseif
 %type <std::shared_ptr<blang::AstElse>> else
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
-%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_equality expression_compare expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
+%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
-
-%right ASSIGN
-%left EQUAL NEQUAL
-%left GREATER LESS GREQ LSEQ
-%left AMPERSAND
-%left PLUS MINUS
-%left MUL DIV
-%precedence EXCLAMATION
 
 %%
 
@@ -275,12 +280,36 @@ expression:
 	;
 
 expression_assign:
-	expression_equality {
+	expression_bitor {
 		$$ = $1;
-	} | expression_equality ASSIGN expression_assign {
+	} | expression_bitor ASSIGN expression_assign {
 		mknode(blang::AstAssign, node, @1);
 		node->dest = $1;
 		node->src = $3;
+		$$ = node;
+	}
+	;
+
+expression_bitor:
+	expression_bitand {
+		$$ = $1;
+	} | expression_bitor BITOR expression_bitand {
+		mknode(AstBinop, node, @1);
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::BITOR;
+		$$ = node;
+	}
+	;
+
+expression_bitand:
+	expression_equality {
+		$$ = $1;
+	} | expression_bitand BITAND expression_equality {
+		mknode(AstBinop, node, @1);
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::BITAND;
 		$$ = node;
 	}
 	;
@@ -304,31 +333,49 @@ expression_equality:
 	;
 
 expression_compare:
-	expression_additive { 
+	expression_bitshift { 
 		$$ = $1;
-	} | expression_compare GREATER expression_additive {
+	} | expression_compare GREATER expression_bitshift {
 		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::GREATER;
 		$$ = node;
-	} | expression_compare LESS expression_additive {
+	} | expression_compare LESS expression_bitshift {
 		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::LESS;
 		$$ = node;
-	} | expression_compare GREQ expression_additive {
+	} | expression_compare GREQ expression_bitshift {
 		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::GREQ;
 		$$ = node;
-	} | expression_compare LSEQ expression_additive {
+	} | expression_compare LSEQ expression_bitshift {
 		mknode(AstBinop, node, @1);
 		node->left = $1;
 		node->right = $3;
 		node->op = AstBinop::LSEQ;
+		$$ = node;
+	}
+	;
+
+expression_bitshift:
+	expression_additive {
+		$$ = $1;
+	} | expression_bitshift BITSHL expression_additive {
+		mknode(AstBinop, node, @1);
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::BITSHL;
+		$$ = node;
+	} | expression_bitshift BITSHR expression_additive {
+		mknode(AstBinop, node, @1);
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::BITSHR;
 		$$ = node;
 	}
 	;
@@ -366,6 +413,12 @@ expression_multiplicative:
 		node->right = $3;
 		node->op = AstBinop::DIV;
 		$$ = node;
+	} | expression_multiplicative PERCENT expression_unary {
+		mknode(AstBinop, node, @1);
+		node->left = $1;
+		node->right = $3;
+		node->op = AstBinop::PERCENT;
+		$$ = node;
 	}
 	;
 
@@ -380,7 +433,7 @@ expression_unary:
 		mknode(blang::AstUnot, node, @1);
 		node->expression = $2;
 		$$ = node;
-	} | AMPERSAND expression_unary {
+	} | BITAND expression_unary {
 		mknode(blang::AstAddrof, node, @1);
 		node->expression = $2;
 		$$ = node;
