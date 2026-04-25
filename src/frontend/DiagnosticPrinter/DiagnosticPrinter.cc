@@ -2,6 +2,7 @@
 #include <fmt/core.h>
 
 #include <utility>
+#include <vector>
 
 #define WHITE_BOLD "\033[1;37m"
 #define RED_BOLD "\033[1;31m"
