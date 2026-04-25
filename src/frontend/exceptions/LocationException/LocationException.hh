@@ -1,15 +1,15 @@
 #pragma once
-#include "parser.tab.hpp"
+#include "location.hh"
 #include <exception>
 
 namespace blang {
 class LocationException : public std::exception {
 public:
-  LocationException(Parser::location_type location);
+  LocationException(class location location);
 
-  Parser::location_type get_location();
+  class location get_location();
 
 private:
-  Parser::location_type location;
+  class location location;
 };
 } // namespace blang

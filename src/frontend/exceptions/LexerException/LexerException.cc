@@ -2,7 +2,7 @@
 #include <fmt/base.h>
 
 namespace blang {
-LexerException::LexerException(Parser::location_type loc, std::string message)
+LexerException::LexerException(class location loc, std::string message)
     : LocationException(loc), message(message) {
   formatted_message = fmt::format("{} at line {} column {}", message,
                                   loc.begin.line, loc.begin.column)

@@ -2,11 +2,11 @@
 #include <fmt/base.h>
 
 namespace blang {
-LocationException::LocationException(Parser::location_type location)
+LocationException::LocationException(class location location)
     : location(location) {
 }
 
-Parser::location_type LocationException::get_location() {
+class location LocationException::get_location() {
   return location;
 }
 

@@ -11,11 +11,11 @@ public:
 
   enum { ERROR = 0, WARNING, NOTE, __DIAG_TYPE_END };
 
-  void printSourceWithMessage(Parser::location_type location,
-                              std::string message, int type);
-  void printDiagnostic(LexerException &exc);
-  void printDiagnostic(ParserException &exc);
-  void printDiagnostic(LocationException &exc);
+  void printSourceWithMessage(class location location, std::string message,
+                              int type);
+  void printDiagnostic(LexerException &exc, int type = ERROR);
+  void printDiagnostic(ParserException &exc, int type = ERROR);
+  void printDiagnostic(LocationException &exc, int type = ERROR);
 
 private:
   std::string getDiagnosticTypeStringForType(int type);

@@ -47,7 +47,7 @@ DiagnosticPrinter::DiagnosticPrinter(std::string filename, std::string source)
 
 DiagnosticPrinter::~DiagnosticPrinter() = default;
 
-void DiagnosticPrinter::printSourceWithMessage(Parser::location_type location,
+void DiagnosticPrinter::printSourceWithMessage(class location location,
                                                std::string message, int type) {
   std::string diagnostic_type_string = getDiagnosticTypeStringForType(type);
 
@@ -85,16 +85,16 @@ void DiagnosticPrinter::printSourceWithMessage(Parser::location_type location,
   fmt::print(GREEN "^\n" RESET);
 }
 
-void DiagnosticPrinter::printDiagnostic(LexerException &exc) {
-  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), ERROR);
+void DiagnosticPrinter::printDiagnostic(LexerException &exc, int type) {
+  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), type);
 }
 
-void DiagnosticPrinter::printDiagnostic(ParserException &exc) {
-  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), ERROR);
+void DiagnosticPrinter::printDiagnostic(ParserException &exc, int type) {
+  printSourceWithMessage(exc.get_location(), exc.get_simple_message(), type);
 }
 
-void DiagnosticPrinter::printDiagnostic(LocationException &exc) {
-  printSourceWithMessage(exc.get_location(), exc.what(), ERROR);
+void DiagnosticPrinter::printDiagnostic(LocationException &exc, int type) {
+  printSourceWithMessage(exc.get_location(), exc.what(), type);
 }
 
 std::string DiagnosticPrinter::getDiagnosticTypeStringForType(int type) {

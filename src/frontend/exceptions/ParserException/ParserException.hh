@@ -1,11 +1,11 @@
 #pragma once
 #include "frontend/exceptions/LocationException/LocationException.hh"
-#include "parser.tab.hpp"
+#include "location.hh"
 
 namespace blang {
 class ParserException : public LocationException {
 public:
-  ParserException(Parser::location_type loc, std::string message);
+  ParserException(class location loc, std::string message);
 
   [[nodiscard]] const char *what() const noexcept override;
 
