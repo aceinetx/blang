@@ -17,7 +17,7 @@ public:
   virtual void print(int indent = 0);
   virtual llvm::Value *compile(Blang *blang, bool rvalue) = 0;
 
-  location location;
+  class location location;
 
 protected:
   void printIndent(int indent);
