@@ -10,9 +10,7 @@ void AstElseIf::print(int indent) {
   printIndent(indent);
   fmt::print("- AstElseIf\n");
   expression->print(indent + 1);
-  for (auto statement : body) {
-    statement->print(indent + 1);
-  }
+  body->print(indent + 1);
 }
 
 llvm::Value *AstElseIf::compile(Blang *blang, bool rvalue) {

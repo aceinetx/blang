@@ -92,8 +92,7 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
 
   /* Compile if body */
   blang->builder.SetInsertPoint(begin_if_block);
-  for (auto node : begin_if->body)
-    node->compile(blang, true);
+  begin_if->body->compile(blang, true);
   if (!blang->builder.GetInsertBlock()->getTerminator())
     blang->builder.CreateBr(chain_end_block);
   blang->builder.SetInsertPoint(chain_end_block);
@@ -103,8 +102,7 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
     auto node = elifs[i];
 
     blang->builder.SetInsertPoint(block);
-    for (auto node : node->body)
-      node->compile(blang, true);
+    node->body->compile(blang, true);
     if (!blang->builder.GetInsertBlock()->getTerminator())
       blang->builder.CreateBr(chain_end_block);
     blang->builder.SetInsertPoint(chain_end_block);
@@ -112,8 +110,7 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
   if (end_else) {
     /* Compile else body */
     blang->builder.SetInsertPoint(end_else_block);
-    for (auto node : end_else->body)
-      node->compile(blang, true);
+    end_else->body->compile(blang, true);
     if (!blang->builder.GetInsertBlock()->getTerminator())
       blang->builder.CreateBr(chain_end_block);
     blang->builder.SetInsertPoint(chain_end_block);

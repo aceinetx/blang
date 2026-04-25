@@ -1,6 +1,5 @@
 #include "frontend/ast/AstFuncDef.hh"
 #include "Blang.hh"
-#include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/core.h>
 #include <llvm/IR/DerivedTypes.h>
@@ -11,9 +10,7 @@ namespace blang {
 void AstFuncDef::print(int indent) {
   printIndent(indent);
   fmt::print("- AstFuncDef\n");
-  for (auto child : statements) {
-    child->print(indent + 1);
-  }
+  node_block->print(indent + 1);
 }
 
 llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
@@ -26,8 +23,8 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   auto type = FunctionType::get(blang->get_word_ty(), arg_types, false);
   auto func =
       Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
-  auto block = BasicBlock::Create(blang->context, "_" + name, func);
-  blang->builder.SetInsertPoint(block);
+  auto function_block = BasicBlock::Create(blang->context, "_" + name, func);
+  blang->builder.SetInsertPoint(function_block);
 
   blang->add_global_scope_var(name, func);
 
@@ -51,10 +48,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   }
 
   /* Compile body */
-  llvm::Value *last = nullptr;
-  for (auto child : statements) {
-    last = child->compile(blang, true);
-  }
+  llvm::Value *last = node_block->compile(blang, true);
 
   blang->pop_scope();
   blang->current_function = nullptr;

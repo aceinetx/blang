@@ -8,9 +8,7 @@ namespace blang {
 void AstWhile::print(int indent) {
   printIndent(indent);
   fmt::print("- AstWhile\n");
-  for (auto statement : statements) {
-    statement->print(indent + 1);
-  }
+  block->print(indent + 1);
 }
 
 llvm::Value *AstWhile::compile(Blang *blang, bool rvalue) {
@@ -32,9 +30,7 @@ llvm::Value *AstWhile::compile(Blang *blang, bool rvalue) {
   blang->builder.CreateCondBr(value, body_block, end_block);
 
   blang->builder.SetInsertPoint(body_block);
-  for (auto statement : statements) {
-    statement->compile(blang, true);
-  }
+  block->compile(blang, true);
   if (!blang->builder.GetInsertBlock()->getTerminator()) {
     blang->builder.CreateBr(comparison_block);
   }

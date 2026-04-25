@@ -9,9 +9,7 @@ namespace blang {
 void AstElse::print(int indent) {
   printIndent(indent);
   fmt::print("- AstElse\n");
-  for (auto statement : body) {
-    statement->print(indent + 1);
-  }
+  body->print(indent + 1);
 }
 
 llvm::Value *AstElse::compile(Blang *blang, bool rvalue) {

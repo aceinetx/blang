@@ -32,6 +32,7 @@
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstUnot.hh"
 #include "frontend/ast/AstIfChain.hh"
+#include "frontend/ast/AstBlock.hh"
 
 namespace blang { class Driver; }
 }
@@ -70,6 +71,7 @@ namespace blang { class Driver; }
 %token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
+%type <std::shared_ptr<blang::AstBlock>> block
 %type <std::shared_ptr<blang::AstNode>> statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
 %type <std::shared_ptr<blang::AstNode>> top_statement
@@ -117,22 +119,24 @@ top_statement_list:
 	;
 
 function_definition:
-	IDENTIFIER LPAREN identifier_list RPAREN LBRACE statement_list RBRACE {
+	IDENTIFIER LPAREN identifier_list RPAREN block {
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
-		node->statements = $6;
+		node->node_block = $5;
 		node->args = $3;
 		$$ = node;
-	} | IDENTIFIER LPAREN RPAREN LBRACE statement_list RBRACE {
+	} | IDENTIFIER LPAREN RPAREN block {
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
-		node->statements = $5;
+		node->node_block = $4;
 		$$ = node;
 	}
 	;
 
 statement:
-	return {
+	block {
+		$$ = $1;
+	} | return {
 		$$ = $1;
 	} | auto {
 		$$ = $1;
@@ -164,6 +168,17 @@ statement_list:
 	}
 	;
 
+block:
+	LBRACE statement_list RBRACE {
+		mknode(AstBlock, node, @1);
+		node->children = $2;
+		$$ = node;
+	} | LBRACE RBRACE {
+		mknode(AstBlock, node, @1);
+		$$ = node;
+	}
+	;
+
 identifier_list:
 	IDENTIFIER {
 		$$.clear();
@@ -190,27 +205,27 @@ if_chain:
 	;
 
 if:
-	IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
+	IF LPAREN expression RPAREN block {
 		mknode(AstIf, node, @1);
 		node->expression = $3;
-		node->body = $6;
+		node->body = $5;
 		$$ = node;
 	}
 	;
 
 elseif:
-	ELSE IF LPAREN expression RPAREN LBRACE statement_list RBRACE {
+	ELSE IF LPAREN expression RPAREN block {
 		mknode(AstElseIf, node, @1);
 		node->expression = $4;
-		node->body = $7;
+		node->body = $6;
 		$$ = node;
 	}
 	;
 
 else:
-	ELSE LBRACE statement_list RBRACE {
+	ELSE block {
 		mknode(AstElse, node, @1);
-		node->body = $3;
+		node->body = $2;
 		$$ = node;
 	}
 	;
@@ -241,10 +256,10 @@ auto:
 	;
 
 while:
-	WHILE LPAREN expression RPAREN LBRACE statement_list RBRACE {
+	WHILE LPAREN expression RPAREN block {
 		mknode(AstWhile, node, @1);
 		node->expression = $3;
-		node->statements = $6;
+		node->block = $5;
 		$$ = node;
 	}
 	;

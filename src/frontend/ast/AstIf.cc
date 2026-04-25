@@ -10,9 +10,7 @@ void AstIf::print(int indent) {
   printIndent(indent);
   fmt::print("- AstIf\n");
   expression->print(indent + 1);
-  for (auto statement : body) {
-    statement->print(indent + 1);
-  }
+  body->print(indent + 1);
 }
 
 llvm::Value *AstIf::compile(Blang *blang, bool rvalue) {

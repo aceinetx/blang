@@ -1,13 +1,11 @@
 #pragma once
-#include "frontend/ast/AstBlock.hh"
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
-struct AstWhile : public AstNode {
+struct AstBlock : public AstNode {
   void print(int indent = 0) override;
   llvm::Value *compile(Blang *blang, bool rvalue) override;
 
-  std::shared_ptr<AstNode> expression;
-  std::shared_ptr<AstBlock> block;
+  std::vector<std::shared_ptr<AstNode>> children;
 };
 } // namespace blang
