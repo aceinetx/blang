@@ -33,7 +33,7 @@ source_template = """
 #include "frontend/ast/Ast%NAME%.hh"
 #include "Blang.hh"
 #include "Assert.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 using namespace llvm;
 
