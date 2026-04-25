@@ -15,33 +15,20 @@ jobs:
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
 
-      - name: Install tools via Chocolatey
-        run: |
-          choco install winflexbison -y
-          choco install llvm -y
-
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-
-      - name: Install dependencies (fmt)
-        run: |
-          vcpkg install fmt:x64-windows
-
-      - name: Configure PATH
-        run: |
-          echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
-          echo "C:\ProgramData\chocolatey\lib\winflexbison\tools" >> $env:GITHUB_PATH
+      - name: Install xmake
+        uses: xmake-io/github-action-setup-xmake@v1
 
       - name: Build
         run: |
-          cmake -S . -B build `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
-          cmake --build build --config Release
-          mv build/blang.exe .
+          xmake f -m debug -a x64 --kind=static
+          xmake -v
+
+      - name: Install artifacts
+        run: |
+          xmake install -o output
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: blang-artifact
-          path: blang.exe
+          name: windows-xmake-build
+          path: output/blang.exe

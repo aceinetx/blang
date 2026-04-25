@@ -8,8 +8,7 @@ if is_plat("linux") then
 end
 
 add_requires("fmt", {external=false})
-add_requires("apt::llvm")
-add_requires("pacman::llvm")
+add_requires("libllvm")
 add_requires("bison")
 
 set_warnings("all") -- warns
@@ -21,5 +20,5 @@ target("blang")
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
 
-	add_packages("fmt", "apt::llvm", "pacman::llvm")
+	add_packages("fmt", "libllvm")
 target_end()
