@@ -8,7 +8,6 @@ if is_plat("linux") then
 end
 
 add_requires("fmt", {external=false})
-add_requires("libllvm")
 add_requires("bison")
 
 set_warnings("all") -- warns
@@ -20,5 +19,20 @@ target("blang")
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
 
-	add_packages("fmt", "libllvm")
+	add_packages("fmt")
+
+	before_link(function(target)
+		import("core.base.process")
+
+		local stdout = os.tmpfile()
+		local stderr = os.tmpfile()
+		local proc = process.open("llvm-config --libs", {
+				stdout = stdout,
+				stderr = stderr
+		})
+		proc:wait()
+		proc:close()
+
+		target:add("ldflags", io.readfile(stdout):trim())
+	end)
 target_end()
