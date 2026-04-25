@@ -27,10 +27,8 @@ jobs:
 
       - name: Build
         run: |
-          cmake -S . -B build `
-            -DCMAKE_BUILD_TYPE=Release `
-            -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
-          cmake --build build --config Release
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+          cmake --build build --config Debug
           mv build/blang.exe .
 
       - name: Upload artifact
