@@ -141,82 +141,128 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
   char c = code[pos];
   auto loc = get_location();
 
-  pos++;
   switch (c) {
   case '(':
+    pos++;
     return Parser::make_LPAREN(loc);
   case ')':
+    pos++;
     return Parser::make_RPAREN(loc);
   case '{':
+    pos++;
     return Parser::make_LBRACE(loc);
   case '}':
+    pos++;
     return Parser::make_RBRACE(loc);
   case ';':
+    pos++;
     return Parser::make_SEMICOLON(loc);
   case '=':
-    if (pos < code.size()) {
+    pos++;
+    if (bounds) {
       char c = code[pos];
-      pos++;
       auto loc2 = get_loc_range(loc);
       switch (c) {
       case '=':
+        // Code ahead resolved ambiguity in '===' by making sure the first token
+        // is always an ASSIGN
+        pos++;
+        if (bounds) {
+          char c = code[pos];
+          if (c == '=') {
+            pos--;
+            auto loc = get_location();
+            loc.begin.column--;
+            loc.end.column--;
+            return Parser::make_ASSIGN(loc);
+          }
+        }
         return Parser::make_EQUAL(loc2);
-      case '!':
-        return Parser::make_NEQUAL(loc2);
-      case '>':
-        return Parser::make_GREQ(loc2);
-      case '<':
-        return Parser::make_LSEQ(loc2);
+      case '*':
+        pos++;
+        return Parser::make_ASSIGNMUL(loc2);
+      case '&':
+        pos++;
+        return Parser::make_ASSIGNBITAND(loc2);
       }
-      pos--;
     }
     return Parser::make_ASSIGN(loc);
   case '+':
+    pos++;
     return Parser::make_PLUS(loc);
   case '-':
+    pos++;
     return Parser::make_MINUS(loc);
   case '*':
+    pos++;
     return Parser::make_MUL(loc);
   case '/':
+    pos++;
     return Parser::make_DIV(loc);
   case '%':
+    pos++;
     return Parser::make_PERCENT(loc);
   case '&':
+    pos++;
     return Parser::make_BITAND(loc);
   case ',':
+    pos++;
     return Parser::make_COMMA(loc);
   case '>':
+    pos++;
     if (pos < code.size()) {
       char c = code[pos];
-      pos++;
       auto loc2 = get_loc_range(loc);
-      if (c == '>')
-        return Parser::make_BITSHL(loc2);
-      pos--;
+      if (c == '>') {
+        pos++;
+        return Parser::make_BITSHR(loc2);
+      }
+      if (c == '=') {
+        pos++;
+        return Parser::make_GREQ(loc2);
+      }
     }
     return Parser::make_GREATER(loc);
   case '<':
+    pos++;
     if (pos < code.size()) {
       char c = code[pos];
       pos++;
       auto loc2 = get_loc_range(loc);
-      if (c == '<')
+      if (c == '<') {
+        pos++;
         return Parser::make_BITSHL(loc2);
-      pos--;
+      }
+      if (c == '=') {
+        pos++;
+        return Parser::make_LSEQ(loc2);
+      }
     }
     return Parser::make_LESS(loc);
   case '!':
+    pos++;
+    if (bounds) {
+      char c = code[pos];
+      pos++;
+      auto loc2 = get_loc_range(loc);
+      if (c == '=')
+        return Parser::make_NEQUAL(loc2);
+      pos--;
+    }
     return Parser::make_EXCLAMATION(loc);
   case ':':
+    pos++;
     return Parser::make_COLON(loc);
   case '[':
+    pos++;
     return Parser::make_LBRACKET(loc);
   case ']':
+    pos++;
     return Parser::make_RBRACKET(loc);
   case '|':
+    pos++;
     return Parser::make_BITOR(loc);
   }
-  pos--;
 
   if (c == '\n') {
     line++;

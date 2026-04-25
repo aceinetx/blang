@@ -68,6 +68,8 @@ namespace blang { class Driver; }
 %token MUL DIV PERCENT
 %token EXCLAMATION 
 
+%token ASSIGNMUL ASSIGNBITAND
+
 %token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -221,7 +223,7 @@ extrn:
 
 auto:
 	AUTO IDENTIFIER SEMICOLON {
-		mknode(blang::AstAutoVar, node, @1);
+		mknode(AstAutoVar, node, @1);
 		node->identifier_location = @2;
 		node->name = $2;
 		$$ = node;
@@ -282,9 +284,174 @@ expression_assign:
 	expression_bitor {
 		$$ = $1;
 	} | expression_bitor ASSIGN expression_assign {
-		mknode(blang::AstAssign, node, @1);
+		mknode(AstAssign, node, @1);
 		node->dest = $1;
 		node->src = $3;
+		$$ = node;
+	} | expression_bitor ASSIGN BITOR expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::BITOR;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGNBITAND expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $3;
+		binop->op = AstBinop::BITAND;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN EQUAL expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::EQUAL;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN NEQUAL expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::NEQUAL;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN LESS expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::LESS;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN LSEQ expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::LSEQ;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN GREATER expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::GREATER;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN GREQ expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::GREQ;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN MINUS expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::MINUS;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN PLUS expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::PLUS;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN PERCENT expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::PERCENT;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGNMUL expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $3;
+		binop->op = AstBinop::MUL;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN DIV expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::DIV;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN BITSHL expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::BITSHL;
+
+		node->src = binop;
+		$$ = node;
+	} | expression_bitor ASSIGN BITSHR expression_assign {
+		mknode(AstAssign, node, @1);
+		node->dest = $1;
+
+		mknode(AstBinop, binop, @1);
+		binop->left = $1;
+		binop->right = $4;
+		binop->op = AstBinop::BITSHR;
+
+		node->src = binop;
 		$$ = node;
 	}
 	;
@@ -425,15 +592,15 @@ expression_unary:
 	expression_postfix {
 		$$ = $1;
 	} | MUL expression_unary {
-		mknode(blang::AstDeref, node, @1);
+		mknode(AstDeref, node, @1);
 		node->expression = $2;
 		$$ = node;
 	} | EXCLAMATION expression_unary {
-		mknode(blang::AstUnot, node, @1);
+		mknode(AstUnot, node, @1);
 		node->expression = $2;
 		$$ = node;
 	} | BITAND expression_unary {
-		mknode(blang::AstAddrof, node, @1);
+		mknode(AstAddrof, node, @1);
 		node->expression = $2;
 		$$ = node;
 	}
@@ -443,17 +610,17 @@ expression_postfix:
 	expression_primary {
 		$$ = $1;
 	} | expression_postfix LBRACKET expression RBRACKET {
-		mknode(blang::AstIndex, node, @1);
+		mknode(AstIndex, node, @1);
 		node->expression = $1;
 		node->index = $3;
 		$$ = node;
 	} | expression_postfix LPAREN expression_list RPAREN {
-		mknode(blang::AstFuncCall, node, @1);
+		mknode(AstFuncCall, node, @1);
 		node->expression = $1;
 		node->args = $3;
 		$$ = node;
 	} | expression_postfix LPAREN RPAREN {
-		mknode(blang::AstFuncCall, node, @1);
+		mknode(AstFuncCall, node, @1);
 		node->expression = $1;
 		$$ = node;
 	}
@@ -461,15 +628,15 @@ expression_postfix:
 
 expression_primary:
 	IDENTIFIER {
-		mknode(blang::AstVarRef, node, @1);
+		mknode(AstVarRef, node, @1);
 		node->name = $1;
 		$$ = node;
 	} | NUMBER {
-		mknode(blang::AstNumber, node, @1);
+		mknode(AstNumber, node, @1);
 		node->number = $1;
 		$$ = node;
 	} | STRING_LIT {
-		mknode(blang::AstStringLit, node, @1);
+		mknode(AstStringLit, node, @1);
 		node->str = $1;
 		$$ = node;
 	}
