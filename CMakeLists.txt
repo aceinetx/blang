@@ -21,4 +21,4 @@ file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "src/*.cc")
 include_directories(${LLVM_INCLUDE_DIRS} ${CMAKE_CURRENT_BINARY_DIR} src)
 
 add_executable(blang ${SOURCES} ${BISON_Parser_OUTPUTS} ${FLEX_Lexer_OUTPUTS})
-target_link_libraries(blang LLVM fmt::fmt-header-only)
+target_link_libraries(blang LLVM fmt::fmt)

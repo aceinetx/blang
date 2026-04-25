@@ -1,6 +1,6 @@
 #include "frontend/ast/AstReturn.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstReturn::print(int indent) {

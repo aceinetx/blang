@@ -1,5 +1,5 @@
 #include "frontend/exceptions/ParserException/ParserException.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 ParserException::ParserException(class location loc, std::string message)

@@ -1,5 +1,5 @@
 #include "frontend/exceptions/LocationException/LocationException.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 LocationException::LocationException(class location location)

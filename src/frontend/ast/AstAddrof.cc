@@ -1,7 +1,7 @@
 #include "frontend/ast/AstAddrof.hh"
 #include "Blang.hh"
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstAddrof::print(int indent) {

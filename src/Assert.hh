@@ -1,6 +1,6 @@
 #pragma once
 #include <exception>
-#include <fmt/base.h>
+#include <fmt/core.h>
 #include <string>
 
 namespace blang {

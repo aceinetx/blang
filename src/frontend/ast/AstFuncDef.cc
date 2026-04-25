@@ -2,7 +2,7 @@
 #include "Blang.hh"
 #include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 #include <llvm/IR/DerivedTypes.h>
 
 using namespace llvm;

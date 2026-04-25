@@ -1,7 +1,7 @@
 #include "frontend/ast/AstVarRef.hh"
 #include "Blang.hh"
 #include "frontend/exceptions/UndeclaredNameException/UndeclaredNameException.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstVarRef::print(int indent) {

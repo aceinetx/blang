@@ -1,6 +1,6 @@
 #include "frontend/ast/AstExtern.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 #include <llvm/IR/GlobalVariable.h>
 
 using namespace llvm;

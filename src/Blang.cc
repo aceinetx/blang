@@ -3,7 +3,7 @@
 
 #include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
 #include "parser.tab.hpp"
-#include <fmt/base.h>
+#include <fmt/core.h>
 #include <llvm/IR/DataLayout.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Verifier.h>

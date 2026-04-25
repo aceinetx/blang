@@ -1,6 +1,6 @@
 #include "frontend/ast/AstDeref.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstDeref::print(int indent) {

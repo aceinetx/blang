@@ -1,6 +1,6 @@
 #include "frontend/ast/AstIfChain.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 using namespace llvm;
 

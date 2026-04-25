@@ -1,6 +1,6 @@
 #include "frontend/ast/AstAssign.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstAssign::print(int indent) {

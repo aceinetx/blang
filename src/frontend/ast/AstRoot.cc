@@ -1,5 +1,5 @@
 #include "frontend/ast/AstRoot.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 namespace blang {
 void AstRoot::print(int indent) {

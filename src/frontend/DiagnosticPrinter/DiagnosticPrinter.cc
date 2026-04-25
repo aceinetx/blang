@@ -1,5 +1,5 @@
 #include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 #include <utility>
 

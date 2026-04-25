@@ -1,6 +1,6 @@
 #include "frontend/ast/AstGoto.hh"
 #include "Blang.hh"
-#include <fmt/base.h>
+#include <fmt/core.h>
 
 using namespace llvm;
 
