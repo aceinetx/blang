@@ -256,7 +256,7 @@ auto:
 	;
 
 while:
-	WHILE LPAREN expression RPAREN block {
+	WHILE LPAREN expression RPAREN statement {
 		mknode(AstWhile, node, @1);
 		node->expression = $3;
 		node->block = $5;

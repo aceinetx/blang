@@ -1,5 +1,4 @@
 #pragma once
-#include "frontend/ast/AstBlock.hh"
 #include "frontend/ast/AstNode.hh"
 
 namespace blang {
@@ -8,6 +7,6 @@ struct AstWhile : public AstNode {
   llvm::Value *compile(Blang *blang, bool rvalue) override;
 
   std::shared_ptr<AstNode> expression;
-  std::shared_ptr<AstBlock> block;
+  std::shared_ptr<AstNode> block;
 };
 } // namespace blang
