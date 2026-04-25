@@ -25,7 +25,7 @@ header_template = """
 namespace blang {
 struct Ast%NAME% : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang) override;
+  llvm::Value *compile(Blang *blang, bool rvalue) override;
 };
 } // namespace blang
 """
@@ -43,7 +43,8 @@ void Ast%NAME%::print(int indent) {
   fmt::println("- Ast%NAME%");
 }
 
-llvm::Value *Ast%NAME%::compile(Blang *blang) {
+llvm::Value *Ast%NAME%::compile(Blang *blang, bool rvalue) {
+	(void)rvalue;
 	blangassert(0 && "Ast%NAME%::compile is not implemented");
   return nullptr;
 }
