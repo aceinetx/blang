@@ -13,7 +13,7 @@ jobs:
         with:
           msystem: UCRT64
           update: true
-          install: mingw-w64-ucrt-x86_64-gcc clang llvm bison mingw-w64-ucrt-x86_64-xmake fmt git
+          install: mingw-w64-ucrt-x86_64-gcc clang llvm bison mingw-w64-ucrt-x86_64-xmake mingw-w64-ucrt-x86_64-fmt git
       - name: Checkout
         uses: actions/checkout@v4
 
