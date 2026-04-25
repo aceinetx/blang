@@ -33,6 +33,7 @@
 #include "frontend/ast/AstUnot.hh"
 #include "frontend/ast/AstIf.hh"
 #include "frontend/ast/AstBlock.hh"
+#include "frontend/ast/AstIncDec.hh"
 
 namespace blang { class Driver; }
 }
@@ -69,6 +70,7 @@ namespace blang { class Driver; }
 %token EXCLAMATION 
 
 %token ASSIGNMUL ASSIGNBITAND
+%token PLUSPLUS MINUSMINUS
 
 %token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
 
@@ -603,6 +605,18 @@ expression_unary:
 		mknode(AstAddrof, node, @1);
 		node->expression = $2;
 		$$ = node;
+	} | PLUSPLUS expression_postfix {
+		mknode(AstIncDec, node, @1);
+		node->expression = $2;
+		node->type = AstIncDec::PRE;
+		node->op = AstIncDec::INC;
+		$$ = node;
+	} | MINUSMINUS expression_postfix {
+		mknode(AstIncDec, node, @1);
+		node->expression = $2;
+		node->type = AstIncDec::PRE;
+		node->op = AstIncDec::DEC;
+		$$ = node;
 	}
 	;
 
@@ -622,6 +636,18 @@ expression_postfix:
 	} | expression_postfix LPAREN RPAREN {
 		mknode(AstFuncCall, node, @1);
 		node->expression = $1;
+		$$ = node;
+	} | expression_postfix PLUSPLUS {
+		mknode(AstIncDec, node, @1);
+		node->expression = $1;
+		node->type = AstIncDec::POST;
+		node->op = AstIncDec::INC;
+		$$ = node;
+	} | expression_postfix MINUSMINUS {
+		mknode(AstIncDec, node, @1);
+		node->expression = $1;
+		node->type = AstIncDec::POST;
+		node->op = AstIncDec::DEC;
 		$$ = node;
 	}
 	;

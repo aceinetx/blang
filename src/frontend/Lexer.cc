@@ -17,7 +17,7 @@ Parser::symbol_type Lexer::next() {
 
     if (std::isalpha(c) || c == '_') {
       return read_identifier();
-    } else if (std::isdigit(c) || c == '-') {
+    } else if (std::isdigit(c)) {
       return read_number();
     } else if (c == '"') {
       return read_string();
@@ -66,16 +66,8 @@ Parser::symbol_type Lexer::read_identifier() {
 Parser::symbol_type Lexer::read_number() {
   auto loc = get_location();
 
-  char c = code[pos];
   long number = 0;
   constexpr long base = 10;
-  const bool negative = c == '-';
-  if (negative) {
-    pos++;
-    if (bounds and !std::isdigit(code[pos])) {
-      return Parser::make_MINUS(loc);
-    }
-  }
 
   while (bounds) {
     char c = code[pos];
@@ -88,7 +80,7 @@ Parser::symbol_type Lexer::read_number() {
 
   loc = get_loc_range(loc);
 
-  return Parser::make_NUMBER(negative ? -number : number, loc);
+  return Parser::make_NUMBER(number, loc);
 }
 
 Parser::symbol_type Lexer::read_string() {
@@ -189,9 +181,17 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     return Parser::make_ASSIGN(loc);
   case '+':
     pos++;
+    if (bounds && code[pos] == '+') {
+      pos++;
+      return Parser::make_PLUSPLUS(loc);
+    }
     return Parser::make_PLUS(loc);
   case '-':
     pos++;
+    if (bounds && code[pos] == '-') {
+      pos++;
+      return Parser::make_MINUSMINUS(get_loc_range(loc));
+    }
     return Parser::make_MINUS(loc);
   case '*':
     pos++;
