@@ -1,35 +1,35 @@
 name: C/C++ CI
 
 on:
-	push:
-		branches: [ "rewrite" ]
-	pull_request:
-		branches: [ "rewrite" ]
+  push:
+    branches: [ "rewrite" ]
+  pull_request:
+    branches: [ "rewrite" ]
 
 jobs:
-	build:
-		name: Build
-		runs-on: ubuntu-latest
+  build:
+    name: Build
+    runs-on: ubuntu-latest
 
-		steps:
-			- name: Checkout code
-				uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-			- name: Install dependencies
-				run: |
-					sudo apt-get update
-					sudo apt-get install -y wget libllvm llvm clang build-essential cmake
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget libllvm llvm clang build-essential cmake
 
-			- name: Build
-				run: |
-					mkdir build
-					cd build
-					cmake ..
-					make -j4
-					mv blang ../blang
-			
-			- name: Upload artifact
-				uses: actions/upload-artifact@v4
-				with:
-					name: blang-artifact
-					path: blang
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make -j4
+          mv blang ../blang
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blang-artifact
+          path: blang
