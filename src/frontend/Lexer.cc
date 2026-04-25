@@ -157,6 +157,7 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     if (pos < code.size()) {
       char c = code[pos];
       pos++;
+      loc = get_loc_range(loc);
       switch (c) {
       case '=':
         return Parser::make_EQUAL(loc);
