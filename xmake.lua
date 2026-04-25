@@ -1,6 +1,8 @@
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"}) -- generate compile commands
-add_rules("lex", "yacc")
+
+includes("xmake-yacc.lua")
+add_rules("blang-yacc")
 
 if is_plat("linux") then
 	set_policy("build.sanitizer.address", true)
