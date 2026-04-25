@@ -8,10 +8,6 @@ jobs:
   build:
     runs-on: windows-latest
 
-    strategy:
-      matrix:
-        build-system: [cmake, xmake]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,14 +32,11 @@ jobs:
           echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
           echo "C:\ProgramData\chocolatey\lib\winflexbison\tools" >> $env:GITHUB_PATH
 
-      - name: Configure CMake
+      - name: Build
         run: |
           cmake -S . -B build `
             -DCMAKE_BUILD_TYPE=Release `
             -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}/scripts/buildsystems/vcpkg.cmake
-
-      - name: Build CMake
-        run: |
           cmake --build build --config Release
           mv build/blang.exe .
 
