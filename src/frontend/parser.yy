@@ -31,7 +31,7 @@
 #include "frontend/ast/AstGoto.hh"
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstUnot.hh"
-#include "frontend/ast/AstIfChain.hh"
+#include "frontend/ast/AstIf.hh"
 #include "frontend/ast/AstBlock.hh"
 
 namespace blang { class Driver; }
@@ -83,10 +83,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstBreak>> break
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
-%type <std::shared_ptr<blang::AstIfChain>> if_chain
 %type <std::shared_ptr<blang::AstIf>> if
-%type <std::shared_ptr<blang::AstElseIf>> elseif
-%type <std::shared_ptr<blang::AstElse>> else
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::vector<std::string>> identifier_list
@@ -150,7 +147,7 @@ statement:
 		$$ = $1;
 	} | label {
 		$$ = $1;
-	} | if_chain {
+	} | if {
 		$$ = $1;
 	} | expression SEMICOLON {
 		$$ = $1;
@@ -190,42 +187,18 @@ identifier_list:
 	}
 	;
 
-if_chain:
-	if {
-		mknode(AstIfChain, node, @1);
-		node->begin_if = $1;
-		$$ = node;
-	} | if_chain elseif {
-		$1->elifs.push_back($2);
-		$$ = $1;
-	} | if_chain else {
-		$1->end_else = $2;
-		$$ = $1;
-	}
-	;
-
+/* NOTE: there *will* be a s/r conflict there which most likely shouldn't do any harm (as far as I tested). I could resolve it with enough time and tedious parsing, but that's not something I would sacrifice my precious time for */
 if:
-	IF LPAREN expression RPAREN block {
+	IF LPAREN expression RPAREN statement {
 		mknode(AstIf, node, @1);
 		node->expression = $3;
-		node->body = $5;
+		node->then_node = $5;
 		$$ = node;
-	}
-	;
-
-elseif:
-	ELSE IF LPAREN expression RPAREN block {
-		mknode(AstElseIf, node, @1);
-		node->expression = $4;
-		node->body = $6;
-		$$ = node;
-	}
-	;
-
-else:
-	ELSE block {
-		mknode(AstElse, node, @1);
-		node->body = $2;
+	} | IF LPAREN expression RPAREN statement ELSE statement {
+		mknode(AstIf, node, @1);
+		node->expression = $3;
+		node->then_node = $5;
+		node->else_node = $7;
 		$$ = node;
 	}
 	;
