@@ -173,6 +173,9 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
       case '*':
         pos++;
         return Parser::make_ASSIGNMUL(loc2);
+      case '-':
+        pos++;
+        return Parser::make_ASSIGNMINUS(loc2);
       case '&':
         pos++;
         return Parser::make_ASSIGNBITAND(loc2);

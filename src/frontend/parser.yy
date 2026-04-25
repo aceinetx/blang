@@ -34,6 +34,7 @@
 #include "frontend/ast/AstIf.hh"
 #include "frontend/ast/AstBlock.hh"
 #include "frontend/ast/AstIncDec.hh"
+#include "frontend/ast/AstUinv.hh"
 
 namespace blang { class Driver; }
 }
@@ -69,7 +70,7 @@ namespace blang { class Driver; }
 %token MUL DIV PERCENT
 %token EXCLAMATION 
 
-%token ASSIGNMUL ASSIGNBITAND
+%token ASSIGNMUL ASSIGNBITAND ASSIGNMINUS
 %token PLUSPLUS MINUSMINUS
 
 %token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
@@ -378,13 +379,13 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN MINUS expression_assign {
+	} | expression_bitor ASSIGNMINUS expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
 		mknode(AstBinop, binop, @1);
 		binop->left = $1;
-		binop->right = $4;
+		binop->right = $3;
 		binop->op = AstBinop::MINUS;
 
 		node->src = binop;
@@ -599,6 +600,10 @@ expression_unary:
 		$$ = node;
 	} | EXCLAMATION expression_unary {
 		mknode(AstUnot, node, @1);
+		node->expression = $2;
+		$$ = node;
+	} | MINUS expression_unary {
+		mknode(AstUinv, node, @1);
 		node->expression = $2;
 		$$ = node;
 	} | BITAND expression_unary {
