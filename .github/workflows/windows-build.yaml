@@ -20,13 +20,6 @@ jobs:
           choco install winflexbison -y
           choco install llvm -y
 
-      - name: Setup vcpkg
-        uses: lukka/run-vcpkg@v11
-
-      - name: Install dependencies (fmt)
-        run: |
-          vcpkg install fmt:x64-windows
-
       - name: Configure PATH
         run: |
           echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
