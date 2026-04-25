@@ -83,7 +83,11 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
       fmt::print(" ");
     }
   }
-  fmt::print(GREEN "^\n" RESET);
+  fmt::print(GREEN "^" RESET);
+  for (int i = 0; i < location.end.column - location.begin.column; i++) {
+    fmt::print(GREEN "~" RESET);
+  }
+  fmt::print("\n");
 }
 
 void DiagnosticPrinter::printDiagnostic(LexerException &exc, int type) {

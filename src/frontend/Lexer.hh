@@ -15,7 +15,10 @@ private:
   Parser::symbol_type read_number();
   Parser::symbol_type read_string();
   Parser::symbol_type read_character();
+  std::optional<Parser::symbol_type> read_symbol();
   Parser::location_type get_location();
+  Parser::location_type get_loc_range(Parser::location_type start,
+                                      int column_offset = -1);
 
   std::size_t pos = 0;
   std::size_t line = 1;

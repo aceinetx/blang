@@ -1,6 +1,6 @@
 #include "frontend/ast/AstStringLit.hh"
-#include "Assert.hh"
 #include "Blang.hh"
+#include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -12,7 +12,10 @@ void AstStringLit::print(int indent) {
 }
 
 llvm::Value *AstStringLit::compile(Blang *blang, bool rvalue) {
-  blangassert(rvalue);
+  if (!rvalue) {
+    throw LvalueException(location, "string literal");
+  }
+
   return blang->builder.CreatePtrToInt(blang->builder.CreateGlobalString(str),
                                        blang->get_word_ty());
 }

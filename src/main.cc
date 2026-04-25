@@ -5,12 +5,13 @@ using namespace blang;
 
 int main(int argc, char **argv) {
   const std::string code = R"(
-_start(){
+_start() {
 	extrn main, exit;
 	auto ret;
 
 	ret = main();
-	exit(ret);	
+	exit(ret);
+  return(0);
 }
   )";
 

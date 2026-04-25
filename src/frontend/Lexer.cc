@@ -13,10 +13,9 @@ Lexer::Lexer(std::string code) : code(std::move(code)) {
 
 Parser::symbol_type Lexer::next() {
   while (bounds) {
-    auto loc = get_location();
     char c = code[pos];
 
-    if (std::isalpha(c)) {
+    if (std::isalpha(c) || c == '_') {
       return read_identifier();
     } else if (std::isdigit(c) || c == '-') {
       return read_number();
@@ -26,70 +25,9 @@ Parser::symbol_type Lexer::next() {
       return read_character();
     }
 
-    pos++;
-    switch (c) {
-    case '(':
-      return Parser::make_LPAREN(loc);
-    case ')':
-      return Parser::make_RPAREN(loc);
-    case '{':
-      return Parser::make_LBRACE(loc);
-    case '}':
-      return Parser::make_RBRACE(loc);
-    case ';':
-      return Parser::make_SEMICOLON(loc);
-    case '=':
-      if (pos < code.size()) {
-        char c = code[pos];
-        pos++;
-        switch (c) {
-        case '=':
-          return Parser::make_EQUAL(loc);
-        case '!':
-          return Parser::make_NEQUAL(loc);
-        case '>':
-          return Parser::make_GREQ(loc);
-        case '<':
-          return Parser::make_LSEQ(loc);
-        }
-        pos--;
-      }
-      return Parser::make_ASSIGN(loc);
-    case '+':
-      return Parser::make_PLUS(loc);
-    case '-':
-      return Parser::make_MINUS(loc);
-    case '*':
-      return Parser::make_MUL(loc);
-    case '/':
-      return Parser::make_DIV(loc);
-    case '&':
-      return Parser::make_AMPERSAND(loc);
-    case ',':
-      return Parser::make_COMMA(loc);
-    case '>':
-      return Parser::make_GREATER(loc);
-    case '<':
-      return Parser::make_LESS(loc);
-    case '!':
-      return Parser::make_EXCLAMATION(loc);
-    case ':':
-      return Parser::make_COLON(loc);
-    case '[':
-      return Parser::make_LBRACKET(loc);
-    case ']':
-      return Parser::make_RBRACKET(loc);
-    }
-    pos--;
-
-    if (c == '\n') {
-      line++;
-      line_start_pos = pos;
-    }
-
-    if (!std::isspace(c)) {
-      throw LexerException(loc, fmt::format("illegal char '{}'", c));
-    }
+    auto sym = read_symbol();
+    if (sym)
+      return *sym;
     pos++;
   }
 
@@ -103,7 +41,7 @@ Parser::symbol_type Lexer::read_identifier() {
 
   while (bounds) {
     char c = code[pos];
-    if (!(std::isalnum(c) or c == '$')) {
+    if (!(std::isalnum(c) or c == '$' or c == '_')) {
       break;
     }
     identifier.push_back(c);
@@ -118,6 +56,7 @@ Parser::symbol_type Lexer::read_identifier() {
           {"goto", Parser::make_GOTO},     {"if", Parser::make_IF},
           {"else", Parser::make_ELSE}};
 
+  loc = get_loc_range(loc);
   if (keyword_mapping.contains(identifier))
     return keyword_mapping.at(identifier)(loc);
 
@@ -147,6 +86,8 @@ Parser::symbol_type Lexer::read_number() {
     pos++;
   }
 
+  loc = get_loc_range(loc);
+
   return Parser::make_NUMBER(negative ? -number : number, loc);
 }
 
@@ -172,6 +113,8 @@ Parser::symbol_type Lexer::read_string() {
 
   pos++;
 
+  loc = get_loc_range(loc);
+
   return Parser::make_STRING_LIT(s, loc);
 }
 
@@ -194,11 +137,91 @@ Parser::symbol_type Lexer::read_character() {
   return Parser::make_NUMBER((long)c, loc);
 }
 
+std::optional<Parser::symbol_type> Lexer::read_symbol() {
+  char c = code[pos];
+  auto loc = get_location();
+
+  pos++;
+  switch (c) {
+  case '(':
+    return Parser::make_LPAREN(loc);
+  case ')':
+    return Parser::make_RPAREN(loc);
+  case '{':
+    return Parser::make_LBRACE(loc);
+  case '}':
+    return Parser::make_RBRACE(loc);
+  case ';':
+    return Parser::make_SEMICOLON(loc);
+  case '=':
+    if (pos < code.size()) {
+      char c = code[pos];
+      pos++;
+      switch (c) {
+      case '=':
+        return Parser::make_EQUAL(loc);
+      case '!':
+        return Parser::make_NEQUAL(loc);
+      case '>':
+        return Parser::make_GREQ(loc);
+      case '<':
+        return Parser::make_LSEQ(loc);
+      }
+      pos--;
+    }
+    return Parser::make_ASSIGN(loc);
+  case '+':
+    return Parser::make_PLUS(loc);
+  case '-':
+    return Parser::make_MINUS(loc);
+  case '*':
+    return Parser::make_MUL(loc);
+  case '/':
+    return Parser::make_DIV(loc);
+  case '&':
+    return Parser::make_AMPERSAND(loc);
+  case ',':
+    return Parser::make_COMMA(loc);
+  case '>':
+    return Parser::make_GREATER(loc);
+  case '<':
+    return Parser::make_LESS(loc);
+  case '!':
+    return Parser::make_EXCLAMATION(loc);
+  case ':':
+    return Parser::make_COLON(loc);
+  case '[':
+    return Parser::make_LBRACKET(loc);
+  case ']':
+    return Parser::make_RBRACKET(loc);
+  }
+  pos--;
+
+  if (c == '\n') {
+    line++;
+    line_start_pos = pos;
+  }
+
+  if (!std::isspace(c)) {
+    throw LexerException(loc, fmt::format("illegal char '{}'", c));
+  }
+
+  return {};
+}
+
 Parser::location_type Lexer::get_location() {
   Parser::location_type loc(nullptr, (int)line, (int)(pos - line_start_pos));
   if (line == 1)
     loc.begin.column++;
   return loc;
+}
+
+Parser::location_type Lexer::get_loc_range(Parser::location_type start,
+                                           int column_offset) {
+  auto end = get_location();
+  start.end = end.begin;
+  start.end.column += column_offset;
+  return start;
 }
 
 Parser::symbol_type yylex(Driver &driver) {
