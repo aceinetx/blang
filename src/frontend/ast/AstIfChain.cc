@@ -33,8 +33,10 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
         BasicBlock::Create(blang->context, "", blang->current_function));
   }
 
-  auto *end_else_block =
-      BasicBlock::Create(blang->context, "", blang->current_function);
+  BasicBlock *end_else_block = nullptr;
+  if (end_else)
+    end_else_block =
+        BasicBlock::Create(blang->context, "", blang->current_function);
 
   /* Create a block for the end of the chain */
   auto *chain_end_block =
@@ -46,6 +48,26 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
   } else if (begin_if_block && elifs.empty() && end_else) {
     /* Only an if and else statement */
     blang->builder.CreateCondBr(value, begin_if_block, end_else_block);
+  } else if (begin_if_block && !elifs.empty() && !end_else) {
+    /* If and elif statements */
+    auto *skip =
+        BasicBlock::Create(blang->context, "", blang->current_function);
+    blang->builder.CreateCondBr(value, begin_if_block, skip);
+
+    blang->builder.SetInsertPoint(skip);
+    for (size_t i = 0; i < elifs.size(); i++) {
+      auto block = elif_blocks[i];
+      auto elif = elifs[i];
+      skip = BasicBlock::Create(blang->context, "", blang->current_function);
+      value = blang->builder.CreateICmpNE(
+          elif->expression->compile(blang, true),
+          ConstantInt::get(blang->get_word_ty(), 0));
+      blang->builder.CreateCondBr(value, block, skip);
+      blang->builder.SetInsertPoint(skip);
+    }
+
+    blang->builder.SetInsertPoint(skip);
+    blang->builder.CreateBr(chain_end_block);
   } else if (begin_if_block && !elifs.empty() && end_else) {
     /* If and else and elif statements */
     auto *skip =
@@ -87,13 +109,15 @@ llvm::Value *AstIfChain::compile(Blang *blang, bool rvalue) {
       blang->builder.CreateBr(chain_end_block);
     blang->builder.SetInsertPoint(chain_end_block);
   }
-  /* Compile else body */
-  blang->builder.SetInsertPoint(end_else_block);
-  for (auto node : end_else->body)
-    node->compile(blang, true);
-  if (!blang->builder.GetInsertBlock()->getTerminator())
-    blang->builder.CreateBr(chain_end_block);
-  blang->builder.SetInsertPoint(chain_end_block);
+  if (end_else) {
+    /* Compile else body */
+    blang->builder.SetInsertPoint(end_else_block);
+    for (auto node : end_else->body)
+      node->compile(blang, true);
+    if (!blang->builder.GetInsertBlock()->getTerminator())
+      blang->builder.CreateBr(chain_end_block);
+    blang->builder.SetInsertPoint(chain_end_block);
+  }
 
   return nullptr;
 }
