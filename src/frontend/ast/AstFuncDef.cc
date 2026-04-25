@@ -35,6 +35,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   blang->current_function = func;
   blang->unresolved_goto_labels.clear();
   blang->goto_blocks.clear();
+  blang->while_statement_end_block = nullptr;
 
   /* Initialize arguments */
   auto fnArgs = func->arg_begin();

@@ -53,8 +53,8 @@ Parser::symbol_type Lexer::read_identifier() {
       keyword_mapping = {
           {"return", Parser::make_RETURN}, {"auto", Parser::make_AUTO},
           {"extrn", Parser::make_EXTRN},   {"while", Parser::make_WHILE},
-          {"goto", Parser::make_GOTO},     {"if", Parser::make_IF},
-          {"else", Parser::make_ELSE}};
+          {"break", Parser::make_BREAK},   {"goto", Parser::make_GOTO},
+          {"if", Parser::make_IF},         {"else", Parser::make_ELSE}};
 
   loc = get_loc_range(loc);
   if (keyword_mapping.contains(identifier))

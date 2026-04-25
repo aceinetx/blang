@@ -22,6 +22,7 @@ llvm::Value *AstWhile::compile(Blang *blang, bool rvalue) {
       llvm::BasicBlock::Create(blang->context, "", blang->current_function);
   llvm::BasicBlock *end_block =
       llvm::BasicBlock::Create(blang->context, "", blang->current_function);
+  blang->while_statement_end_block = end_block;
 
   blang->builder.CreateBr(comparison_block);
   blang->builder.SetInsertPoint(comparison_block);

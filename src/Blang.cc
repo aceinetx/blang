@@ -14,7 +14,8 @@ using namespace llvm;
 
 namespace blang {
 Blang::Blang(std::string moduleName)
-    : builder(context), fmodule(moduleName, context) {
+    : builder(context), fmodule(moduleName, context), current_function(nullptr),
+      while_statement_end_block(nullptr) {
   InitializeNativeTarget();
   InitializeAllTargetInfos();
   InitializeAllTargets();

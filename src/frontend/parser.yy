@@ -27,6 +27,7 @@
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstStringLit.hh"
 #include "frontend/ast/AstWhile.hh"
+#include "frontend/ast/AstBreak.hh"
 #include "frontend/ast/AstGoto.hh"
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstUnot.hh"
@@ -66,7 +67,7 @@ namespace blang { class Driver; }
 %token MUL DIV PERCENT
 %token EXCLAMATION 
 
-%token RETURN AUTO EXTRN WHILE GOTO IF ELSE /* keywords */
+%token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
 
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -77,6 +78,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstWhile>> while
+%type <std::shared_ptr<blang::AstBreak>> break
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstIfChain>> if_chain
@@ -137,6 +139,8 @@ statement:
 	} | extrn {
 		$$ = $1;
 	} | while {
+		$$ = $1;
+	} | break {
 		$$ = $1;
 	} | goto {
 		$$ = $1;
@@ -258,6 +262,13 @@ label:
 	IDENTIFIER COLON {
 		mknode(AstLabel, node, @1);
 		node->name = $1;
+		$$ = node;
+	}
+	;
+
+break:
+	BREAK SEMICOLON {
+		mknode(AstBreak, node, @1);
 		$$ = node;
 	}
 	;
