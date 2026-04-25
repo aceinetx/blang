@@ -53,9 +53,9 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
   std::string diagnostic_type_string = getDiagnosticTypeStringForType(type);
 
   // Print the message at the top
-  fmt::println(WHITE_BOLD "{}:{}:{}: {} " WHITE_BOLD "{}" RESET, filename,
-               location.begin.line, location.begin.column,
-               diagnostic_type_string, message);
+  fmt::print(WHITE_BOLD "{}:{}:{}: {} \n" WHITE_BOLD "{}" RESET, filename,
+             location.begin.line, location.begin.column, diagnostic_type_string,
+             message);
 
   // Print the source code line
   auto lines = string_split(source, "\n");
@@ -72,8 +72,8 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
 
   auto line = lines[location.begin.line - 1];
 
-  fmt::println("{: 5} | {}", location.begin.line,
-               replace_all(line, "\t", tab_strip));
+  fmt::print("{: 5} | {}\n", location.begin.line,
+             replace_all(line, "\t", tab_strip));
   fmt::print("      | ");
 
   for (int i = 0; i < location.begin.column - 1; i++) {
