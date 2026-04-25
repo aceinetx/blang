@@ -53,7 +53,7 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
   std::string diagnostic_type_string = getDiagnosticTypeStringForType(type);
 
   // Print the message at the top
-  fmt::print(WHITE_BOLD "{}:{}:{}: {} \n" WHITE_BOLD "{}" RESET, filename,
+  fmt::print(WHITE_BOLD "{}:{}:{}: {} " WHITE_BOLD "{}" RESET "\n", filename,
              location.begin.line, location.begin.column, diagnostic_type_string,
              message);
 
