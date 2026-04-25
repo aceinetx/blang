@@ -20,8 +20,8 @@ jobs:
 
       - name: Build
         run: |
-          xmake f -m debug -a x64 --kind=static
-          xmake -v
+          xmake f -m debug -a x64 --kind=static -y
+          xmake -v -y
 
       - name: Install artifacts
         run: |
