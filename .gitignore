@@ -5,3 +5,4 @@ build
 *.ll
 *.o
 *.s
+*.out

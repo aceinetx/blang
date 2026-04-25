@@ -83,6 +83,9 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
     }
   }
 
+  if (!blang->builder.GetInsertBlock()->getTerminator())
+    blang->builder.CreateRet(ConstantInt::get(blang->get_word_ty(), 0));
+
   return last;
 }
 } // namespace blang
