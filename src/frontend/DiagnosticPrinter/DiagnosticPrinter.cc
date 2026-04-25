@@ -60,7 +60,7 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
   auto lines = string_split(source, "\n");
 
   if (lines.size() < (size_t)location.begin.line) {
-    fmt::println("(no source available)");
+    fmt::print("(no source available)\n");
     return;
   }
 

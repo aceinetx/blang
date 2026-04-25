@@ -10,7 +10,7 @@ using namespace llvm;
 namespace blang {
 void AstFuncDef::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstFuncDef");
+  fmt::print("- AstFuncDef\n");
   for (auto child : statements) {
     child->print(indent + 1);
   }

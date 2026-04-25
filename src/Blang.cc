@@ -73,7 +73,7 @@ llvm::Type *Blang::get_word_ty() {
 void Blang::compile(std::string code) {
   Driver driver = Driver(code);
   Parser parser = Parser(driver);
-  fmt::println("{}", parser.parse());
+  fmt::print("{}\n", parser.parse());
   driver.get_root()->print();
   driver.get_root()->compile(this);
 

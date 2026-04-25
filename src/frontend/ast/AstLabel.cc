@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstLabel::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstLabel {}", name);
+  fmt::print("- AstLabel {}\n", name);
 }
 
 llvm::Value *AstLabel::compile(Blang *blang, bool rvalue) {

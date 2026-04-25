@@ -12,7 +12,7 @@ void AstExtern::print(int indent) {
   for (const auto &name : names) {
     fmt::print("{} ", name);
   }
-  fmt::println("");
+  fmt::print("\n");
 }
 
 llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {

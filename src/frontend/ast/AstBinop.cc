@@ -6,7 +6,7 @@
 namespace blang {
 void AstBinop::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstBinop {}", (int)op);
+  fmt::print("- AstBinop {}\n", (int)op);
 
   left->print(indent + 1);
   right->print(indent + 1);

@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstGoto::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstGoto {}", name);
+  fmt::print("- AstGoto {}\n", name);
 }
 
 llvm::Value *AstGoto::compile(Blang *blang, bool rvalue) {

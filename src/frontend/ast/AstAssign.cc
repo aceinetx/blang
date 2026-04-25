@@ -5,7 +5,7 @@
 namespace blang {
 void AstAssign::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstAssign");
+  fmt::print("- AstAssign\n");
 
   dest->print(indent + 1);
   src->print(indent + 1);

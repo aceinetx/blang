@@ -8,7 +8,7 @@ using namespace llvm;
 namespace blang {
 void AstIf::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstIf");
+  fmt::print("- AstIf\n");
   expression->print(indent + 1);
   for (auto statement : body) {
     statement->print(indent + 1);

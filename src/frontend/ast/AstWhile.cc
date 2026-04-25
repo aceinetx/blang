@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstWhile::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstWhile");
+  fmt::print("- AstWhile\n");
   for (auto statement : statements) {
     statement->print(indent + 1);
   }

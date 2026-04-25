@@ -5,7 +5,7 @@
 namespace blang {
 void AstReturn::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstReturn");
+  fmt::print("- AstReturn\n");
   expression->print(indent + 1);
 }
 

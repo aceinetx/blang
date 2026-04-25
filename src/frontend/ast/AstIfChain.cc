@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstIfChain::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstIfChain");
+  fmt::print("- AstIfChain\n");
   begin_if->print(indent + 1);
   for (auto node : elifs) {
     node->print(indent + 1);

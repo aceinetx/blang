@@ -5,7 +5,7 @@
 namespace blang {
 void AstAutoVar::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstAutoVar {}", name);
+  fmt::print("- AstAutoVar {}\n", name);
 }
 
 llvm::Value *AstAutoVar::compile(Blang *blang, bool rvalue) {

@@ -8,7 +8,7 @@ using namespace llvm;
 namespace blang {
 void AstNumber::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstNumber {}", number);
+  fmt::print("- AstNumber {}\n", number);
 }
 
 llvm::Value *AstNumber::compile(Blang *blang, bool rvalue) {

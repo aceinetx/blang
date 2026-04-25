@@ -4,7 +4,7 @@
 namespace blang {
 void AstRoot::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstRoot");
+  fmt::print("- AstRoot\n");
   for (auto child : children) {
     child->print(indent + 1);
   }

@@ -6,7 +6,7 @@
 namespace blang {
 void AstAddrof::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstAddrof");
+  fmt::print("- AstAddrof\n");
   expression->print(indent + 1);
 }
 

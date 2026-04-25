@@ -6,7 +6,7 @@
 namespace blang {
 void AstVarRef::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstVarRef {}", name);
+  fmt::print("- AstVarRef {}\n", name);
 }
 
 llvm::Value *AstVarRef::compile(Blang *blang, bool rvalue) {

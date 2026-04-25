@@ -5,7 +5,7 @@
 namespace blang {
 void AstDeref::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstDeref");
+  fmt::print("- AstDeref\n");
   expression->print(indent + 1);
 }
 
