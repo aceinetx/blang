@@ -43,7 +43,7 @@ namespace blang { class Driver; }
 %code {
 	#include "frontend/Driver.hh"
 	#include "frontend/exceptions/ParserException/ParserException.hh"
-	#define mknode(type, name, loc) auto name = std::make_shared<type>(); name->location = loc;
+	#define mknode(type, name, loc) std::shared_ptr<type> name = std::make_shared<type>(); name->location = loc;
 
 	namespace blang {
 		Parser::symbol_type yylex(Driver& driver);
@@ -119,13 +119,13 @@ top_statement_list:
 	;
 
 function_definition:
-	IDENTIFIER LPAREN identifier_list RPAREN block {
+	IDENTIFIER LPAREN identifier_list RPAREN statement {
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
 		node->node_block = $5;
 		node->args = $3;
 		$$ = node;
-	} | IDENTIFIER LPAREN RPAREN block {
+	} | IDENTIFIER LPAREN RPAREN statement {
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
 		node->node_block = $4;
