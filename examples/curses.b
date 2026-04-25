@@ -1,5 +1,5 @@
 main(){
-	extrn initscr, curs_set, clear, mvprintw, refresh, getch;
+	extrn initscr, endwin, curs_set, clear, mvprintw, refresh, getch;
 	auto k, x, y;
 
 	initscr();
