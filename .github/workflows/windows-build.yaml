@@ -9,30 +9,15 @@ jobs:
     runs-on: windows-latest
 
     steps:
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: mingw-w64-x86_64-gcc clang llvm bison xmake fmt
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup MSVC
-        uses: ilammy/msvc-dev-cmd@v1
-
-      - name: Install tools via Chocolatey
-        run: |
-          choco install winflexbison -y
-          choco install llvm -y
-
-      - name: Configure PATH
-        run: |
-          echo "C:\Program Files\LLVM\bin" >> $env:GITHUB_PATH
-          echo "C:\ProgramData\chocolatey\lib\winflexbison\tools" >> $env:GITHUB_PATH
-
       - name: Build
+        shell: msys2 {0}
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
-          cmake --build build --config Debug
-          mv build/blang.exe .
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: blang-artifact
-          path: blang.exe
+          xmake build
