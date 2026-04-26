@@ -1,3 +1,8 @@
 .cache
 build
 .vs
+.xmake
+*.ll
+*.o
+*.s
+*.out

@@ -1,16 +1,16 @@
-#include "blang.hh"
-#include "util.hh"
-#include <parser.hh>
+#include "Blang.hh"
+#include "Util.hh"
+#include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
+#include <fmt/core.h>
 
 using namespace blang;
 
 int main(int argc, char **argv) {
   std::string output = "a.out";
-  Blang::EmitLevel emit_level = Blang::EMIT_EXE;
+  EmitLevel emit_level = EmitLevel::EMIT_EXE;
 
   Blang blang = Blang("b");
-  if (!blang.target)
-    return 1;
+  std::string input = "";
 
   argsShift();
   for ([[maybe_unused]] int i = 0; argc; ++i) {
@@ -20,17 +20,15 @@ int main(int argc, char **argv) {
       if (arg == "-o") {
         output = argsShift();
       } else if (arg == "-c") {
-        emit_level = Blang::EMIT_OBJ;
+        emit_level = EmitLevel::EMIT_OBJ;
       } else if (arg == "-emit-llvm") {
-        emit_level = Blang::EMIT_IR;
+        emit_level = EmitLevel::EMIT_IR;
       } else if (arg == "-l") {
         blang.link_libraries.push_back(argsShift());
       } else if (arg == "-L") {
-        blang.link_path = argsShift();
-      } else if (arg == "-b") {
-        blang.libb = true;
+        blang.link_paths.push_back(argsShift());
       } else if (arg == "--help") {
-        fmt::printf(R"(OVERVIEW: blang LLVM compiler
+        fmt::print(R"(OVERVIEW: blang LLVM compiler
 
 USAGE: blang [options] file...
 
@@ -41,33 +39,33 @@ OPTIONS:
   -emit-llvm          Output LLVM IR
   -L <dir>            Add directory to library search path
   -l <lib>            Link libraries 
-  -b                  Link with B runtime and B standard library
 )");
         return 0;
       } else {
-        fmt::printf("blang: error: unknown argument: {}", arg);
+        fmt::print("blang: error: unknown argument: {}\n", arg);
         return 1;
       }
     } else { /* assume it's a file */
       auto result = readFile(arg);
-      if (result.is_error()) {
-        fmt::println("blang: {}", result.get_error().value());
+      if (!result) {
+        fmt::print("blang: could not open file {}\n", arg);
         return 1;
       }
 
-      blang.input = result.get_success().value();
+      input = *result;
     }
   }
 
-  auto result = blang.parseAndCompile();
-  if (result.is_error()) {
-    fmt::println("blang: {}", result.get_error().value());
-    return 1;
-  }
+  DiagnosticPrinter diag_printer = DiagnosticPrinter("b", input);
 
-  result = blang.emit(output, emit_level);
-  if (result.is_error()) {
-    fmt::println("blang: {}", result.get_error().value());
-    return 1;
+  try {
+    blang.compile(input);
+    blang.emit(output, emit_level);
+  } catch (LexerException &exc) {
+    diag_printer.printDiagnostic(exc);
+  } catch (ParserException &exc) {
+    diag_printer.printDiagnostic(exc);
+  } catch (LocationException &exc) {
+    diag_printer.printDiagnostic(exc);
   }
 }

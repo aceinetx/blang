@@ -1,0 +1,9 @@
+root = true
+
+[*.{cc,hh}]
+indent_style = space
+indent_size = 2
+
+[*.yaml]
+indent_style = tab
+indent_size = 2

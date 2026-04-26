@@ -1,0 +1,33 @@
+name: Linux Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget llvm-dev llvm-runtime llvm clang build-essential cmake libfmt-dev
+
+      - name: Build
+        run: |
+          mkdir build
+          cd build
+          cmake ..
+          make -j4
+          mv blang ../blang
+      
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: blang-artifact
+          path: blang

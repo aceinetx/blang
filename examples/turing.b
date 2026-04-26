@@ -41,7 +41,7 @@ increment(){
 }
 
 copy(){
-  extrn malloc, free;
+  extrn malloc, free, memcpy;
   auto tape;
   tape = malloc(50 * W);
 
@@ -59,7 +59,7 @@ copy(){
 }
 
 is_even(){
-  extrn malloc, free;
+  extrn malloc, free, puts;
   auto tape;
   tape = malloc(50 * W);
 
@@ -79,7 +79,7 @@ is_even(){
 }
 
 clear(){
-  extrn malloc, free;
+  extrn malloc, free, memset;
   auto tape;
   tape = malloc(50 * W);
 
@@ -95,7 +95,7 @@ clear(){
 }
 
 contains(){
-  extrn malloc, free;
+  extrn malloc, free, printf;
   auto tape, i;
   tape = malloc(50 * W);
 
