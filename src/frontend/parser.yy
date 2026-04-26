@@ -35,6 +35,7 @@
 #include "frontend/ast/AstBlock.hh"
 #include "frontend/ast/AstIncDec.hh"
 #include "frontend/ast/AstUinv.hh"
+#include "frontend/ast/AstIdentifierList.hh"
 
 namespace blang { class Driver; }
 }
@@ -91,7 +92,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstIf>> if
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
-%type <std::vector<std::string>> identifier_list
+%type <std::shared_ptr<blang::AstIdentifierList>> identifier_list
 
 %%
 
@@ -183,11 +184,11 @@ block:
 
 identifier_list:
 	IDENTIFIER {
-		$$.clear();
-		$$.push_back($1);
-	}
-	| identifier_list COMMA IDENTIFIER {
-		$1.push_back($3);
+		mknode(AstIdentifierList, node, @1);
+		node->identifiers.push_back({$1, @1});
+		$$ = node;
+	} | identifier_list COMMA IDENTIFIER {
+		$1->identifiers.push_back({$3, @3});
 		$$ = $1;
 	}
 	;
@@ -219,16 +220,15 @@ return:
 extrn:
 	EXTRN identifier_list SEMICOLON {
 		mknode(AstExtern, node, @1);
-		node->names = std::move($2);
+		node->names = $2;
 		$$ = node;
 	}
 	;
 
 auto:
-	AUTO IDENTIFIER SEMICOLON {
+	AUTO identifier_list SEMICOLON {
 		mknode(AstAutoVar, node, @1);
-		node->identifier_location = @2;
-		node->name = $2;
+		node->names = $2;
 		$$ = node;
 	}
 	;

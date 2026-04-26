@@ -7,9 +7,13 @@
 using namespace llvm;
 
 namespace blang {
+AstFuncDef::AstFuncDef() : args(std::make_shared<AstIdentifierList>()) {
+}
+
 void AstFuncDef::print(int indent) {
   printIndent(indent);
   fmt::print("- AstFuncDef\n");
+  args->print(indent + 1);
   node_block->print(indent + 1);
 }
 
@@ -17,7 +21,7 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   (void)rvalue;
 
   std::vector<Type *> arg_types = {};
-  for (size_t i = 0; i < args.size(); i++)
+  for (size_t i = 0; i < args->identifiers.size(); i++)
     arg_types.push_back(blang->get_word_ty());
 
   auto type = FunctionType::get(blang->get_word_ty(), arg_types, false);
@@ -37,11 +41,15 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   /* Initialize arguments */
   auto fnArgs = func->arg_begin();
   Value *arg = fnArgs++;
-  for (const auto &i : args) {
+  for (const auto &pair : args->identifiers) {
+    const auto &name = pair.first;
+    const auto &location = pair.second;
+
     {
-      auto var = blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, i);
+      auto var =
+          blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, name);
       blang->builder.CreateStore(arg, var);
-      blang->add_scope_var(i, var, location);
+      blang->add_scope_var(name, var, location);
     }
 
     arg = fnArgs++;

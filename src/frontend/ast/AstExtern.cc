@@ -6,18 +6,22 @@
 using namespace llvm;
 
 namespace blang {
+AstExtern::AstExtern() : names(std::make_shared<AstIdentifierList>()) {
+}
+
 void AstExtern::print(int indent) {
   printIndent(indent);
-  fmt::print("- AstExtern ");
-  for (const auto &name : names) {
-    fmt::print("{} ", name);
-  }
+  fmt::print("- AstExtern\n");
+  names->print(indent + 1);
   fmt::print("\n");
 }
 
 llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {
   (void)rvalue;
-  for (const auto &name : names) {
+  for (const auto &pair : names->identifiers) {
+    const auto &name = pair.first;
+    const auto &location = pair.second;
+
     if (!blang->extern_values.contains(name)) {
       auto *GV =
           new GlobalVariable(blang->fmodule, blang->get_word_ty(), false,

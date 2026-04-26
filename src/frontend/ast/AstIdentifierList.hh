@@ -1,14 +1,14 @@
 #pragma once
-#include "frontend/ast/AstIdentifierList.hh"
 #include "frontend/ast/AstNode.hh"
+#include <location.hh>
+#include <utility>
+#include <vector>
 
 namespace blang {
-struct AstExtern : public AstNode {
-  AstExtern();
-
+struct AstIdentifierList : public AstNode {
   void print(int indent = 0) override;
   llvm::Value *compile(Blang *blang, bool rvalue) override;
 
-  std::shared_ptr<AstIdentifierList> names;
+  std::vector<std::pair<std::string, class location>> identifiers;
 };
 } // namespace blang
