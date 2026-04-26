@@ -1,5 +1,5 @@
 #include "frontend/ast/AstAddrof.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
@@ -10,10 +10,10 @@ void AstAddrof::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstAddrof::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstAddrof::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue)
     throw LvalueException(location, "addrof");
 
-  return expression->compile(blang, false);
+  return expression->compile(C, false);
 }
 } // namespace blang

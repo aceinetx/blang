@@ -1,5 +1,5 @@
 #include "frontend/ast/AstFuncDef.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include "frontend/exceptions/InvalidAttributeException/InvalidAttributeException.hh"
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/core.h>
@@ -20,16 +20,16 @@ void AstFuncDef::print(int indent) {
   node_block->print(indent + 1);
 }
 
-llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
   std::vector<Type *> arg_types = {};
   for (size_t i = 0; i < args->identifiers.size(); i++)
-    arg_types.push_back(blang->get_word_ty());
+    arg_types.push_back(C->get_word_ty());
 
-  auto type = FunctionType::get(blang->get_word_ty(), arg_types, false);
+  auto type = FunctionType::get(C->get_word_ty(), arg_types, false);
   auto func =
-      Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
+      Function::Create(type, Function::ExternalLinkage, name, C->fmodule);
 
   auto attr_list = AttributeList();
   std::unordered_map<std::string, Attribute::AttrKind> attribute_map = {
@@ -41,38 +41,38 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
 
   for (const auto &attr : attrs) {
     if (attribute_map.contains(attr)) {
-      attr_list = attr_list.addFnAttribute(blang->context, attribute_map[attr]);
+      attr_list = attr_list.addFnAttribute(C->context, attribute_map[attr]);
     } else
       throw InvalidAttributeException(location, attr);
   }
   func->setAttributes(attr_list);
 
-  auto function_block = BasicBlock::Create(blang->context, "_" + name, func);
-  blang->builder.SetInsertPoint(function_block);
+  auto function_block = BasicBlock::Create(C->context, "_" + name, func);
+  C->builder.SetInsertPoint(function_block);
 
   // if user forward declared the function that is in this module then we
   // replace all references with the real function and remove the extern so that
   // we don't get duplicate symbols
-  if (blang->extern_values.contains(name)) {
-    auto *stub = blang->extern_values[name];
+  if (C->extern_values.contains(name)) {
+    auto *stub = C->extern_values[name];
     llvm::cast<GlobalVariable>(stub)->eraseFromParent();
     stub->replaceAllUsesWith(func);
-    blang->extern_values.erase(name);
-    blang->update_global_scope_var(name, func);
+    C->extern_values.erase(name);
+    C->update_global_scope_var(name, func);
 
     // without this the function name would clash with the extern symbol, this
     // happens because we create the function before we delete the extern symbol
     // above
     func->setName(name);
   } else {
-    blang->add_global_scope_var(name, func);
+    C->add_global_scope_var(name, func);
   }
 
-  blang->push_scope();
-  blang->current_function = func;
-  blang->unresolved_goto_labels.clear();
-  blang->goto_blocks.clear();
-  blang->while_statement_end_block = nullptr;
+  C->push_scope();
+  C->current_function = func;
+  C->unresolved_goto_labels.clear();
+  C->goto_blocks.clear();
+  C->while_statement_end_block = nullptr;
 
   /* Initialize arguments */
   auto fnArgs = func->arg_begin();
@@ -83,24 +83,24 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
 
     {
       auto var =
-          blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, name);
-      blang->builder.CreateStore(arg, var);
-      blang->add_scope_var(name, var, location);
+          C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
+      C->builder.CreateStore(arg, var);
+      C->add_scope_var(name, var, location);
     }
 
     arg = fnArgs++;
   }
 
   /* Compile body */
-  llvm::Value *last = node_block->compile(blang, true);
+  llvm::Value *last = node_block->compile(C, true);
 
-  blang->pop_scope();
-  blang->current_function = nullptr;
+  C->pop_scope();
+  C->current_function = nullptr;
 
   /*
    * Check for unresolved goto labels
    */
-  for (const auto &label : blang->unresolved_goto_labels) {
+  for (const auto &label : C->unresolved_goto_labels) {
     throw UnresolvedLabelException(label.second, label.first);
   }
 
@@ -127,8 +127,8 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
     }
   }
 
-  if (!blang->builder.GetInsertBlock()->getTerminator())
-    blang->builder.CreateRet(ConstantInt::get(blang->get_word_ty(), 0));
+  if (!C->builder.GetInsertBlock()->getTerminator())
+    C->builder.CreateRet(ConstantInt::get(C->get_word_ty(), 0));
 
   return last;
 }

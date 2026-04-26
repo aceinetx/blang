@@ -1,7 +1,6 @@
 #include "Blang.hh"
 #include "frontend/Driver.hh"
 
-#include "frontend/exceptions/RedefinitionException/RedefinitionException.hh"
 #include "parser.tab.hpp"
 #include <filesystem>
 #include <fmt/core.h>
@@ -18,9 +17,7 @@
 using namespace llvm;
 
 namespace blang {
-Blang::Blang(std::string moduleName)
-    : builder(context), fmodule(moduleName, context), current_function(nullptr),
-      while_statement_end_block(nullptr) {
+Blang::Blang(std::string moduleName) : context(moduleName) {
   InitializeNativeTarget();
   InitializeAllTargetInfos();
   InitializeAllTargets();
@@ -38,13 +35,13 @@ Blang::Blang(std::string moduleName)
                                          targetTriple.getTriple(), err));
   }
 
-  fmodule.setTargetTriple(targetTriple);
+  context.fmodule.setTargetTriple(targetTriple);
 
   TargetOptions opt;
   targetMachine = std::unique_ptr<TargetMachine>(target->createTargetMachine(
       targetTriple, "generic", "", opt, Reloc::PIC_));
 
-  fmodule.setDataLayout(targetMachine->createDataLayout());
+  context.fmodule.setDataLayout(targetMachine->createDataLayout());
 #else
   auto targetTriple = sys::getDefaultTargetTriple();
 
@@ -55,91 +52,39 @@ Blang::Blang(std::string moduleName)
         fmt::format("failed to lookup target {}: {}", targetTriple, err));
   }
 
-  fmodule.setTargetTriple(targetTriple);
+  context.fmodule.setTargetTriple(targetTriple);
 
   TargetOptions opt;
   targetMachine = std::unique_ptr<TargetMachine>(target->createTargetMachine(
       targetTriple, "generic", "", opt, Reloc::PIC_));
 
-  fmodule.setDataLayout(targetMachine->createDataLayout());
+  context.fmodule.setDataLayout(targetMachine->createDataLayout());
 #endif
 
-  push_scope();
+  context.push_scope();
 }
 
 Blang::~Blang() = default;
-
-llvm::Type *Blang::get_word_ty() {
-  llvm::DataLayout DL = fmodule.getDataLayout();
-  unsigned maxIntSize = DL.getLargestLegalIntTypeSizeInBits();
-  llvm::Type *maxIntType = llvm::IntegerType::get(context, maxIntSize);
-  return maxIntType;
-}
 
 void Blang::compile(std::string code) {
   Driver driver = Driver(code);
   Parser parser = Parser(driver);
   parser.parse();
   driver.get_root()->print();
-  driver.get_root()->compile(this);
+  driver.get_root()->compile(&context);
 
   {
     // Add compiler identification
     Metadata *textnode = MDString::get(
-        context, fmt::format("blang llvm {}", LLVM_VERSION_STRING));
-    MDNode *IdentNode = MDNode::get(context, ArrayRef<Metadata *>(textnode));
-    NamedMDNode *IdentMD = fmodule.getOrInsertNamedMetadata("llvm.ident");
+        context.context, fmt::format("blang llvm {}", LLVM_VERSION_STRING));
+    MDNode *IdentNode =
+        MDNode::get(context.context, ArrayRef<Metadata *>(textnode));
+    NamedMDNode *IdentMD =
+        context.fmodule.getOrInsertNamedMetadata("llvm.ident");
     IdentMD->addOperand(IdentNode);
   }
 
-  verifyModule(fmodule);
-}
-
-void Blang::push_scope() {
-  scopes.insert(scopes.begin(), Scope());
-}
-
-void Blang::pop_scope() {
-  scopes.erase(scopes.begin());
-}
-
-Scope &Blang::get_scope() {
-  return scopes[0];
-}
-
-llvm::Value *Blang::get_scope_var(std::string name) {
-  for (auto &scope : scopes) {
-    if (scope.contains(name))
-      return scope[name];
-  }
-  return nullptr;
-}
-
-void Blang::add_scope_var(std::string name, llvm::Value *value,
-                          std::optional<class location> diagnostic_location) {
-  auto &scope = get_scope();
-  if (scope.contains(name)) {
-    if (diagnostic_location)
-      throw RedefinitionException(*diagnostic_location, name);
-    throw std::runtime_error("redefinition of " + name);
-  }
-  scope[name] = value;
-}
-
-void Blang::add_global_scope_var(
-    std::string name, llvm::Value *value,
-    std::optional<class location> diagnostic_location) {
-  auto &scope = scopes.back();
-  if (scope.contains(name)) {
-    if (diagnostic_location)
-      throw RedefinitionException(*diagnostic_location, "global " + name);
-    throw std::runtime_error("redefinition of global " + name);
-  }
-  scope[name] = value;
-}
-
-void Blang::update_global_scope_var(std::string name, llvm::Value *value) {
-  scopes.back()[name] = value;
+  verifyModule(context.fmodule);
 }
 
 void Blang::emit(std::string filename, EmitLevel level) {
@@ -165,7 +110,7 @@ void Blang::emit(std::string filename, EmitLevel level) {
       throw std::runtime_error("TargetMachine can't emit a file of this type");
     }
 
-    passManager.run(fmodule);
+    passManager.run(context.fmodule);
     dest.flush();
 
     if (level == EmitLevel::EMIT_EXE) {
@@ -190,7 +135,7 @@ void Blang::emit(std::string filename, EmitLevel level) {
       throw std::runtime_error("could not open output file: " + EC.message());
     }
 
-    fmodule.print(dest, nullptr);
+    context.fmodule.print(dest, nullptr);
   } break;
   }
 }

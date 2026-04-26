@@ -1,5 +1,5 @@
 #include "frontend/ast/AstIncDec.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
@@ -12,33 +12,33 @@ void AstIncDec::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstIncDec::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstIncDec::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "unary incdec");
   }
 
-  auto value = blang->builder.CreateIntToPtr(expression->compile(blang, false),
-                                             blang->builder.getPtrTy());
+  auto value = C->builder.CreateIntToPtr(expression->compile(C, false),
+                                             C->builder.getPtrTy());
   Value *output = nullptr;
 
   if (type == POST)
-    output = blang->builder.CreateLoad(blang->get_word_ty(), value);
+    output = C->builder.CreateLoad(C->get_word_ty(), value);
 
   if (op == INC)
-    blang->builder.CreateStore(
-        blang->builder.CreateAdd(
-            blang->builder.CreateLoad(blang->get_word_ty(), value),
-            ConstantInt::get(blang->get_word_ty(), 1)),
+    C->builder.CreateStore(
+        C->builder.CreateAdd(
+            C->builder.CreateLoad(C->get_word_ty(), value),
+            ConstantInt::get(C->get_word_ty(), 1)),
         value);
   else if (op == DEC)
-    blang->builder.CreateStore(
-        blang->builder.CreateSub(
-            blang->builder.CreateLoad(blang->get_word_ty(), value),
-            ConstantInt::get(blang->get_word_ty(), 1)),
+    C->builder.CreateStore(
+        C->builder.CreateSub(
+            C->builder.CreateLoad(C->get_word_ty(), value),
+            ConstantInt::get(C->get_word_ty(), 1)),
         value);
 
   if (type == PRE)
-    output = blang->builder.CreateLoad(blang->get_word_ty(), value);
+    output = C->builder.CreateLoad(C->get_word_ty(), value);
 
   return output;
 }

@@ -1,6 +1,6 @@
 #include "AstBinop.hh"
 #include "Assert.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 namespace blang {
@@ -12,63 +12,63 @@ void AstBinop::print(int indent) {
   right->print(indent + 1);
 }
 
-llvm::Value *AstBinop::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstBinop::compile(CompilerContext *C, bool rvalue) {
   blangassert(rvalue);
-  auto lhs = left->compile(blang, true);
-  auto rhs = right->compile(blang, true);
+  auto lhs = left->compile(C, true);
+  auto rhs = right->compile(C, true);
   llvm::Value *result = nullptr;
 
   switch (op) {
   case PLUS:
-    result = blang->builder.CreateAdd(lhs, rhs);
+    result = C->builder.CreateAdd(lhs, rhs);
     break;
   case MINUS:
-    result = blang->builder.CreateSub(lhs, rhs);
+    result = C->builder.CreateSub(lhs, rhs);
     break;
   case MUL:
-    result = blang->builder.CreateMul(lhs, rhs);
+    result = C->builder.CreateMul(lhs, rhs);
     break;
   case DIV:
-    result = blang->builder.CreateSDiv(lhs, rhs);
+    result = C->builder.CreateSDiv(lhs, rhs);
     break;
   case EQUAL:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpEQ(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpEQ(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case NEQUAL:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpNE(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpNE(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case GREATER:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGT(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpSGT(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case LESS:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLT(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpSLT(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case GREQ:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpSGE(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpSGE(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case LSEQ:
-    result = blang->builder.CreateZExt(blang->builder.CreateICmpSLE(lhs, rhs),
-                                       blang->get_word_ty());
+    result = C->builder.CreateZExt(C->builder.CreateICmpSLE(lhs, rhs),
+                                       C->get_word_ty());
     break;
   case BITOR:
-    result = blang->builder.CreateOr(lhs, rhs);
+    result = C->builder.CreateOr(lhs, rhs);
     break;
   case BITAND:
-    result = blang->builder.CreateAnd(lhs, rhs);
+    result = C->builder.CreateAnd(lhs, rhs);
     break;
   case BITSHL:
-    result = blang->builder.CreateShl(lhs, rhs);
+    result = C->builder.CreateShl(lhs, rhs);
     break;
   case BITSHR:
-    result = blang->builder.CreateLShr(lhs, rhs);
+    result = C->builder.CreateLShr(lhs, rhs);
     break;
   case PERCENT:
-    result = blang->builder.CreateURem(lhs, rhs);
+    result = C->builder.CreateURem(lhs, rhs);
     break;
   }
 

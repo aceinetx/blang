@@ -1,5 +1,5 @@
 #include "frontend/ast/AstBreak.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -10,9 +10,9 @@ void AstBreak::print(int indent) {
   fmt::println("- AstBreak");
 }
 
-llvm::Value *AstBreak::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstBreak::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
-  blang->builder.CreateBr(blang->while_statement_end_block);
+  C->builder.CreateBr(C->while_statement_end_block);
   return nullptr;
 }
 

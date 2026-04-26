@@ -1,5 +1,5 @@
 #include "frontend/ast/AstUinv.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
@@ -12,14 +12,14 @@ void AstUinv::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstUinv::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstUinv::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "unary inverse");
   }
 
-  auto value = expression->compile(blang, true);
-  auto result = blang->builder.CreateSub(
-      ConstantInt::get(blang->get_word_ty(), 0), value);
+  auto value = expression->compile(C, true);
+  auto result = C->builder.CreateSub(
+      ConstantInt::get(C->get_word_ty(), 0), value);
 
   return result;
 }

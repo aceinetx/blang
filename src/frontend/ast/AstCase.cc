@@ -1,6 +1,6 @@
 #include "frontend/ast/AstCase.hh"
 #include "Assert.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -11,16 +11,16 @@ void AstCase::print(int indent) {
   fmt::println("- AstCase {}", number);
 }
 
-llvm::Value *AstCase::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstCase::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
-  blangassert(blang->last_switch);
+  blangassert(C->last_switch);
 
-  auto block = BasicBlock::Create(blang->context, "", blang->current_function);
-  blang->builder.CreateBr(block);
+  auto block = BasicBlock::Create(C->context, "", C->current_function);
+  C->builder.CreateBr(block);
 
-  blang->last_switch->add_case(blang, number, block);
+  C->last_switch->add_case(C, number, block);
 
-  blang->builder.SetInsertPoint(block);
+  C->builder.SetInsertPoint(block);
   return nullptr;
 }
 

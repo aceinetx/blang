@@ -1,5 +1,5 @@
 #include "frontend/ast/AstBlock.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -12,10 +12,10 @@ void AstBlock::print(int indent) {
     child->print(indent + 1);
 }
 
-llvm::Value *AstBlock::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstBlock::compile(CompilerContext *C, bool rvalue) {
   Value *last = nullptr;
   for (auto child : children)
-    last = child->compile(blang, rvalue);
+    last = child->compile(C, rvalue);
   return last;
 }
 

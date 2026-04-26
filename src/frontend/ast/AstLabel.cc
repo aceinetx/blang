@@ -1,5 +1,5 @@
 #include "frontend/ast/AstLabel.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -10,28 +10,28 @@ void AstLabel::print(int indent) {
   fmt::print("- AstLabel {}\n", name);
 }
 
-llvm::Value *AstLabel::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstLabel::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
-  if (!blang->goto_blocks.contains(name)) {
+  if (!C->goto_blocks.contains(name)) {
     auto block =
-        BasicBlock::Create(blang->context, name, blang->current_function);
-    if (!blang->builder.GetInsertBlock()->getTerminator()) {
-      blang->builder.CreateBr(block);
+        BasicBlock::Create(C->context, name, C->current_function);
+    if (!C->builder.GetInsertBlock()->getTerminator()) {
+      C->builder.CreateBr(block);
     }
-    blang->builder.SetInsertPoint(block);
-    blang->goto_blocks[name] = block;
+    C->builder.SetInsertPoint(block);
+    C->goto_blocks[name] = block;
   } else {
-    if (!blang->builder.GetInsertBlock()->getTerminator()) {
-      blang->builder.CreateBr(blang->goto_blocks[name]);
+    if (!C->builder.GetInsertBlock()->getTerminator()) {
+      C->builder.CreateBr(C->goto_blocks[name]);
     }
-    blang->builder.SetInsertPoint(blang->goto_blocks[name]);
+    C->builder.SetInsertPoint(C->goto_blocks[name]);
 
-    for (ssize_t i = 0; i < (ssize_t)blang->unresolved_goto_labels.size();
+    for (ssize_t i = 0; i < (ssize_t)C->unresolved_goto_labels.size();
          i++) {
-      if (blang->unresolved_goto_labels[i].first == name) {
-        blang->unresolved_goto_labels.erase(
-            blang->unresolved_goto_labels.begin() + i);
+      if (C->unresolved_goto_labels[i].first == name) {
+        C->unresolved_goto_labels.erase(
+            C->unresolved_goto_labels.begin() + i);
       }
     }
   }

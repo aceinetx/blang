@@ -1,5 +1,5 @@
 #include "frontend/ast/AstSwitch.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -12,42 +12,42 @@ void AstSwitch::print(int indent) {
   statement->print(indent + 1);
 }
 
-llvm::Value *AstSwitch::compile(Blang *blang, bool rvalue) {
-  blang->last_switch = this;
+llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
+  C->last_switch = this;
 
-  value = expression->compile(blang, true);
+  value = expression->compile(C, true);
 
-  evaluator = BasicBlock::Create(blang->context, "", blang->current_function);
-  body = BasicBlock::Create(blang->context, "", blang->current_function);
-  end = BasicBlock::Create(blang->context, "", blang->current_function);
+  evaluator = BasicBlock::Create(C->context, "", C->current_function);
+  body = BasicBlock::Create(C->context, "", C->current_function);
+  end = BasicBlock::Create(C->context, "", C->current_function);
 
-  blang->builder.CreateBr(evaluator);
+  C->builder.CreateBr(evaluator);
 
-  blang->builder.SetInsertPoint(body);
-  statement->compile(blang, true);
+  C->builder.SetInsertPoint(body);
+  statement->compile(C, true);
 
-  if (!blang->builder.GetInsertBlock()->getTerminator())
-    blang->builder.CreateBr(end);
+  if (!C->builder.GetInsertBlock()->getTerminator())
+    C->builder.CreateBr(end);
 
-  blang->builder.SetInsertPoint(evaluator);
+  C->builder.SetInsertPoint(evaluator);
   if (!evaluator->getTerminator())
-    blang->builder.CreateBr(body);
+    C->builder.CreateBr(body);
 
-  blang->builder.SetInsertPoint(end);
+  C->builder.SetInsertPoint(end);
 
-  blang->last_switch = nullptr;
+  C->last_switch = nullptr;
   return nullptr;
 }
 
-void AstSwitch::add_case(Blang *blang, long number, llvm::BasicBlock *block) {
-  blang->builder.SetInsertPoint(evaluator);
-  auto result = blang->builder.CreateICmpEQ(
-      value, ConstantInt::get(blang->get_word_ty(), number));
+void AstSwitch::add_case(CompilerContext *C, long number, llvm::BasicBlock *block) {
+  C->builder.SetInsertPoint(evaluator);
+  auto result = C->builder.CreateICmpEQ(
+      value, ConstantInt::get(C->get_word_ty(), number));
 
   BasicBlock *new_evaluator =
-      BasicBlock::Create(blang->context, "", blang->current_function);
+      BasicBlock::Create(C->context, "", C->current_function);
 
-  blang->builder.CreateCondBr(result, block, new_evaluator);
+  C->builder.CreateCondBr(result, block, new_evaluator);
 
   evaluator = new_evaluator;
 }

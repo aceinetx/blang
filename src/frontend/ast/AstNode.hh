@@ -3,7 +3,7 @@
 #include <location.hh>
 
 namespace blang {
-struct Blang;
+struct CompilerContext;
 
 class AstNode {
 public:
@@ -15,7 +15,7 @@ public:
   virtual ~AstNode();
 
   virtual void print(int indent = 0);
-  virtual llvm::Value *compile(Blang *blang, bool rvalue) = 0;
+  virtual llvm::Value *compile(CompilerContext *C, bool rvalue) = 0;
 
   class location location;
 

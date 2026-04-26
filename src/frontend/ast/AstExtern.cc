@@ -1,5 +1,5 @@
 #include "frontend/ast/AstExtern.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 #include <llvm/IR/GlobalVariable.h>
 
@@ -16,26 +16,26 @@ void AstExtern::print(int indent) {
   fmt::print("\n");
 }
 
-llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstExtern::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   for (const auto &pair : names->identifiers) {
     const auto &name = pair.first;
     const auto &location = pair.second;
 
     // if we already have the symbol in this module just use it
-    if (auto *existing = blang->get_scope_var(name)) {
-      blang->add_scope_var(name, existing, location);
+    if (auto *existing = C->get_scope_var(name)) {
+      C->add_scope_var(name, existing, location);
       continue;
     }
 
-    if (!blang->extern_values.contains(name)) {
+    if (!C->extern_values.contains(name)) {
       auto *GV =
-          new GlobalVariable(blang->fmodule, blang->get_word_ty(), false,
+          new GlobalVariable(C->fmodule, C->get_word_ty(), false,
                              GlobalValue::ExternalLinkage, nullptr, name);
-      blang->extern_values[name] = GV;
-      blang->add_scope_var(name, GV, location);
+      C->extern_values[name] = GV;
+      C->add_scope_var(name, GV, location);
     } else {
-      blang->add_scope_var(name, blang->extern_values[name], location);
+      C->add_scope_var(name, C->extern_values[name], location);
     }
   }
 

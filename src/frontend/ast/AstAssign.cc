@@ -1,5 +1,5 @@
 #include "frontend/ast/AstAssign.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 namespace blang {
@@ -11,14 +11,14 @@ void AstAssign::print(int indent) {
   src->print(indent + 1);
 }
 
-llvm::Value *AstAssign::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstAssign::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
-  auto lv = blang->builder.CreateIntToPtr(dest->compile(blang, false),
-                                          blang->builder.getPtrTy());
-  auto rv = src->compile(blang, true);
+  auto lv = C->builder.CreateIntToPtr(dest->compile(C, false),
+                                          C->builder.getPtrTy());
+  auto rv = src->compile(C, true);
 
-  blang->builder.CreateStore(rv, lv);
+  C->builder.CreateStore(rv, lv);
 
   return rv;
 }

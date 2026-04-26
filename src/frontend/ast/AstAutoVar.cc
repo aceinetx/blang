@@ -1,5 +1,5 @@
 #include "AstAutoVar.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 namespace blang {
@@ -9,15 +9,15 @@ void AstAutoVar::print(int indent) {
   names->print(indent + 1);
 }
 
-llvm::Value *AstAutoVar::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstAutoVar::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   for (const auto &pair : names->identifiers) {
     const auto &name = pair.first;
     const auto &location = pair.second;
 
     auto value =
-        blang->builder.CreateAlloca(blang->get_word_ty(), nullptr, name);
-    blang->add_scope_var(name, value, location);
+        C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
+    C->add_scope_var(name, value, location);
   }
 
   return nullptr;

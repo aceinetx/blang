@@ -1,6 +1,6 @@
 #include "frontend/ast/AstFuncCall.hh"
 #include "Assert.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -14,18 +14,18 @@ void AstFuncCall::print(int indent) {
     arg->print(indent + 1);
 }
 
-llvm::Value *AstFuncCall::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstFuncCall::compile(CompilerContext *C, bool rvalue) {
   blangassert(rvalue);
 
-  auto *callee_value = blang->builder.CreateIntToPtr(
-      expression->compile(blang, false), blang->builder.getPtrTy());
+  auto *callee_value = C->builder.CreateIntToPtr(
+      expression->compile(C, false), C->builder.getPtrTy());
   std::vector<llvm::Value *> arg_values = {};
   for (auto arg : args) {
-    arg_values.push_back(arg->compile(blang, true));
+    arg_values.push_back(arg->compile(C, true));
   }
 
-  auto *return_value = blang->builder.CreateCall(
-      FunctionType::get(blang->get_word_ty(), {}, true), callee_value,
+  auto *return_value = C->builder.CreateCall(
+      FunctionType::get(C->get_word_ty(), {}, true), callee_value,
       arg_values);
 
   return return_value;

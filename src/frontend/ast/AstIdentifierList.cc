@@ -1,6 +1,6 @@
 #include "frontend/ast/AstIdentifierList.hh"
 #include "Assert.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include <fmt/core.h>
 
 using namespace llvm;
@@ -15,7 +15,7 @@ void AstIdentifierList::print(int indent) {
   }
 }
 
-llvm::Value *AstIdentifierList::compile(Blang *blang, bool rvalue) {
+llvm::Value *AstIdentifierList::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   blangassert(0 && "AstIdentifierList should never be compiled");
   return nullptr;

@@ -4,9 +4,9 @@
 namespace blang {
 struct AstSwitch : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang, bool rvalue) override;
+  llvm::Value *compile(CompilerContext *C, bool rvalue) override;
 
-  void add_case(Blang *blang, long number, llvm::BasicBlock *block);
+  void add_case(CompilerContext *C, long number, llvm::BasicBlock *block);
 
   std::shared_ptr<AstNode> expression;
   std::shared_ptr<AstNode> statement;
