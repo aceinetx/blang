@@ -19,6 +19,7 @@ private:
   Parser::location_type get_location();
   Parser::location_type get_loc_range(Parser::location_type start,
                                       int column_offset = -1);
+  std::string parse_escape_sequences(const std::string &s);
 
   std::size_t pos = 0;
   std::size_t line = 1;

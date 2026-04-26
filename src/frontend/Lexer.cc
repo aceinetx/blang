@@ -1,8 +1,10 @@
+#include "Util.hh"
 #include "frontend/Driver.hh"
 #include "frontend/exceptions/LexerException/LexerException.hh"
 #include "parser.tab.hpp"
 #include <cctype>
 #include <fmt/format.h>
+#include <map>
 #include <unordered_map>
 
 #define bounds (pos < code.length())
@@ -107,6 +109,7 @@ Parser::symbol_type Lexer::read_string() {
 
   loc = get_loc_range(loc);
 
+  s = parse_escape_sequences(s);
   return Parser::make_STRING_LIT(s, loc);
 }
 
@@ -292,6 +295,19 @@ Parser::location_type Lexer::get_loc_range(Parser::location_type start,
   start.end = end.begin;
   start.end.column += column_offset;
   return start;
+}
+
+std::string Lexer::parse_escape_sequences(const std::string &s) {
+  std::string new_s = s;
+  const std::map<std::string, std::string> charmap = {
+      {"**", "\01"}, {"*0", "\0"}, {"*(", "{"},   {"*)", "}"},
+      {"*t", "\t"},  {"*'", "'"},  {"*\"", "\""}, {"*n", "\n"}};
+  for (const auto &pair : charmap) {
+    new_s = strings::replace_all(new_s, pair.first, pair.second);
+  }
+  new_s = strings::replace_all(new_s, "\01", "*");
+
+  return new_s;
 }
 
 Parser::symbol_type yylex(Driver &driver) {

@@ -1,8 +1,8 @@
 #include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
 #include <fmt/core.h>
 
+#include "Util.hh"
 #include <utility>
-#include <vector>
 
 #define WHITE_BOLD "\033[1;37m"
 #define RED_BOLD "\033[1;31m"
@@ -11,35 +11,6 @@
 #define CYAN_BOLD "\033[1;36m"
 #define GREEN "\033[0;92m"
 #define RESET "\033[0m"
-
-static std::string replace_all(const std::string &str, const std::string &from,
-                               const std::string &to) {
-  if (from.empty())
-    return str;
-
-  std::string result = str;
-  size_t start_pos = 0;
-  while ((start_pos = result.find(from, start_pos)) != std::string::npos) {
-    result.replace(start_pos, from.length(), to);
-    start_pos += to.length();
-  }
-  return result;
-}
-
-static std::vector<std::string> string_split(std::string s,
-                                             const std::string &delimiter) {
-  std::vector<std::string> tokens;
-  size_t pos = 0;
-  std::string token;
-  while ((pos = s.find(delimiter)) != std::string::npos) {
-    token = s.substr(0, pos);
-    tokens.push_back(token);
-    s.erase(0, pos + delimiter.length());
-  }
-  tokens.push_back(s);
-
-  return tokens;
-}
 
 namespace blang {
 DiagnosticPrinter::DiagnosticPrinter(std::string filename, std::string source)
@@ -58,7 +29,7 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
              message);
 
   // Print the source code line
-  auto lines = string_split(source, "\n");
+  auto lines = strings::split(source, "\n");
 
   if (lines.size() < (size_t)location.begin.line) {
     fmt::print("(no source available)\n");
@@ -73,7 +44,7 @@ void DiagnosticPrinter::printSourceWithMessage(class location location,
   auto line = lines[location.begin.line - 1];
 
   fmt::print("{: 5} | {}\n", location.begin.line,
-             replace_all(line, "\t", tab_strip));
+             strings::replace_all(line, "\t", tab_strip));
   fmt::print("      | ");
 
   for (int i = 0; i < location.begin.column - 1; i++) {
