@@ -138,6 +138,10 @@ void Blang::add_global_scope_var(
   scope[name] = value;
 }
 
+void Blang::update_global_scope_var(std::string name, llvm::Value *value) {
+  scopes.back()[name] = value;
+}
+
 void Blang::emit(std::string filename, EmitLevel level) {
   switch (level) {
   case EmitLevel::EMIT_EXE:

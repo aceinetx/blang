@@ -2,6 +2,7 @@
 #include "Blang.hh"
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/core.h>
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
 
 using namespace llvm;
@@ -30,7 +31,23 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   auto function_block = BasicBlock::Create(blang->context, "_" + name, func);
   blang->builder.SetInsertPoint(function_block);
 
-  blang->add_global_scope_var(name, func);
+  // if user forward declared the function that is in this module then we
+  // replace all references with the real function and remove the extern so that
+  // we don't get duplicate symbols
+  if (blang->extern_values.contains(name)) {
+    auto *stub = blang->extern_values[name];
+    llvm::cast<GlobalVariable>(stub)->eraseFromParent();
+    stub->replaceAllUsesWith(func);
+    blang->extern_values.erase(name);
+    blang->update_global_scope_var(name, func);
+
+    // without this the function name would clash with the extern symbol, this
+    // happens because we create the function before we delete the extern symbol
+    // above
+    func->setName(name);
+  } else {
+    blang->add_global_scope_var(name, func);
+  }
 
   blang->push_scope();
   blang->current_function = func;

@@ -22,6 +22,12 @@ llvm::Value *AstExtern::compile(Blang *blang, bool rvalue) {
     const auto &name = pair.first;
     const auto &location = pair.second;
 
+    // if we already have the symbol in this module just use it
+    if (auto *existing = blang->get_scope_var(name)) {
+      blang->add_scope_var(name, existing, location);
+      continue;
+    }
+
     if (!blang->extern_values.contains(name)) {
       auto *GV =
           new GlobalVariable(blang->fmodule, blang->get_word_ty(), false,

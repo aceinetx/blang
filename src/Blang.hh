@@ -45,6 +45,8 @@ struct Blang {
   add_global_scope_var(std::string name, llvm::Value *value,
                        std::optional<class location> diagnostic_location = {});
 
+  void update_global_scope_var(std::string name, llvm::Value *value);
+
   std::vector<std::string> link_libraries = {};
   std::vector<std::string> link_paths = {};
   llvm::OptimizationLevel optimizationLevel = llvm::OptimizationLevel::O2;
