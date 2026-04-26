@@ -1,4 +1,3 @@
-import os
 import sys
 import pathlib
 
@@ -25,13 +24,13 @@ header_template = """
 namespace blang {
 struct Ast%NAME% : public AstNode {
   void print(int indent = 0) override;
-  llvm::Value *compile(Blang *blang, bool rvalue) override;
+  llvm::Value *compile(CompilerContext* C, bool rvalue) override;
 };
 } // namespace blang
 """
 source_template = """
 #include "frontend/ast/Ast%NAME%.hh"
-#include "Blang.hh"
+#include "CompilerContext.hh"
 #include "Assert.hh"
 #include <fmt/core.h>
 
@@ -43,7 +42,7 @@ void Ast%NAME%::print(int indent) {
   fmt::println("- Ast%NAME%");
 }
 
-llvm::Value *Ast%NAME%::compile(Blang *blang, bool rvalue) {
+llvm::Value *Ast%NAME%::compile(CompilerContext* C, bool rvalue) {
 	(void)rvalue;
 	blangassert(0 && "Ast%NAME%::compile is not implemented");
   return nullptr;
