@@ -1,5 +1,6 @@
 #pragma once
 #include "Scope.hh"
+#include "frontend/ast/AstSwitch.hh"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Metadata.h>
@@ -62,6 +63,8 @@ struct Blang {
   std::unordered_map<std::string, llvm::BasicBlock *> goto_blocks;
   std::vector<std::pair<std::string, class location>> unresolved_goto_labels;
   llvm::BasicBlock *while_statement_end_block;
+
+  AstSwitch *last_switch = nullptr;
 
 private:
   std::string targetTriple;

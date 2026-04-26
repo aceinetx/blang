@@ -37,6 +37,8 @@
 #include "frontend/ast/AstUinv.hh"
 #include "frontend/ast/AstIdentifierList.hh"
 #include "frontend/ast/AstGlobalVar.hh"
+#include "frontend/ast/AstSwitch.hh"
+#include "frontend/ast/AstCase.hh"
 
 namespace blang { class Driver; }
 }
@@ -77,12 +79,12 @@ namespace blang { class Driver; }
 %token ASSIGNMUL ASSIGNBITAND ASSIGNMINUS
 %token PLUSPLUS MINUSMINUS
 
-%token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
+%token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE SWITCH CASE /* keywords */
 
 %type <std::shared_ptr<blang::AstIdentifierList>> function_definition_args
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstBlock>> block
-%type <std::shared_ptr<blang::AstNode>> statement
+%type <std::shared_ptr<blang::AstNode>> statement_base statement_expression statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> statement_list
 %type <std::shared_ptr<blang::AstNode>> top_statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> top_statement_list
@@ -94,6 +96,8 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstIf>> if
+%type <std::shared_ptr<blang::AstSwitch>> switch
+%type <std::shared_ptr<blang::AstCase>> case
 %type <std::shared_ptr<blang::AstGlobalVar>> global_var
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
@@ -161,7 +165,7 @@ global_var:
 	}
 	;
 
-statement:
+statement_base:
 	block {
 		$$ = $1;
 	} | return {
@@ -180,7 +184,23 @@ statement:
 		$$ = $1;
 	} | if {
 		$$ = $1;
+	} | switch {
+		$$ = $1;
+	} | case {
+		$$ = $1;
+	}
+	;
+
+statement_expression:
+	statement_base {
+		$$ = $1;
 	} | expression SEMICOLON {
+		$$ = $1;
+	}
+	;
+
+statement:
+	statement_expression {
 		$$ = $1;
 	}
 	;
@@ -287,6 +307,23 @@ label:
 break:
 	BREAK SEMICOLON {
 		mknode(AstBreak, node, @1);
+		$$ = node;
+	}
+	;
+
+switch:
+	SWITCH expression statement_base {
+		mknode(AstSwitch, node, @1);
+		node->expression = $2;
+		node->statement = $3;
+		$$ = node;
+	}
+	;
+
+case:
+	CASE NUMBER COLON {
+		mknode(AstCase, node, @1);
+		node->number = $2;
 		$$ = node;
 	}
 	;
