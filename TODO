@@ -1,4 +1,4 @@
-Todo (rewrite branch):
-- Global variables
+Todo:
+- Character escape sequences
 - Default values in global variables: `W 80;`
 - Arrays in global variables: `ARRAY[1] 0, 1;`
