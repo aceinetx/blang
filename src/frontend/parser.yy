@@ -36,6 +36,7 @@
 #include "frontend/ast/AstIncDec.hh"
 #include "frontend/ast/AstUinv.hh"
 #include "frontend/ast/AstIdentifierList.hh"
+#include "frontend/ast/AstGlobalVar.hh"
 
 namespace blang { class Driver; }
 }
@@ -90,6 +91,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstIf>> if
+%type <std::shared_ptr<blang::AstGlobalVar>> global_var
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::shared_ptr<blang::AstIdentifierList>> identifier_list
@@ -106,6 +108,8 @@ program:
 
 top_statement:
 	function_definition {
+		$$ = $1;
+	} | global_var {
 		$$ = $1;
 	}
 	;
@@ -132,6 +136,14 @@ function_definition:
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
 		node->node_block = $4;
+		$$ = node;
+	}
+	;
+
+global_var:
+	identifier_list SEMICOLON {
+		mknode(AstGlobalVar, node, @1);
+		node->names = $1;
 		$$ = node;
 	}
 	;
@@ -670,6 +682,8 @@ expression_primary:
 		mknode(AstStringLit, node, @1);
 		node->str = $1;
 		$$ = node;
+	} | LPAREN expression RPAREN {
+		$$ = $2;	
 	}
 	;
 

@@ -126,7 +126,7 @@ lit(){
 }
 
 factor(){
-	extrn puts, expr, printf;
+	extrn puts, printf, expr;
 
 	if(token == LPAREN){
 		auto v;
