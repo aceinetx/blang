@@ -206,13 +206,31 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     pos++;
     if (bounds && code[pos] == '*') {
       pos++;
+      std::string comment = "";
       while (bounds) {
         if (code[pos] == '*') {
           pos++;
           if (bounds && code[pos] == '/') {
+            // Parse comment for compiler extensions
+            auto loc2 = get_loc_range(loc, 0);
+            std::string nospace = strings::remove_whitespace(comment);
+            if (nospace.starts_with("blang:attr:")) {
+              nospace.erase(nospace.begin(),
+                            nospace.begin() + (ssize_t)strlen("blang:attr:"));
+              pos++;
+              return Parser::make_BLANG_ATTRIBUTE(strings::split(nospace, ","),
+                                                  loc2);
+            } else if (nospace.starts_with("blang:")) {
+              nospace.erase(nospace.begin(),
+                            nospace.begin() + (ssize_t)strlen("blang:"));
+              pos++;
+              return Parser::make_BLANG_EXTENSION(nospace, loc2);
+            }
+
             return {};
           }
-        }
+        } else
+          comment.push_back(code[pos]);
         pos++;
       }
     }

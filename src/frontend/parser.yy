@@ -58,6 +58,8 @@ namespace blang { class Driver; }
 %token <long> NUMBER
 %token <std::string> IDENTIFIER
 %token <std::string> STRING_LIT
+%token <std::string> BLANG_EXTENSION
+%token <std::vector<std::string>> BLANG_ATTRIBUTE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
 %token SEMICOLON COLON COMMA
 
@@ -77,6 +79,7 @@ namespace blang { class Driver; }
 
 %token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE /* keywords */
 
+%type <std::shared_ptr<blang::AstIdentifierList>> function_definition_args
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
 %type <std::shared_ptr<blang::AstBlock>> block
 %type <std::shared_ptr<blang::AstNode>> statement
@@ -125,17 +128,27 @@ top_statement_list:
 	}
 	;
 
-function_definition:
-	IDENTIFIER LPAREN identifier_list RPAREN statement {
-		mknode(AstFuncDef, node, @1);
-		node->name = $1;
-		node->node_block = $5;
-		node->args = $3;
+function_definition_args:
+	LPAREN identifier_list RPAREN {
+		$$ = $2;
+	} | LPAREN RPAREN {
+		mknode(AstIdentifierList, node, @1);
 		$$ = node;
-	} | IDENTIFIER LPAREN RPAREN statement {
+	}
+
+function_definition:
+	IDENTIFIER function_definition_args statement {
 		mknode(AstFuncDef, node, @1);
 		node->name = $1;
+		node->node_block = $3;
+		node->args = $2;
+		$$ = node;
+	} | BLANG_ATTRIBUTE IDENTIFIER function_definition_args statement {
+		mknode(AstFuncDef, node, @1);
+		node->name = $2;
 		node->node_block = $4;
+		node->args = $3;
+		node->attrs = $1;
 		$$ = node;
 	}
 	;

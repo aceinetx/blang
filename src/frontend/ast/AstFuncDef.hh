@@ -12,5 +12,6 @@ struct AstFuncDef : public AstNode {
   std::shared_ptr<AstNode> node_block;
   std::string name;
   std::shared_ptr<AstIdentifierList> args;
+  std::vector<std::string> attrs;
 };
 } // namespace blang

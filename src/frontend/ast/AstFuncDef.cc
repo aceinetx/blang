@@ -1,9 +1,11 @@
 #include "frontend/ast/AstFuncDef.hh"
 #include "Blang.hh"
+#include "frontend/exceptions/InvalidAttributeException/InvalidAttributeException.hh"
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/core.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DerivedTypes.h>
+#include <unordered_map>
 
 using namespace llvm;
 
@@ -28,6 +30,23 @@ llvm::Value *AstFuncDef::compile(Blang *blang, bool rvalue) {
   auto type = FunctionType::get(blang->get_word_ty(), arg_types, false);
   auto func =
       Function::Create(type, Function::ExternalLinkage, name, blang->fmodule);
+
+  auto attr_list = AttributeList();
+  std::unordered_map<std::string, Attribute::AttrKind> attribute_map = {
+      {"inline", Attribute::AlwaysInline},
+      {"noreturn", Attribute::NoReturn},
+      {"naked", Attribute::Naked},
+      {"norecurse", Attribute::NoRecurse},
+  };
+
+  for (const auto &attr : attrs) {
+    if (attribute_map.contains(attr)) {
+      attr_list = attr_list.addFnAttribute(blang->context, attribute_map[attr]);
+    } else
+      throw InvalidAttributeException(location, attr);
+  }
+  func->setAttributes(attr_list);
+
   auto function_block = BasicBlock::Create(blang->context, "_" + name, func);
   blang->builder.SetInsertPoint(function_block);
 

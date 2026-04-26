@@ -1,4 +1,5 @@
 #include "Util.hh"
+#include <cctype>
 #include <fstream>
 #include <sstream>
 
@@ -50,6 +51,15 @@ std::vector<std::string> split(std::string s, const std::string &delimiter) {
   tokens.push_back(s);
 
   return tokens;
+}
+
+std::string remove_whitespace(const std::string &s) {
+  std::string new_s = "";
+  for (char c : s) {
+    if (!std::isspace(c))
+      new_s.push_back(c);
+  }
+  return new_s;
 }
 } // namespace strings
 } // namespace blang
