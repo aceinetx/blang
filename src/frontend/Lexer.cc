@@ -204,6 +204,18 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     return Parser::make_MUL(loc);
   case '/':
     pos++;
+    if (bounds && code[pos] == '*') {
+      pos++;
+      while (bounds) {
+        if (code[pos] == '*') {
+          pos++;
+          if (bounds && code[pos] == '/') {
+            return {};
+          }
+        }
+        pos++;
+      }
+    }
     return Parser::make_DIV(loc);
   case '%':
     pos++;
