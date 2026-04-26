@@ -39,6 +39,7 @@
 #include "frontend/ast/AstGlobalVar.hh"
 #include "frontend/ast/AstSwitch.hh"
 #include "frontend/ast/AstCase.hh"
+#include "frontend/ast/AstTernary.hh"
 
 namespace blang { class Driver; }
 }
@@ -63,7 +64,7 @@ namespace blang { class Driver; }
 %token <std::string> BLANG_EXTENSION
 %token <std::vector<std::string>> BLANG_ATTRIBUTE
 %token LPAREN RPAREN LBRACE RBRACE LBRACKET RBRACKET
-%token SEMICOLON COLON COMMA
+%token SEMICOLON COLON COMMA QUESTION
 
 /* operators sorted by precedence */
 %token ASSIGN
@@ -100,7 +101,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstCase>> case
 %type <std::shared_ptr<blang::AstGlobalVar>> global_var
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
-%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
+%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_conditional expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
 %type <std::shared_ptr<blang::AstIdentifierList>> identifier_list
 
 %%
@@ -346,14 +347,14 @@ expression:
 	;
 
 expression_assign:
-	expression_bitor {
+	expression_conditional {
 		$$ = $1;
-	} | expression_bitor ASSIGN expression_assign {
+	} | expression_conditional ASSIGN expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 		node->src = $3;
 		$$ = node;
-	} | expression_bitor ASSIGN BITOR expression_assign {
+	} | expression_conditional ASSIGN BITOR expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -364,7 +365,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGNBITAND expression_assign {
+	} | expression_conditional ASSIGNBITAND expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -375,7 +376,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN EQUAL expression_assign {
+	} | expression_conditional ASSIGN EQUAL expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -386,7 +387,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN NEQUAL expression_assign {
+	} | expression_conditional ASSIGN NEQUAL expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -397,7 +398,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN LESS expression_assign {
+	} | expression_conditional ASSIGN LESS expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -408,7 +409,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN LSEQ expression_assign {
+	} | expression_conditional ASSIGN LSEQ expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -419,7 +420,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN GREATER expression_assign {
+	} | expression_conditional ASSIGN GREATER expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -430,7 +431,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN GREQ expression_assign {
+	} | expression_conditional ASSIGN GREQ expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -441,7 +442,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGNMINUS expression_assign {
+	} | expression_conditional ASSIGNMINUS expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -452,7 +453,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN PLUS expression_assign {
+	} | expression_conditional ASSIGN PLUS expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -463,7 +464,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN PERCENT expression_assign {
+	} | expression_conditional ASSIGN PERCENT expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -474,7 +475,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGNMUL expression_assign {
+	} | expression_conditional ASSIGNMUL expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -485,7 +486,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN DIV expression_assign {
+	} | expression_conditional ASSIGN DIV expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -496,7 +497,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN BITSHL expression_assign {
+	} | expression_conditional ASSIGN BITSHL expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -507,7 +508,7 @@ expression_assign:
 
 		node->src = binop;
 		$$ = node;
-	} | expression_bitor ASSIGN BITSHR expression_assign {
+	} | expression_conditional ASSIGN BITSHR expression_assign {
 		mknode(AstAssign, node, @1);
 		node->dest = $1;
 
@@ -520,6 +521,17 @@ expression_assign:
 		$$ = node;
 	}
 	;
+
+expression_conditional:
+	expression_bitor {
+		$$ = $1;
+	} | expression_bitor QUESTION expression COLON expression_conditional {
+		mknode(AstTernary, node, @1);
+		node->expression = $1;
+		node->true_expression = $3;
+		node->false_expression = $5;
+		$$ = node;
+	}
 
 expression_bitor:
 	expression_bitand {

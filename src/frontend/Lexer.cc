@@ -300,6 +300,9 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
   case '|':
     pos++;
     return Parser::make_BITOR(loc);
+  case '?':
+    pos++;
+    return Parser::make_QUESTION(loc);
   }
 
   if (c == '\n') {
