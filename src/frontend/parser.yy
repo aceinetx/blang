@@ -260,6 +260,12 @@ return:
 		mknode(AstReturn, node, @1);
 		node->expression = $3;
 		$$ = node;
+	} | RETURN SEMICOLON {
+		mknode(AstReturn, node, @1);
+		mknode(AstNumber, expr, @1);
+		expr->number = 0;
+		node->expression = expr;
+		$$ = node;
 	}
 	;
 
