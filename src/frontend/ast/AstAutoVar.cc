@@ -17,6 +17,7 @@ llvm::Value *AstAutoVar::compile(CompilerContext *C, bool rvalue) {
 
     auto value =
         C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
+    C->builder.CreateStore(llvm::ConstantInt::get(C->get_word_ty(), 0), value);
     C->add_scope_var(name, value, location);
   }
 
