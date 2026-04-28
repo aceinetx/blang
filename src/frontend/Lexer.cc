@@ -123,7 +123,24 @@ Parser::symbol_type Lexer::read_character() {
     throw LexerException(loc, "incomplete character literal");
   }
 
-  char c = code[pos];
+  long c = (long)code[pos];
+  if(c == '*'){
+	  pos++;
+	  if (!bounds) {
+	    throw LexerException(loc, "incomplete character escape sequence");
+	  }
+
+	  long seq = (long)code[pos];
+	  std::map<long int, int> charmap = {
+	      {'*', '*'}, {'0', '\0'}, {'(', '{'},   {')', '}'},
+	      {'t', '\t'},  {'\'', '\''},  {'\'', '\''}, {'n', '\n'}, {'e', EOF}};
+
+	  if(charmap.contains(seq)){
+		c = long(charmap[(long int)seq]);
+	  } else {
+	    throw LexerException(loc, "invalid escape sequence");
+	  }
+  }
 
   pos++;
   if (!bounds or (bounds and code[pos] != '\'')) {
@@ -131,7 +148,7 @@ Parser::symbol_type Lexer::read_character() {
   }
   pos++;
 
-  return Parser::make_NUMBER((long)c, loc);
+  return Parser::make_NUMBER(c, loc);
 }
 
 std::optional<Parser::symbol_type> Lexer::read_symbol() {
@@ -336,7 +353,7 @@ std::string Lexer::parse_escape_sequences(const std::string &s) {
   std::string new_s = s;
   const std::map<std::string, std::string> charmap = {
       {"**", "\01"}, {"*0", "\0"}, {"*(", "{"},   {"*)", "}"},
-      {"*t", "\t"},  {"*'", "'"},  {"*\"", "\""}, {"*n", "\n"}};
+      {"*t", "\t"},  {"*'", "'"},  {"*\"", "\""}, {"*n", "\n"}, {"*e", std::string((char[]){EOF, 00})}};
   for (const auto &pair : charmap) {
     new_s = strings::replace_all(new_s, pair.first, pair.second);
   }
