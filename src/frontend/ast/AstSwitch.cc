@@ -31,7 +31,7 @@ llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
 
   C->builder.SetInsertPoint(evaluator);
   if (!evaluator->getTerminator())
-    C->builder.CreateBr(body);
+    C->builder.CreateBr(end);
 
   C->builder.SetInsertPoint(end);
 

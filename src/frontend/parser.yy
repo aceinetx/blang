@@ -99,6 +99,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstIf>> if
 %type <std::shared_ptr<blang::AstSwitch>> switch
 %type <std::shared_ptr<blang::AstCase>> case
+%type <std::vector<long>> number_list
 %type <std::shared_ptr<blang::AstGlobalVar>> global_var
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
 %type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_conditional expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
@@ -158,8 +159,25 @@ function_definition:
 	}
 	;
 
+number_list:
+	NUMBER {
+		$$.clear();
+		$$.push_back($1);
+	} | number_list COMMA NUMBER {
+		$1.push_back($3);
+		$$ = $1;
+	}
+
 global_var:
 	identifier_list SEMICOLON {
+		mknode(AstGlobalVar, node, @1);
+		node->names = $1;
+		$$ = node;
+	} | identifier_list LBRACKET NUMBER RBRACKET SEMICOLON {
+		mknode(AstGlobalVar, node, @1);
+		node->names = $1;
+		$$ = node;
+	} | identifier_list LBRACKET NUMBER RBRACKET number_list SEMICOLON {
 		mknode(AstGlobalVar, node, @1);
 		node->names = $1;
 		$$ = node;
