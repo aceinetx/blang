@@ -14,5 +14,6 @@ printn(n,b) {
 
 	if(a=n/b) /* assignment, not test for equality */
 		printn(a, b); /* recursive */
-	putchar(n%b + '0');
+	putchar(*("0123456789ABCDEFGHJKLMNOP" + n%b));
+);
 }
