@@ -1,4 +1,5 @@
 Todo:
-- Character escape sequences
 - Default values in global variables: `W 80;`
 - Arrays in global variables: `ARRAY[1] 0, 1;`
+- Auto var constant syntax: auto x 0, y 1, z 2;
+- Rvalue function calls
