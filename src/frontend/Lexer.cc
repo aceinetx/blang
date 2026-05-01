@@ -75,6 +75,10 @@ Parser::symbol_type Lexer::read_number() {
 
   while (bounds) {
     char c = code[pos];
+    if (c == 'x' && number == 0) {
+      throw LexerException(get_location(), "B does not support hex literals");
+    }
+
     if (!std::isdigit(c))
       break;
     number *= base;
