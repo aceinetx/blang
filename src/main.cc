@@ -2,6 +2,7 @@
 #include "Util.hh"
 #include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
 #include <fmt/core.h>
+#include <fstream>
 
 using namespace blang;
 
@@ -11,6 +12,8 @@ int main(int argc, char **argv) {
 
   Blang blang = Blang("b");
   std::string input = "";
+
+  bool bindings = false;
 
   argsShift();
   for ([[maybe_unused]] int i = 0; argc; ++i) {
@@ -27,6 +30,8 @@ int main(int argc, char **argv) {
         blang.link_libraries.push_back(argsShift());
       } else if (arg == "-L") {
         blang.link_paths.push_back(argsShift());
+      } else if (arg == "--bindings") {
+        bindings = true;
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
@@ -39,6 +44,7 @@ OPTIONS:
   -emit-llvm          Output LLVM IR
   -L <dir>            Add directory to library search path
   -l <lib>            Link libraries 
+  --bindings          Generate .h C bindings
 )");
         return 0;
       } else {
@@ -59,8 +65,19 @@ OPTIONS:
   DiagnosticPrinter diag_printer = DiagnosticPrinter("b", input);
 
   try {
-    blang.compile(input);
-    blang.emit(output, emit_level);
+    if (!bindings) {
+      blang.compile(input);
+      blang.emit(output, emit_level);
+    } else {
+      auto file = std::ofstream(output);
+      if (!file.is_open()) {
+        fmt::print("blang: could not open file {}\n", output);
+        return 1;
+      }
+      blang.bindings(input, file);
+      file.close();
+      fmt::print("blang: bindings written to {}\n", output);
+    }
   } catch (LexerException &exc) {
     diag_printer.printDiagnostic(exc);
   } catch (ParserException &exc) {

@@ -1,6 +1,5 @@
-long hello(const char *);
-
+#include "b.h"
 int main() {
-  hello("B");
+  hello(array[1]);
   return 0;
 }

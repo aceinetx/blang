@@ -28,6 +28,7 @@ struct Blang {
   ~Blang();
 
   void compile(std::string code);
+  void bindings(std::string code, std::ostream &stream);
 
   std::vector<std::string> link_libraries = {};
   std::vector<std::string> link_paths = {};

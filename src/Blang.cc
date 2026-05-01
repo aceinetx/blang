@@ -70,7 +70,6 @@ void Blang::compile(std::string code) {
   Driver driver = Driver(code);
   Parser parser = Parser(driver);
   parser.parse();
-  driver.get_root()->print();
   driver.get_root()->compile(&context);
 
   {
@@ -85,6 +84,22 @@ void Blang::compile(std::string code) {
   }
 
   verifyModule(context.fmodule);
+}
+
+void Blang::bindings(std::string code, std::ostream &stream) {
+  Driver driver = Driver(code);
+  Parser parser = Parser(driver);
+  parser.parse();
+
+  auto guard_name = "BLANG_" + context.fmodule.getName().str();
+  stream << "#ifndef " << guard_name << "\n";
+  stream << "#define " << guard_name << "\n";
+  stream << "#include <stdint.h>\n";
+  stream << "#include <stddef.h>\n";
+
+  driver.get_root()->bindings(stream);
+
+  stream << "#endif\n";
 }
 
 void Blang::emit(std::string filename, EmitLevel level) {

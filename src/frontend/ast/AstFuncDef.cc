@@ -82,8 +82,7 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
     const auto &location = pair.second;
 
     {
-      auto var =
-          C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
+      auto var = C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
       C->builder.CreateStore(arg, var);
       C->add_scope_var(name, var, location);
     }
@@ -132,4 +131,10 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
 
   return last;
 }
+
+void AstFuncDef::bindings(std::ostream &os) {
+  os << "extern int64_t " << name << " (int64_t arg, ...);\n";
+  os << "#define " << name << "(...) " << name << "((int64_t)__VA_ARGS__)\n";
+}
+
 } // namespace blang

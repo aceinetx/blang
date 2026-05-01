@@ -18,4 +18,11 @@ llvm::Value *AstRoot::compile(CompilerContext *C, bool rvalue) {
   }
   return last;
 }
+
+void AstRoot::bindings(std::ostream &os) {
+  for (auto child : children) {
+    child->bindings(os);
+  }
+}
+
 } // namespace blang

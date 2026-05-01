@@ -60,4 +60,8 @@ llvm::Value *AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
   return nullptr;
 }
 
+void AstGlobalArray::bindings(std::ostream &os) {
+  os << "extern int64_t *" << name << ";\n";
+}
+
 } // namespace blang
