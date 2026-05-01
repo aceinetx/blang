@@ -357,7 +357,7 @@ std::string Lexer::parse_escape_sequences(const std::string &s) {
   const std::map<std::string, std::string> charmap = {
       {"**", "\01"}, {"*0", "\0"}, {"*(", "{"},
       {"*)", "}"},   {"*t", "\t"}, {"*'", "'"},
-      {"*\"", "\""}, {"*n", "\n"}, {"*e", std::string((char[]){EOF, 00})}};
+      {"*\"", "\""}, {"*n", "\n"}, {"*e", std::string()}};
   for (const auto &pair : charmap) {
     new_s = strings::replace_all(new_s, pair.first, pair.second);
   }
