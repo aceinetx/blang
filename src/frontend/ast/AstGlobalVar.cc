@@ -18,19 +18,17 @@ void AstGlobalVar::print(int indent) {
 llvm::Value *AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
+  GlobalVariable *var = nullptr;
   if (values.empty()) {
-    auto var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
-                                  llvm::GlobalValue::ExternalLinkage,
-                                  ConstantInt::get(C->get_word_ty(), 0), name);
+    var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                             llvm::GlobalValue::ExternalLinkage,
+                             ConstantInt::get(C->get_word_ty(), 0), name);
 
-    C->add_global_scope_var(name, var, location);
   } else if (values.size() == 1) {
     auto value = values[0]->compile(C, true);
-    auto var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
-                                  llvm::GlobalValue::ExternalLinkage,
-                                  dyn_cast<Constant>(value), name);
-
-    C->add_global_scope_var(name, var, location);
+    var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                             llvm::GlobalValue::ExternalLinkage,
+                             dyn_cast<Constant>(value), name);
   } else {
     auto type = C->get_word_ty();
     auto arrayType = ArrayType::get(type, values.size());
@@ -41,10 +39,25 @@ llvm::Value *AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
     }
 
     auto array = ConstantArray::get(arrayType, consts);
-    auto var =
-        new GlobalVariable(C->fmodule, C->get_word_ty(), false,
-                           llvm::GlobalValue::ExternalLinkage, array, name);
+    var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                             llvm::GlobalValue::ExternalLinkage, array, name);
+  }
 
+  // if user forward declared the variable that is in this module then we
+  // replace all references with the real variable and remove the extern so that
+  // we don't get duplicate symbols
+  if (C->extern_values.contains(name)) {
+    auto *stub = C->extern_values[name];
+    llvm::cast<GlobalVariable>(stub)->eraseFromParent();
+    stub->replaceAllUsesWith(var);
+    C->extern_values.erase(name);
+    C->update_global_scope_var(name, var);
+
+    // without this the variable name would clash with the extern symbol, this
+    // happens because we create the variable before we delete the extern symbol
+    // above
+    var->setName(name);
+  } else {
     C->add_global_scope_var(name, var, location);
   }
   return nullptr;

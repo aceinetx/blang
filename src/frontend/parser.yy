@@ -191,6 +191,11 @@ global_var:
 		node->size = $3;
 		node->values = $5;
 		$$ = node;
+	} | IDENTIFIER LBRACKET NUMBER RBRACKET SEMICOLON {
+		mknode(AstGlobalArray, node, @1);
+		node->name = $1;
+		node->size = $3;
+		$$ = node;
 	}
 	;
 

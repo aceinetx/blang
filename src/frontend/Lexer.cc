@@ -124,22 +124,22 @@ Parser::symbol_type Lexer::read_character() {
   }
 
   long c = (long)code[pos];
-  if(c == '*'){
-	  pos++;
-	  if (!bounds) {
-	    throw LexerException(loc, "incomplete character escape sequence");
-	  }
+  if (c == '*') {
+    pos++;
+    if (!bounds) {
+      throw LexerException(loc, "incomplete character escape sequence");
+    }
 
-	  long seq = (long)code[pos];
-	  std::map<long int, int> charmap = {
-	      {'*', '*'}, {'0', '\0'}, {'(', '{'},   {')', '}'},
-	      {'t', '\t'},  {'\'', '\''},  {'\'', '\''}, {'n', '\n'}, {'e', EOF}};
+    long seq = (long)code[pos];
+    std::map<long int, int> charmap = {{'*', '*'},   {'0', '\0'}, {'(', '{'},
+                                       {')', '}'},   {'t', '\t'}, {'\'', '\''},
+                                       {'\'', '\''}, {'n', '\n'}, {'e', EOF}};
 
-	  if(charmap.contains(seq)){
-		c = long(charmap[(long int)seq]);
-	  } else {
-	    throw LexerException(loc, "invalid escape sequence");
-	  }
+    if (charmap.contains(seq)) {
+      c = long(charmap[(long int)seq]);
+    } else {
+      throw LexerException(loc, "invalid escape sequence");
+    }
   }
 
   pos++;
@@ -282,7 +282,6 @@ std::optional<Parser::symbol_type> Lexer::read_symbol() {
     pos++;
     if (pos < code.size()) {
       char c = code[pos];
-      pos++;
       auto loc2 = get_loc_range(loc);
       if (c == '<') {
         pos++;
@@ -352,8 +351,9 @@ Parser::location_type Lexer::get_loc_range(Parser::location_type start,
 std::string Lexer::parse_escape_sequences(const std::string &s) {
   std::string new_s = s;
   const std::map<std::string, std::string> charmap = {
-      {"**", "\01"}, {"*0", "\0"}, {"*(", "{"},   {"*)", "}"},
-      {"*t", "\t"},  {"*'", "'"},  {"*\"", "\""}, {"*n", "\n"}, {"*e", std::string((char[]){EOF, 00})}};
+      {"**", "\01"}, {"*0", "\0"}, {"*(", "{"},
+      {"*)", "}"},   {"*t", "\t"}, {"*'", "'"},
+      {"*\"", "\""}, {"*n", "\n"}, {"*e", std::string((char[]){EOF, 00})}};
   for (const auto &pair : charmap) {
     new_s = strings::replace_all(new_s, pair.first, pair.second);
   }
