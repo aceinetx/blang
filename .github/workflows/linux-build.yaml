@@ -21,6 +21,7 @@ jobs:
 
       - name: Build
         run: |
+          xmake build blang
           xmake build
           xmake install -o out blang
       
