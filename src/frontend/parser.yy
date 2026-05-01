@@ -786,6 +786,7 @@ constant:
 	} | STRING_LIT {
 		mknode(AstStringLit, node, @1);
 		node->str = $1;
+		$$ = node;
 	}
 	;
 
