@@ -15,9 +15,10 @@ llvm::Value *AstStringLit::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "string literal");
   }
-
-  return C->builder.CreatePtrToInt(C->builder.CreateGlobalString(str),
-                                       C->get_word_ty());
+  Constant *c = ConstantDataArray::getString(C->context, str);
+  auto *var = new GlobalVariable(C->fmodule, c->getType(), true,
+                                 GlobalValue::ExternalLinkage, c);
+  return var;
 }
 
 } // namespace blang
