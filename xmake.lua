@@ -18,7 +18,6 @@ set_languages("c++20", "c90")
 
 target("blang")
 	set_kind("binary")
-	set_default(true)
 
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
