@@ -18,6 +18,7 @@ set_languages("c++20")
 
 target("blang")
 	set_kind("binary")
+	set_default(true)
 
 	add_includedirs("src")
 	add_files("src/*.cc", "src/**/*.cc", "src/**/*.yy")
@@ -40,6 +41,7 @@ target("blang")
 	end)
 target_end()
 
+-- Build libb
 target("brt")
 	set_kind("static")
 
@@ -52,6 +54,48 @@ target("b")
 	set_kind("static")
 
 	add_files("libb/libb.b")
+
+	add_deps("blang")
+target_end()
+
+-- Build examples
+target("example-curses")
+	set_kind("binary")
+
+	add_files("examples/curses.b")
+	add_links("ncurses")
+
+	add_deps("blang")
+target_end()
+
+target("example-duffs_device")
+	set_kind("binary")
+
+	add_files("examples/duffs_device.b")
+
+	add_deps("blang")
+target_end()
+
+target("example-hello")
+	set_kind("binary")
+
+	add_files("examples/hello.b")
+
+	add_deps("blang")
+target_end()
+
+target("example-mandelbrot")
+	set_kind("binary")
+
+	add_files("examples/mandelbrot.b")
+
+	add_deps("blang")
+target_end()
+
+target("example-turing")
+	set_kind("binary")
+
+	add_files("examples/turing.b")
 
 	add_deps("blang")
 target_end()
