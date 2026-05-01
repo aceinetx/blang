@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstSwitch::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstSwitch");
+  fmt::print("- AstSwitch\n");
   expression->print(indent + 1);
   statement->print(indent + 1);
 }
@@ -39,7 +39,8 @@ llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
   return nullptr;
 }
 
-void AstSwitch::add_case(CompilerContext *C, long number, llvm::BasicBlock *block) {
+void AstSwitch::add_case(CompilerContext *C, long number,
+                         llvm::BasicBlock *block) {
   C->builder.SetInsertPoint(evaluator);
   auto result = C->builder.CreateICmpEQ(
       value, ConstantInt::get(C->get_word_ty(), number));

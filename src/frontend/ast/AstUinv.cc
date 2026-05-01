@@ -8,7 +8,7 @@ using namespace llvm;
 namespace blang {
 void AstUinv::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstUinv");
+  fmt::print("- AstUinv\n");
   expression->print(indent + 1);
 }
 
@@ -18,8 +18,8 @@ llvm::Value *AstUinv::compile(CompilerContext *C, bool rvalue) {
   }
 
   auto value = expression->compile(C, true);
-  auto result = C->builder.CreateSub(
-      ConstantInt::get(C->get_word_ty(), 0), value);
+  auto result =
+      C->builder.CreateSub(ConstantInt::get(C->get_word_ty(), 0), value);
 
   return result;
 }

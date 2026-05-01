@@ -39,7 +39,7 @@ using namespace llvm;
 namespace blang {
 void Ast%NAME%::print(int indent) {
   printIndent(indent);
-  fmt::println("- Ast%NAME%");
+  fmt::print("- Ast%NAME%\n");
 }
 
 llvm::Value *Ast%NAME%::compile(CompilerContext* C, bool rvalue) {

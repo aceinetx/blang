@@ -7,7 +7,7 @@ using namespace llvm;
 namespace blang {
 void AstBreak::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstBreak");
+  fmt::print("- AstBreak\n");
 }
 
 llvm::Value *AstBreak::compile(CompilerContext *C, bool rvalue) {

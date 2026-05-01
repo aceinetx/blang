@@ -8,7 +8,7 @@ using namespace llvm;
 namespace blang {
 void AstIncDec::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstIncDec {} {}", type, op);
+  fmt::print("- AstIncDec {} {}\n", type, op);
   expression->print(indent + 1);
 }
 
@@ -18,7 +18,7 @@ llvm::Value *AstIncDec::compile(CompilerContext *C, bool rvalue) {
   }
 
   auto value = C->builder.CreateIntToPtr(expression->compile(C, false),
-                                             C->builder.getPtrTy());
+                                         C->builder.getPtrTy());
   Value *output = nullptr;
 
   if (type == POST)
@@ -26,15 +26,13 @@ llvm::Value *AstIncDec::compile(CompilerContext *C, bool rvalue) {
 
   if (op == INC)
     C->builder.CreateStore(
-        C->builder.CreateAdd(
-            C->builder.CreateLoad(C->get_word_ty(), value),
-            ConstantInt::get(C->get_word_ty(), 1)),
+        C->builder.CreateAdd(C->builder.CreateLoad(C->get_word_ty(), value),
+                             ConstantInt::get(C->get_word_ty(), 1)),
         value);
   else if (op == DEC)
     C->builder.CreateStore(
-        C->builder.CreateSub(
-            C->builder.CreateLoad(C->get_word_ty(), value),
-            ConstantInt::get(C->get_word_ty(), 1)),
+        C->builder.CreateSub(C->builder.CreateLoad(C->get_word_ty(), value),
+                             ConstantInt::get(C->get_word_ty(), 1)),
         value);
 
   if (type == PRE)

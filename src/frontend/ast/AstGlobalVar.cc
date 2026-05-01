@@ -10,7 +10,7 @@ using namespace llvm;
 namespace blang {
 void AstGlobalVar::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstGlobalVar {}", name);
+  fmt::print("- AstGlobalVar {}\n", name);
   for (auto value : values)
     value->print(indent + 1);
 }

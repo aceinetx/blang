@@ -12,7 +12,7 @@ using namespace llvm;
 namespace blang {
 void AstGlobalArray::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstGlobalArray {}[{}]", name, size);
+  fmt::print("- AstGlobalArray {}[{}]\n", name, size);
   for (auto value : values)
     value->print(indent + 1);
 }

@@ -8,7 +8,7 @@ using namespace llvm;
 namespace blang {
 void AstCase::print(int indent) {
   printIndent(indent);
-  fmt::println("- AstCase {}", number);
+  fmt::print("- AstCase {}\n", number);
 }
 
 llvm::Value *AstCase::compile(CompilerContext *C, bool rvalue) {
