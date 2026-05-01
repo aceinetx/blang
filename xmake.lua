@@ -14,7 +14,7 @@ add_requires("fmt", {external=false})
 add_requires("bison")
 
 set_warnings("all") -- warns
-set_languages("c++20")
+set_languages("c++20", "c90")
 
 target("blang")
 	set_kind("binary")
@@ -98,4 +98,13 @@ target("example-turing")
 	add_files("examples/turing.b")
 
 	add_deps("blang")
+target_end()
+
+target("example-c_interop")
+	set_kind("binary")
+
+	add_files("examples/c_interop/*.c")
+	add_files("examples/c_interop/*.b")
+
+	add_deps("blang", "b")
 target_end()
