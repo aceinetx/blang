@@ -16,7 +16,8 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y wget llvm-dev llvm-runtime llvm clang build-essential cmake libfmt-dev xmake
+          sudo apt-get install -y wget llvm-dev llvm-runtime llvm clang build-essential cmake libfmt-dev
+          curl -fsSL https://xmake.io/shget.text | bash
 
       - name: Build
         run: |
