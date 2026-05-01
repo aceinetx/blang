@@ -37,6 +37,7 @@
 #include "frontend/ast/AstUinv.hh"
 #include "frontend/ast/AstIdentifierList.hh"
 #include "frontend/ast/AstGlobalVar.hh"
+#include "frontend/ast/AstGlobalArray.hh"
 #include "frontend/ast/AstSwitch.hh"
 #include "frontend/ast/AstCase.hh"
 #include "frontend/ast/AstTernary.hh"
@@ -99,10 +100,10 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstIf>> if
 %type <std::shared_ptr<blang::AstSwitch>> switch
 %type <std::shared_ptr<blang::AstCase>> case
-%type <std::vector<long>> number_list
-%type <std::shared_ptr<blang::AstGlobalVar>> global_var
+%type <std::vector<std::shared_ptr<blang::AstNode>>> ival_list
+%type <std::shared_ptr<blang::AstNode>> global_var
 %type <std::vector<std::shared_ptr<blang::AstNode>>> expression_list
-%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_conditional expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary
+%type <std::shared_ptr<blang::AstNode>> expression expression_assign expression_conditional expression_bitor expression_bitand expression_equality expression_compare expression_bitshift expression_additive expression_multiplicative expression_unary expression_postfix expression_primary constant
 %type <std::shared_ptr<blang::AstIdentifierList>> identifier_list
 
 %%
@@ -159,27 +160,36 @@ function_definition:
 	}
 	;
 
-number_list:
-	NUMBER {
+ival_list:
+	constant {
 		$$.clear();
 		$$.push_back($1);
-	} | number_list COMMA NUMBER {
+	} | ival_list COMMA constant {
 		$1.push_back($3);
 		$$ = $1;
 	}
 
 global_var:
-	identifier_list SEMICOLON {
+	IDENTIFIER SEMICOLON {
 		mknode(AstGlobalVar, node, @1);
-		node->names = $1;
+		node->name = $1;
 		$$ = node;
-	} | identifier_list LBRACKET NUMBER RBRACKET SEMICOLON {
+	} | IDENTIFIER ival_list SEMICOLON {
 		mknode(AstGlobalVar, node, @1);
-		node->names = $1;
+		node->name = $1;
+		node->values = $2;
 		$$ = node;
-	} | identifier_list LBRACKET NUMBER RBRACKET number_list SEMICOLON {
-		mknode(AstGlobalVar, node, @1);
-		node->names = $1;
+	} | IDENTIFIER LBRACKET RBRACKET ival_list SEMICOLON {
+		mknode(AstGlobalArray, node, @1);
+		node->name = $1;
+		node->size = 0;
+		node->values = $4;
+		$$ = node;
+	} | IDENTIFIER LBRACKET NUMBER RBRACKET ival_list SEMICOLON {
+		mknode(AstGlobalArray, node, @1);
+		node->name = $1;
+		node->size = $3;
+		node->values = $5;
 		$$ = node;
 	}
 	;
@@ -760,16 +770,22 @@ expression_primary:
 		mknode(AstVarRef, node, @1);
 		node->name = $1;
 		$$ = node;
-	} | NUMBER {
+		$$ = node;
+	} | constant {
+		$$ = $1;
+	} | LPAREN expression RPAREN {
+		$$ = $2;	
+	}
+	;
+
+constant:
+	NUMBER {
 		mknode(AstNumber, node, @1);
 		node->number = $1;
 		$$ = node;
 	} | STRING_LIT {
 		mknode(AstStringLit, node, @1);
 		node->str = $1;
-		$$ = node;
-	} | LPAREN expression RPAREN {
-		$$ = $2;	
 	}
 	;
 
