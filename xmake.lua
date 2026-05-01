@@ -3,7 +3,7 @@ add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"}) -- genera
 
 includes("rules/blang-yacc.lua")
 includes("rules/blang.lua")
-add_rules("blang-yacc", "blang")
+add_rules("blang-yacc")
 
 if is_plat("linux") then
 	set_policy("build.sanitizer.address", true)
@@ -43,6 +43,7 @@ target_end()
 
 -- Build libb
 target("brt")
+	add_rules("blang")
 	set_kind("static")
 
 	add_files("libb/brt.b")
@@ -51,6 +52,7 @@ target("brt")
 target_end()
 
 target("b")
+	add_rules("blang")
 	set_kind("static")
 
 	add_files("libb/libb.b")
@@ -60,6 +62,7 @@ target_end()
 
 -- Build examples
 target("example-curses")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/curses.b")
@@ -69,6 +72,7 @@ target("example-curses")
 target_end()
 
 target("example-duffs_device")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/duffs_device.b")
@@ -77,6 +81,7 @@ target("example-duffs_device")
 target_end()
 
 target("example-hello")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/hello.b")
@@ -85,6 +90,7 @@ target("example-hello")
 target_end()
 
 target("example-mandelbrot")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/mandelbrot.b")
@@ -93,6 +99,7 @@ target("example-mandelbrot")
 target_end()
 
 target("example-turing")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/turing.b")
@@ -101,6 +108,7 @@ target("example-turing")
 target_end()
 
 target("example-c_interop")
+	add_rules("blang")
 	set_kind("binary")
 
 	add_files("examples/c_interop/*.c")
