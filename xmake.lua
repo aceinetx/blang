@@ -1,8 +1,9 @@
 add_rules("mode.debug", "mode.release")
 add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"}) -- generate compile commands
 
-includes("xmake-yacc.lua")
-add_rules("blang-yacc")
+includes("rules/blang-yacc.lua")
+includes("rules/blang.lua")
+add_rules("blang-yacc", "blang")
 
 if is_plat("linux") then
 	set_policy("build.sanitizer.address", true)
@@ -37,4 +38,20 @@ target("blang")
 
 		target:add("ldflags", io.readfile(stdout):trim())
 	end)
+target_end()
+
+target("brt")
+	set_kind("static")
+
+	add_files("libb/brt.b")
+
+	add_deps("blang")
+target_end()
+
+target("b")
+	set_kind("static")
+
+	add_files("libb/libb.b")
+
+	add_deps("blang")
 target_end()
