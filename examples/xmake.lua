@@ -4,11 +4,12 @@ add_rules("plugin.compile_commands.autoupdate", {outputdir = "build"}) -- genera
 includes("../rules/blang.lua")
 
 target("example-curses")
+	add_rules("c", "c++", "blang")
 	add_rules("blang")
 	set_kind("binary")
 
 	add_files("curses.b")
-	add_ldflags("-lncurses")
+	add_links("ncurses")
 target_end()
 
 target("example-duffs_device")
@@ -40,7 +41,7 @@ target("example-turing")
 target_end()
 
 target("example-c_interop")
-	add_rules("blang")
+	add_rules("c", "c++", "blang")
 	set_kind("binary")
 
 	add_files("c_interop/*.c")

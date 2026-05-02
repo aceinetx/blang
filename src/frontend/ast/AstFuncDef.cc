@@ -134,7 +134,22 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
 
 void AstFuncDef::bindings(std::ostream &os) {
   os << "extern int64_t " << name << " (int64_t arg, ...);\n";
-  os << "#define " << name << "(...) " << name << "((int64_t)__VA_ARGS__)\n";
+
+  os << "#define " << name << "(";
+  for (const auto &arg : args->identifiers) {
+    if (&arg != &args->identifiers[0]) {
+      os << ",";
+    }
+    os << arg.first;
+  }
+  os << ") " << name << "(";
+  for (const auto &arg : args->identifiers) {
+    if (&arg != &args->identifiers[0]) {
+      os << ",";
+    }
+    os << "(int64_t)(" << arg.first << ")";
+  }
+  os << ")\n";
 }
 
 } // namespace blang
