@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
   std::string input = "";
 
   bool bindings = false;
+  std::string bindings_out = "";
 
   argsShift();
   for ([[maybe_unused]] int i = 0; argc; ++i) {
@@ -32,6 +33,8 @@ int main(int argc, char **argv) {
         blang.link_paths.push_back(argsShift());
       } else if (arg == "--bindings") {
         bindings = true;
+      } else if (arg == "--bindings-out") {
+        bindings_out = argsShift();
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
@@ -45,6 +48,7 @@ OPTIONS:
   -L <dir>            Add directory to library search path
   -l <lib>            Link libraries 
   --bindings          Generate .h C bindings
+  --bindings-out      Generate .h C bindings alongside compilation
 )");
         return 0;
       } else {
@@ -68,16 +72,22 @@ OPTIONS:
     if (!bindings) {
       blang.compile(input);
       blang.emit(output, emit_level);
-    } else {
-      auto file = std::ofstream(output);
-      if (!file.is_open()) {
-        fmt::print("blang: could not open file {}\n", output);
-        return 1;
+
+      if (bindings_out.empty()) {
+        return 0;
       }
-      blang.bindings(input, file);
-      file.close();
-      fmt::print("blang: bindings written to {}\n", output);
+
+      output = bindings_out;
     }
+
+    auto file = std::ofstream(output);
+    if (!file.is_open()) {
+      fmt::print("blang: could not open file {}\n", output);
+      return 1;
+    }
+    blang.bindings(input, file);
+    file.close();
+    fmt::print("blang: bindings written to {}\n", output);
   } catch (LexerException &exc) {
     diag_printer.printDiagnostic(exc);
   } catch (ParserException &exc) {
