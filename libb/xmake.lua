@@ -5,6 +5,8 @@ includes("../rules/blang.lua")
 
 target("brt")
 	add_rules("blang")
+	add_rules("utils.install.pkgconfig_importfiles")
+
 	set_kind("static")
 
 	add_files("brt.b")
@@ -12,6 +14,8 @@ target_end()
 
 target("b")
 	add_rules("blang")
+	add_rules("utils.install.pkgconfig_importfiles")
+
 	set_kind("static")
 
 	add_files("libb.b")
