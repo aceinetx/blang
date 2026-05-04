@@ -17,6 +17,7 @@
 #include "frontend/ast/AstReturn.hh"
 #include "frontend/ast/AstNumber.hh"
 #include "frontend/ast/AstAutoVar.hh"
+#include "frontend/ast/AstAutoVarList.hh"
 #include "frontend/ast/AstVarRef.hh"
 #include "frontend/ast/AstAssign.hh"
 #include "frontend/ast/AstDeref.hh"
@@ -91,6 +92,7 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstNode>> top_statement
 %type <std::vector<std::shared_ptr<blang::AstNode>>> top_statement_list
 %type <std::shared_ptr<blang::AstReturn>> return
+%type <std::shared_ptr<blang::AstAutoVarList>> auto_list
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstWhile>> while
@@ -310,10 +312,28 @@ extrn:
 	}
 	;
 
+auto_list:
+	IDENTIFIER {
+		mknode(AstAutoVarList, node, @1);
+		$$ = node;
+		$$->list.emplace_back($1, @1);
+	} | IDENTIFIER constant {
+		mknode(AstAutoVarList, node, @1);
+		$$ = node;
+		$$->list.emplace_back($1, @1, $2, @2);
+	} | auto_list COMMA IDENTIFIER {
+		$1->list.emplace_back($3, @3);
+		$$ = $1;
+	} | auto_list COMMA IDENTIFIER constant {
+		$1->list.emplace_back($3, @3, $4, @4);
+		$$ = $1;
+	}
+	;
+
 auto:
-	AUTO identifier_list SEMICOLON {
+	AUTO auto_list SEMICOLON {
 		mknode(AstAutoVar, node, @1);
-		node->names = $2;
+		node->list = $2;
 		$$ = node;
 	}
 	;
