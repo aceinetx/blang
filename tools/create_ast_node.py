@@ -39,11 +39,12 @@ using namespace llvm;
 namespace blang {
 void Ast%NAME%::print(int indent) {
   printIndent(indent);
-  fmt::print("- Ast%NAME%\n");
+  fmt::print("- Ast%NAME%\\n");
 }
 
 llvm::Value *Ast%NAME%::compile(CompilerContext* C, bool rvalue) {
 	(void)rvalue;
+	(void)C;
 	blangassert(0 && "Ast%NAME%::compile is not implemented");
   return nullptr;
 }
