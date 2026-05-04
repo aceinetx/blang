@@ -1,11 +1,9 @@
 main(){
 	extrn initscr, endwin, curs_set, clear, mvprintw, refresh, getch;
-	auto k, x, y;
+	auto k, x 1, y 1;
 
 	initscr();
 	curs_set(0);
-
-	x = y = 1;
 
 	while(1){
 		clear();

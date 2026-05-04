@@ -2,8 +2,7 @@ W;
 
 print_tape(tape, N){
   extrn printf, putchar;
-  auto i;
-  i = 0;
+  auto i 0;
   while(i++ < N){
     printf("%ld ", tape[i-1]);
   }
@@ -96,7 +95,7 @@ clear(){
 
 contains(){
   extrn malloc, free, printf;
-  auto tape, i;
+  auto tape, i 0;
   tape = malloc(50 * W);
 
   tape[0] = 1;
@@ -108,7 +107,6 @@ contains(){
   tape[6] = 1;
   tape[7] = 1;
 
-  i = 0;
   while(i < 7){
     if(tape[i] & tape[i+1]){
       printf("found at %d*n", i);

@@ -1,10 +1,10 @@
 /* https://github.com/bext-lang/b/blob/main/examples/mandelbrot.b */
 
-W;
-H;
-IT;
+W 80;
+H 40;
+IT 100;
 
-f;
+f 1000;
 
 gradient;
 
@@ -13,14 +13,12 @@ char(string, i){
 }
 
 m(cr,ci) {
-    auto a, b, i, tmp;
+    auto a 0, b 0, i, tmp;
     cr =- 3*W/4;
     ci =- H/2;
 
     cr = (cr * f * 3) / W;
     ci = (ci * f * 3) / H;
-
-    a = b = 0;
 
     i = 0; while (i < IT) {
         if (a*a/f + b*b/f > 2*2*f) {
@@ -39,10 +37,6 @@ m(cr,ci) {
 
 main() {
     extrn char, putchar;
-		W = 80;
-		H = 40;
-		IT = 100;
-		f = 1000;
 		gradient = "@%#*+=-:. ";
 
     /* we can't use more precision on 16-bit systems. */
