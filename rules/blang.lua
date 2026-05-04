@@ -9,6 +9,7 @@ rule("blang")
 	end)
 
 	on_buildcmd_file(function (target, batchcmds, sourcefile, opt)
+		-- find blang
 		import("lib.detect.find_program")
 		local blang = assert(find_program("blang", {paths = {"/usr/bin", "/usr/local/bin", target:targetdir()}, check = "--help"}), "blang not found!")
 
@@ -20,15 +21,17 @@ rule("blang")
 
 		local binding_path = path.absolute(path.join(target:autogendir(), "rules", "blang", path.basename(sourcefile) .. ".h"))
 
+		-- add object file
+		local objectfile = target:objectfile(sourcefile)
+		table.insert(target:objectfiles(), objectfile)
+
+		-- run blang
 		batchcmds:show_progress(opt.progress, "${color.build.object}compiling.blang %s", sourcefile)
 		batchcmds:mkdir(objdir)
 		batchcmds:mkdir(path.directory(binding_path))
 		batchcmds:execv(blang, {"-c", sourcefile, "-o", obj, "--bindings-out", binding_path})
 
-		local objectfile = target:objectfile(sourcefile)
-		table.insert(target:objectfiles(), objectfile)
-
 		batchcmds:add_depfiles(sourcefile)
-		batchcmds:set_depmtime(os.mtime(target:objectfile(sourcefile)))
-		batchcmds:set_depcache(target:dependfile(target:objectfile(sourcefile)))
+		batchcmds:set_depmtime(os.mtime(objectfile))
+		batchcmds:set_depcache(target:dependfile(objectfile))
 	end)
