@@ -29,9 +29,11 @@ llvm::Value *AstExtern::compile(CompilerContext *C, bool rvalue) {
     }
 
     if (!C->extern_values.contains(name)) {
-      auto *GV =
+      auto *func =
           new GlobalVariable(C->fmodule, C->get_word_ty(), false,
                              GlobalValue::ExternalLinkage, nullptr, name);
+      auto *GV = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                                    GlobalValue::PrivateLinkage, func);
       C->extern_values[name] = GV;
       C->add_scope_var(name, GV, location);
     } else {

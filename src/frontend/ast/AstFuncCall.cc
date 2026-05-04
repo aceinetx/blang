@@ -17,16 +17,15 @@ void AstFuncCall::print(int indent) {
 llvm::Value *AstFuncCall::compile(CompilerContext *C, bool rvalue) {
   blangassert(rvalue);
 
-  auto *callee_value = C->builder.CreateIntToPtr(
-      expression->compile(C, false), C->builder.getPtrTy());
+  auto *callee_value = C->builder.CreateIntToPtr(expression->compile(C, true),
+                                                 C->builder.getPtrTy());
   std::vector<llvm::Value *> arg_values = {};
   for (auto arg : args) {
     arg_values.push_back(arg->compile(C, true));
   }
 
   auto *return_value = C->builder.CreateCall(
-      FunctionType::get(C->get_word_ty(), {}, true), callee_value,
-      arg_values);
+      FunctionType::get(C->get_word_ty(), {}, true), callee_value, arg_values);
 
   return return_value;
 }
