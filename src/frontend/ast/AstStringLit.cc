@@ -17,7 +17,7 @@ llvm::Value *AstStringLit::compile(CompilerContext *C, bool rvalue) {
   }
   Constant *c = ConstantDataArray::getString(C->context, str);
   auto *var = new GlobalVariable(C->fmodule, c->getType(), true,
-                                 GlobalValue::ExternalLinkage, c);
+                                 GlobalValue::PrivateLinkage, c);
   return var;
 }
 
