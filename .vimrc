@@ -1,0 +1,2 @@
+packadd! editorconfig
+syntax on
