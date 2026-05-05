@@ -50,22 +50,25 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
   auto function_block = BasicBlock::Create(C->context, "_" + name, func);
   C->builder.SetInsertPoint(function_block);
 
+  auto* func_var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                                    GlobalValue::PrivateLinkage, func);
+
   // if user forward declared the function that is in this module then we
   // replace all references with the real function and remove the extern so that
   // we don't get duplicate symbols
   if (C->extern_values.contains(name)) {
     auto *stub = C->extern_values[name];
     llvm::cast<GlobalVariable>(stub)->eraseFromParent();
-    stub->replaceAllUsesWith(func);
+    stub->replaceAllUsesWith(func_var);
     C->extern_values.erase(name);
-    C->update_global_scope_var(name, func);
+    C->update_global_scope_var(name, func_var);
 
     // without this the function name would clash with the extern symbol, this
     // happens because we create the function before we delete the extern symbol
     // above
     func->setName(name);
   } else {
-    C->add_global_scope_var(name, func);
+    C->add_global_scope_var(name, func_var);
   }
 
   C->push_scope();
