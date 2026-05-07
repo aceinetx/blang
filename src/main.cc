@@ -35,6 +35,18 @@ int main(int argc, char **argv) {
         bindings = true;
       } else if (arg == "--bindings-out") {
         bindings_out = argsShift();
+      } else if (arg == "-O0") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O0;
+      } else if (arg == "-O1") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O1;
+      } else if (arg == "-O2") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O2;
+      } else if (arg == "-O3") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O3;
+      } else if (arg == "-Os") {
+        blang.optimizationLevel = llvm::OptimizationLevel::Os;
+      } else if (arg == "-Oz") {
+        blang.optimizationLevel = llvm::OptimizationLevel::Oz;
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
@@ -49,6 +61,7 @@ OPTIONS:
   -l <lib>            Link libraries 
   --bindings          Generate .h C bindings
   --bindings-out      Generate .h C bindings alongside compilation
+  -O(0|1|2|3|s|z)     Set optimization level
 )");
         return 0;
       } else {
