@@ -17,6 +17,8 @@ void AstIf::print(int indent) {
 llvm::Value *AstIf::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
+  C->set_debug_location(location);
+
   /* create the blocks */
   auto then_block = BasicBlock::Create(C->context, "", C->current_function);
 

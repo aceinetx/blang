@@ -14,8 +14,7 @@ llvm::Value *AstLabel::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
   if (!C->goto_blocks.contains(name)) {
-    auto block =
-        BasicBlock::Create(C->context, name, C->current_function);
+    auto block = BasicBlock::Create(C->context, name, C->current_function);
     if (!C->builder.GetInsertBlock()->getTerminator()) {
       C->builder.CreateBr(block);
     }
@@ -27,11 +26,9 @@ llvm::Value *AstLabel::compile(CompilerContext *C, bool rvalue) {
     }
     C->builder.SetInsertPoint(C->goto_blocks[name]);
 
-    for (ssize_t i = 0; i < (ssize_t)C->unresolved_goto_labels.size();
-         i++) {
+    for (ssize_t i = 0; i < (ssize_t)C->unresolved_goto_labels.size(); i++) {
       if (C->unresolved_goto_labels[i].first == name) {
-        C->unresolved_goto_labels.erase(
-            C->unresolved_goto_labels.begin() + i);
+        C->unresolved_goto_labels.erase(C->unresolved_goto_labels.begin() + i);
       }
     }
   }

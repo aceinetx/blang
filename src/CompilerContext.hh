@@ -1,6 +1,7 @@
 #pragma once
 #include "Scope.hh"
 #include "frontend/ast/AstSwitch.hh"
+#include <llvm/IR/DIBuilder.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Metadata.h>
@@ -11,6 +12,8 @@
 #include <llvm/Support/InitLLVM.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
+#include <location.hh>
+#include <memory>
 
 namespace blang {
 struct CompilerContext {
@@ -35,6 +38,30 @@ struct CompilerContext {
 
   void update_global_scope_var(std::string name, llvm::Value *value);
 
+  void setup_debug_info(const std::string &source_path);
+  void finalize_debug_info();
+  void set_debug_location(const class location &loc);
+  void clear_debug_location();
+
+  llvm::DIBasicType *get_word_di_type();
+
+  void emit_local_var_debug_info(llvm::AllocaInst *alloca,
+                                 const std::string &var_name,
+                                 const class location &loc,
+                                 bool is_param = false,
+                                 unsigned param_index = 0);
+
+  void emit_global_var_debug_info(llvm::GlobalVariable *gvar,
+                                  const std::string &var_name,
+                                  const class location &loc,
+                                  llvm::DIType *type = nullptr);
+
+  void emit_global_array_debug_info(llvm::GlobalVariable *inner_gvar,
+                                    llvm::GlobalVariable *outer_gvar,
+                                    const std::string &var_name,
+                                    size_t element_count,
+                                    const class location &loc);
+
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   llvm::Module fmodule;
@@ -48,5 +75,12 @@ struct CompilerContext {
   AstSwitch *last_switch = nullptr;
 
   std::vector<Scope> scopes;
+
+  bool debug_enabled = false;
+  std::unique_ptr<llvm::DIBuilder> di_builder;
+  llvm::DICompileUnit *di_compile_unit = nullptr;
+  llvm::DIFile *di_file = nullptr;
+  llvm::DISubprogram *di_current_subprogram = nullptr;
+  llvm::DIBasicType *di_word_type = nullptr;
 };
 } // namespace blang

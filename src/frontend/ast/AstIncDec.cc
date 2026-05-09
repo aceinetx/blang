@@ -17,6 +17,8 @@ llvm::Value *AstIncDec::compile(CompilerContext *C, bool rvalue) {
     throw LvalueException(location, "unary incdec");
   }
 
+  C->set_debug_location(location);
+
   auto value = C->builder.CreateIntToPtr(expression->compile(C, false),
                                          C->builder.getPtrTy());
   Value *output = nullptr;

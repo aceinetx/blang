@@ -17,6 +17,8 @@ void AstFuncCall::print(int indent) {
 llvm::Value *AstFuncCall::compile(CompilerContext *C, bool rvalue) {
   blangassert(rvalue);
 
+  C->set_debug_location(location);
+
   auto *callee_value = C->builder.CreateIntToPtr(expression->compile(C, true),
                                                  C->builder.getPtrTy());
   std::vector<llvm::Value *> arg_values = {};

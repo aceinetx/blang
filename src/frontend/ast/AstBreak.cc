@@ -12,6 +12,7 @@ void AstBreak::print(int indent) {
 
 llvm::Value *AstBreak::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
+  C->set_debug_location(location);
   C->builder.CreateBr(C->while_statement_end_block);
   return nullptr;
 }

@@ -47,6 +47,8 @@ int main(int argc, char **argv) {
         blang.optimizationLevel = llvm::OptimizationLevel::Os;
       } else if (arg == "-Oz") {
         blang.optimizationLevel = llvm::OptimizationLevel::Oz;
+      } else if (arg == "-g") {
+        blang.debug = true;
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
@@ -62,6 +64,7 @@ OPTIONS:
   --bindings          Generate .h C bindings
   --bindings-out      Generate .h C bindings alongside compilation
   -O(0|1|2|3|s|z)     Set optimization level
+  -g                  Emit DWARF debug information
 )");
         return 0;
       } else {
@@ -76,6 +79,7 @@ OPTIONS:
       }
 
       input = *result;
+      blang.source_filename = arg;
     }
   }
 

@@ -11,6 +11,7 @@ void AstReturn::print(int indent) {
 
 llvm::Value *AstReturn::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
+  C->set_debug_location(location);
   C->builder.CreateRet(expression->compile(C, true));
   return nullptr;
 }

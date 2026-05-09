@@ -14,6 +14,7 @@ void AstCase::print(int indent) {
 llvm::Value *AstCase::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   blangassert(C->last_switch);
+  C->set_debug_location(location);
 
   auto block = BasicBlock::Create(C->context, "", C->current_function);
   C->builder.CreateBr(block);

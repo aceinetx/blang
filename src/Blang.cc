@@ -67,10 +67,16 @@ Blang::Blang(std::string moduleName) : context(moduleName) {
 Blang::~Blang() = default;
 
 void Blang::compile(std::string code) {
+  if (debug)
+    context.setup_debug_info(source_filename);
+
   Driver driver = Driver(code);
   Parser parser = Parser(driver);
   parser.parse();
   driver.get_root()->compile(&context);
+
+  if (debug)
+    context.finalize_debug_info();
 
   {
     // Add compiler identification

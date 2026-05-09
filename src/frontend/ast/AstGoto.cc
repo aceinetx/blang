@@ -12,6 +12,7 @@ void AstGoto::print(int indent) {
 
 llvm::Value *AstGoto::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
+  C->set_debug_location(location);
 
   if (C->goto_blocks.contains(name)) {
     C->builder.CreateBr(C->goto_blocks[name]);

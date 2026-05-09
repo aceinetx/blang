@@ -17,13 +17,14 @@ llvm::Value *AstUnot::compile(CompilerContext *C, bool rvalue) {
     throw LvalueException(location, "unary not");
 
   Value *v = expression->compile(C, true);
+  C->set_debug_location(location);
 
   Value *isZero = C->builder.CreateICmpEQ(
       v, ConstantInt::get(C->get_word_ty(), 0), "is_zero");
 
-  Value *result = C->builder.CreateSelect(
-      isZero, ConstantInt::get(C->get_word_ty(), 1),
-      ConstantInt::get(C->get_word_ty(), 0));
+  Value *result =
+      C->builder.CreateSelect(isZero, ConstantInt::get(C->get_word_ty(), 1),
+                              ConstantInt::get(C->get_word_ty(), 0));
 
   return result;
 }

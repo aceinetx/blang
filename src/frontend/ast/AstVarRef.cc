@@ -15,6 +15,7 @@ llvm::Value *AstVarRef::compile(CompilerContext *C, bool rvalue) {
   auto *value = C->get_scope_var(name);
   if (!value)
     throw UndeclaredNameException(location, name);
+  C->set_debug_location(location);
   return rvalue ? C->builder.CreateLoad(C->get_word_ty(), value)
                 : C->builder.CreatePtrToInt(value, C->get_word_ty());
 }

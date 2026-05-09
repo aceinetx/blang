@@ -33,6 +33,8 @@ struct Blang {
   std::vector<std::string> link_libraries = {};
   std::vector<std::string> link_paths = {};
   llvm::OptimizationLevel optimizationLevel = llvm::OptimizationLevel::O2;
+  bool debug = false;
+  std::string source_filename = "<unknown>";
 
   void emit(std::string out, EmitLevel level);
 

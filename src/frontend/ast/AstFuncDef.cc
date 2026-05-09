@@ -4,7 +4,9 @@
 #include "frontend/exceptions/UnresolvedLabelException/UnresolvedLabelException.hh"
 #include <fmt/core.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Instructions.h>
 #include <unordered_map>
 
 using namespace llvm;
@@ -50,8 +52,36 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
   auto function_block = BasicBlock::Create(C->context, "_" + name, func);
   C->builder.SetInsertPoint(function_block);
 
-  auto* func_var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
-                                    GlobalValue::PrivateLinkage, func);
+  // setup debug info
+  if (C->debug_enabled && C->di_builder && C->di_file) {
+    auto line_no = static_cast<unsigned>(location.begin.line);
+
+    llvm::SmallVector<llvm::Metadata *, 64> param_types;
+    auto *word_di_type = C->get_word_di_type();
+    param_types.push_back(word_di_type);
+    for (size_t i = 0; i < args->identifiers.size(); i++)
+      param_types.push_back(word_di_type);
+
+    auto *subroutine_type = C->di_builder->createSubroutineType(
+        C->di_builder->getOrCreateTypeArray(param_types));
+
+    auto *sp = C->di_builder->createFunction(
+        C->di_file,      // scope
+        name,            // name
+        name,            // linkage name
+        C->di_file,      // file
+        line_no,         // line number
+        subroutine_type, // type
+        line_no,         // scope line
+        llvm::DINode::FlagPrototyped, llvm::DISubprogram::SPFlagDefinition);
+
+    func->setSubprogram(sp);
+    C->di_current_subprogram = sp;
+    C->set_debug_location(location);
+  }
+
+  auto *func_var = new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                                      GlobalValue::PrivateLinkage, func);
 
   // if user forward declared the function that is in this module then we
   // replace all references with the real function and remove the extern so that
@@ -80,14 +110,17 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
   /* Initialize arguments */
   auto fnArgs = func->arg_begin();
   Value *arg = fnArgs++;
-  for (const auto &pair : args->identifiers) {
-    const auto &name = pair.first;
-    const auto &location = pair.second;
+  for (size_t i = 0; i < args->identifiers.size(); i++) {
+    const auto &name = args->identifiers[i].first;
+    const auto &location = args->identifiers[i].second;
 
     {
       auto var = C->builder.CreateAlloca(C->get_word_ty(), nullptr, name);
       C->builder.CreateStore(arg, var);
       C->add_scope_var(name, var, location);
+
+      C->emit_local_var_debug_info(var, name, location, true,
+                                   static_cast<unsigned>(i + 1));
     }
 
     arg = fnArgs++;
@@ -98,6 +131,11 @@ llvm::Value *AstFuncDef::compile(CompilerContext *C, bool rvalue) {
 
   C->pop_scope();
   C->current_function = nullptr;
+
+  if (C->debug_enabled) {
+    C->di_current_subprogram = nullptr;
+    C->clear_debug_location();
+  }
 
   /*
    * Check for unresolved goto labels

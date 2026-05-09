@@ -14,6 +14,7 @@ void AstTernary::print(int indent) {
 }
 
 llvm::Value *AstTernary::compile(CompilerContext *C, bool rvalue) {
+  C->set_debug_location(location);
   return C->builder.CreateSelect(expression->compile(C, true),
                                  true_expression->compile(C, true),
                                  false_expression->compile(C, true));

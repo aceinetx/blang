@@ -60,6 +60,9 @@ llvm::Value *AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
   } else {
     C->add_global_scope_var(name, var, location);
   }
+
+  C->emit_global_var_debug_info(var, name, location);
+
   return nullptr;
 }
 

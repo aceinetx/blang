@@ -33,11 +33,13 @@ llvm::Value *AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
   }
 
   auto array = ConstantArray::get(arrayType, consts);
-  auto var = new GlobalVariable(
-      C->fmodule, C->get_word_ty(), false, llvm::GlobalValue::ExternalLinkage,
+
+  auto *inner_var =
       new GlobalVariable(C->fmodule, C->get_word_ty(), false,
-                         llvm::GlobalValue::ExternalLinkage, array),
-      name);
+                         llvm::GlobalValue::ExternalLinkage, array);
+  auto *var =
+      new GlobalVariable(C->fmodule, C->get_word_ty(), false,
+                         llvm::GlobalValue::ExternalLinkage, inner_var, name);
 
   // if user forward declared the variable that is in this module then we
   // replace all references with the real variable and remove the extern so that
@@ -56,6 +58,8 @@ llvm::Value *AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
   } else {
     C->add_global_scope_var(name, var, location);
   }
+
+  C->emit_global_array_debug_info(inner_var, var, name, needed_size, location);
 
   return nullptr;
 }

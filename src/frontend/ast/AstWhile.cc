@@ -14,6 +14,8 @@ void AstWhile::print(int indent) {
 llvm::Value *AstWhile::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
+  C->set_debug_location(location);
+
   llvm::BasicBlock *comparison_block =
       llvm::BasicBlock::Create(C->context, "", C->current_function);
   llvm::BasicBlock *body_block =

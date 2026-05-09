@@ -13,6 +13,7 @@ void AstAddrof::print(int indent) {
 llvm::Value *AstAddrof::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue)
     throw LvalueException(location, "addrof");
+  C->set_debug_location(location);
 
   return expression->compile(C, false);
 }

@@ -21,6 +21,8 @@ llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
   body = BasicBlock::Create(C->context, "", C->current_function);
   end = BasicBlock::Create(C->context, "", C->current_function);
 
+  C->set_debug_location(location);
+
   C->builder.CreateBr(evaluator);
 
   C->builder.SetInsertPoint(body);

@@ -18,6 +18,7 @@ llvm::Value *AstUinv::compile(CompilerContext *C, bool rvalue) {
   }
 
   auto value = expression->compile(C, true);
+  C->set_debug_location(location);
   auto result =
       C->builder.CreateSub(ConstantInt::get(C->get_word_ty(), 0), value);
 

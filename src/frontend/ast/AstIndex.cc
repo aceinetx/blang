@@ -13,12 +13,12 @@ void AstIndex::print(int indent) {
 }
 
 llvm::Value *AstIndex::compile(CompilerContext *C, bool rvalue) {
+  C->set_debug_location(location);
   auto *array = C->builder.CreateIntToPtr(expression->compile(C, true),
-                                              C->builder.getPtrTy());
+                                          C->builder.getPtrTy());
 
   auto *index_value = index->compile(C, true);
-  auto *element =
-      C->builder.CreateGEP(C->get_word_ty(), array, index_value);
+  auto *element = C->builder.CreateGEP(C->get_word_ty(), array, index_value);
   if (rvalue)
     element = C->builder.CreateLoad(C->get_word_ty(), element);
   else

@@ -14,6 +14,8 @@ void AstAssign::print(int indent) {
 llvm::Value *AstAssign::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
+  C->set_debug_location(location);
+
   auto lv = C->builder.CreateIntToPtr(dest->compile(C, false),
                                           C->builder.getPtrTy());
   auto rv = src->compile(C, true);

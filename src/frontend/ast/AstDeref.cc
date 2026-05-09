@@ -10,6 +10,8 @@ void AstDeref::print(int indent) {
 }
 
 llvm::Value *AstDeref::compile(CompilerContext *C, bool rvalue) {
+  C->set_debug_location(location);
+
   auto ptr_i64 = expression->compile(C, true);
   auto ptr = C->builder.CreateIntToPtr(ptr_i64, C->builder.getPtrTy());
   if (rvalue)

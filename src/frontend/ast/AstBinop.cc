@@ -18,6 +18,7 @@ llvm::Value *AstBinop::compile(CompilerContext *C, bool rvalue) {
   auto rhs = right->compile(C, true);
   llvm::Value *result = nullptr;
 
+  C->set_debug_location(location);
   switch (op) {
   case PLUS:
     result = C->builder.CreateAdd(lhs, rhs);
@@ -33,27 +34,27 @@ llvm::Value *AstBinop::compile(CompilerContext *C, bool rvalue) {
     break;
   case EQUAL:
     result = C->builder.CreateZExt(C->builder.CreateICmpEQ(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case NEQUAL:
     result = C->builder.CreateZExt(C->builder.CreateICmpNE(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case GREATER:
     result = C->builder.CreateZExt(C->builder.CreateICmpSGT(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case LESS:
     result = C->builder.CreateZExt(C->builder.CreateICmpSLT(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case GREQ:
     result = C->builder.CreateZExt(C->builder.CreateICmpSGE(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case LSEQ:
     result = C->builder.CreateZExt(C->builder.CreateICmpSLE(lhs, rhs),
-                                       C->get_word_ty());
+                                   C->get_word_ty());
     break;
   case BITOR:
     result = C->builder.CreateOr(lhs, rhs);
