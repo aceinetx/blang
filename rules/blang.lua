@@ -11,7 +11,12 @@ rule("blang")
 	on_buildcmd_file(function (target, batchcmds, sourcefile, opt)
 		-- find blang
 		import("lib.detect.find_program")
-		local blang = assert(find_program("blang", {paths = {"/usr/bin", "/usr/local/bin", target:targetdir()}, check = "--help"}), "blang not found!")
+		local blang
+		if is_plat("windows") then
+			blang = assert(find_program("blang.exe", {paths = {"/usr/bin", "/usr/local/bin", target:targetdir()}, check = "--help"}), "blang not found!")
+		else
+			blang = assert(find_program("blang", {paths = {"/usr/bin", "/usr/local/bin", target:targetdir()}, check = "--help"}), "blang not found!")
+		end
 
 		os.mkdir(target:targetdir())
 
