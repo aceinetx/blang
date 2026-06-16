@@ -3,8 +3,6 @@
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstUinv::print(int indent) {
   printIndent(indent);
@@ -12,15 +10,14 @@ void AstUinv::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstUinv::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstUinv::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "unary inverse");
   }
 
   auto value = expression->compile(C, true);
-  C->set_debug_location(location);
-  auto result =
-      C->builder.CreateSub(ConstantInt::get(C->get_word_ty(), 0), value);
+  auto zero = C->ir.constant(C->get_word_ty(), 0L);
+  auto result = C->ir.sub(value, zero);
 
   return result;
 }

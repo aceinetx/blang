@@ -2,8 +2,6 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstBlock::print(int indent) {
   printIndent(indent);
@@ -12,8 +10,8 @@ void AstBlock::print(int indent) {
     child->print(indent + 1);
 }
 
-llvm::Value *AstBlock::compile(CompilerContext *C, bool rvalue) {
-  Value *last = nullptr;
+fir::Value AstBlock::compile(CompilerContext *C, bool rvalue) {
+  fir::Value last;
   for (auto child : children)
     last = child->compile(C, rvalue);
   return last;

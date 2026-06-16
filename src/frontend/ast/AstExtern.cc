@@ -1,9 +1,7 @@
 #include "frontend/ast/AstExtern.hh"
+#include "Assert.hh"
 #include "CompilerContext.hh"
 #include <fmt/core.h>
-#include <llvm/IR/GlobalVariable.h>
-
-using namespace llvm;
 
 namespace blang {
 AstExtern::AstExtern() : names(std::make_shared<AstIdentifierList>()) {
@@ -16,15 +14,18 @@ void AstExtern::print(int indent) {
   fmt::print("\n");
 }
 
-llvm::Value *AstExtern::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstExtern::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
+  blangassert(0 && "Unsupported");
+#if 0
   for (const auto &pair : names->identifiers) {
     const auto &name = pair.first;
     const auto &location = pair.second;
 
     // if we already have the symbol in this module just use it
-    if (auto *existing = C->get_scope_var(name)) {
-      C->add_scope_var(name, existing, location);
+    auto existing = C->get_scope_var(name);
+    if (existing) {
+      C->add_scope_var(name, *existing, location);
       continue;
     }
 
@@ -40,7 +41,8 @@ llvm::Value *AstExtern::compile(CompilerContext *C, bool rvalue) {
       C->add_scope_var(name, C->extern_values[name], location);
     }
   }
+#endif
 
-  return nullptr;
+  return {0};
 }
 } // namespace blang

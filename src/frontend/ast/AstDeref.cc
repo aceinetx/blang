@@ -9,13 +9,11 @@ void AstDeref::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstDeref::compile(CompilerContext *C, bool rvalue) {
-  C->set_debug_location(location);
-
+fir::Value AstDeref::compile(CompilerContext *C, bool rvalue) {
   auto ptr_i64 = expression->compile(C, true);
-  auto ptr = C->builder.CreateIntToPtr(ptr_i64, C->builder.getPtrTy());
+  auto ptr = C->ir.cast(ptr_i64, C->get_word_ptr_ty());
   if (rvalue)
-    ptr = C->builder.CreateLoad(C->get_word_ty(), ptr);
+    ptr = C->ir.load(ptr, C->get_word_ty());
 
   return ptr;
 }

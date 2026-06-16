@@ -4,8 +4,8 @@
 #include "parser.tab.hpp"
 #include <cctype>
 #include <fmt/format.h>
+#include <functional>
 #include <map>
-#include <unordered_map>
 
 #define bounds (pos < code.length())
 

@@ -11,16 +11,15 @@ void AstAssign::print(int indent) {
   src->print(indent + 1);
 }
 
-llvm::Value *AstAssign::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstAssign::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
-  C->set_debug_location(location);
+  auto lv = dest->compile(C, false);
+  auto lv_ptr = C->ir.cast(lv, C->get_word_ptr_ty());
 
-  auto lv = C->builder.CreateIntToPtr(dest->compile(C, false),
-                                          C->builder.getPtrTy());
   auto rv = src->compile(C, true);
 
-  C->builder.CreateStore(rv, lv);
+  C->ir.store(lv_ptr, rv);
 
   return rv;
 }

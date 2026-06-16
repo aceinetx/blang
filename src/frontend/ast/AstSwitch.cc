@@ -2,8 +2,6 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstSwitch::print(int indent) {
   printIndent(indent);
@@ -12,45 +10,39 @@ void AstSwitch::print(int indent) {
   statement->print(indent + 1);
 }
 
-llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstSwitch::compile(CompilerContext *C, bool rvalue) {
   C->last_switch = this;
 
   value = expression->compile(C, true);
 
-  evaluator = BasicBlock::Create(C->context, "", C->current_function);
-  body = BasicBlock::Create(C->context, "", C->current_function);
-  end = BasicBlock::Create(C->context, "", C->current_function);
+  evaluator = C->ir.block();
+  body = C->ir.block();
+  end = C->ir.block();
 
-  C->set_debug_location(location);
+  C->ir.br(evaluator);
 
-  C->builder.CreateBr(evaluator);
-
-  C->builder.SetInsertPoint(body);
+  C->ir.set_insert_point(body);
   statement->compile(C, true);
 
-  if (!C->builder.GetInsertBlock()->getTerminator())
-    C->builder.CreateBr(end);
+  C->ir.br(end);
 
-  C->builder.SetInsertPoint(evaluator);
-  if (!evaluator->getTerminator())
-    C->builder.CreateBr(end);
+  C->ir.set_insert_point(evaluator);
+  C->ir.br(end);
 
-  C->builder.SetInsertPoint(end);
+  C->ir.set_insert_point(end);
 
   C->last_switch = nullptr;
-  return nullptr;
+  return {0};
 }
 
-void AstSwitch::add_case(CompilerContext *C, long number,
-                         llvm::BasicBlock *block) {
-  C->builder.SetInsertPoint(evaluator);
-  auto result = C->builder.CreateICmpEQ(
-      value, ConstantInt::get(C->get_word_ty(), number));
+void AstSwitch::add_case(CompilerContext *C, long number, fir::Block block) {
+  C->ir.set_insert_point(evaluator);
+  auto number_value = C->ir.constant(C->get_word_ty(), number);
+  auto result = C->ir.neq(value, number_value);
 
-  BasicBlock *new_evaluator =
-      BasicBlock::Create(C->context, "", C->current_function);
+  auto new_evaluator = C->ir.block();
 
-  C->builder.CreateCondBr(result, block, new_evaluator);
+  C->ir.cond_br(result, new_evaluator, block);
 
   evaluator = new_evaluator;
 }

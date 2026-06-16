@@ -3,8 +3,6 @@
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstIncDec::print(int indent) {
   printIndent(indent);
@@ -12,33 +10,32 @@ void AstIncDec::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstIncDec::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstIncDec::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "unary incdec");
   }
 
-  C->set_debug_location(location);
+  auto one = C->ir.constant(C->get_word_ty(), 1L);
+  auto value = expression->compile(C, false);
+  value = C->ir.cast(value, C->get_word_ptr_ty());
 
-  auto value = C->builder.CreateIntToPtr(expression->compile(C, false),
-                                         C->builder.getPtrTy());
-  Value *output = nullptr;
+  fir::Value output;
 
   if (type == POST)
-    output = C->builder.CreateLoad(C->get_word_ty(), value);
+    output = C->ir.load(value, C->get_word_ty());
 
-  if (op == INC)
-    C->builder.CreateStore(
-        C->builder.CreateAdd(C->builder.CreateLoad(C->get_word_ty(), value),
-                             ConstantInt::get(C->get_word_ty(), 1)),
-        value);
-  else if (op == DEC)
-    C->builder.CreateStore(
-        C->builder.CreateSub(C->builder.CreateLoad(C->get_word_ty(), value),
-                             ConstantInt::get(C->get_word_ty(), 1)),
-        value);
+  if (op == INC) {
+    auto new_value = C->ir.load(value, C->get_word_ty());
+    new_value = C->ir.add(new_value, one);
+    C->ir.store(value, new_value);
+  } else if (op == DEC) {
+    auto new_value = C->ir.load(value, C->get_word_ty());
+    new_value = C->ir.sub(new_value, one);
+    C->ir.store(value, new_value);
+  }
 
   if (type == PRE)
-    output = C->builder.CreateLoad(C->get_word_ty(), value);
+    output = C->ir.load(value, C->get_word_ty());
 
   return output;
 }

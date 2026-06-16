@@ -3,8 +3,6 @@
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstUnot::print(int indent) {
   printIndent(indent);
@@ -12,19 +10,17 @@ void AstUnot::print(int indent) {
   expression->print(indent + 1);
 }
 
-llvm::Value *AstUnot::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstUnot::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue)
     throw LvalueException(location, "unary not");
 
-  Value *v = expression->compile(C, true);
-  C->set_debug_location(location);
+  auto v = expression->compile(C, true);
+  auto zero = C->ir.constant(C->get_word_ty(), 0L);
+  auto one = C->ir.constant(C->get_word_ty(), 1L);
 
-  Value *isZero = C->builder.CreateICmpEQ(
-      v, ConstantInt::get(C->get_word_ty(), 0), "is_zero");
+  auto isZero = C->ir.neq(v, zero);
 
-  Value *result =
-      C->builder.CreateSelect(isZero, ConstantInt::get(C->get_word_ty(), 1),
-                              ConstantInt::get(C->get_word_ty(), 0));
+  auto result = C->ir.select(isZero, one, zero);
 
   return result;
 }

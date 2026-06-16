@@ -1,5 +1,5 @@
 #pragma once
-#include <llvm/IR/Value.h>
+#include "fircpp/value.hpp"
 #include <location.hh>
 
 namespace blang {
@@ -15,7 +15,7 @@ public:
   virtual ~AstNode();
 
   virtual void print(int indent = 0);
-  virtual llvm::Value *compile(CompilerContext *C, bool rvalue) = 0;
+  virtual fir::Value compile(CompilerContext *C, bool rvalue) = 0;
   virtual void bindings(std::ostream &os);
 
   class location location;

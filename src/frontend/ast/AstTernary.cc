@@ -2,8 +2,6 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstTernary::print(int indent) {
   printIndent(indent);
@@ -13,11 +11,11 @@ void AstTernary::print(int indent) {
   false_expression->print(indent + 1);
 }
 
-llvm::Value *AstTernary::compile(CompilerContext *C, bool rvalue) {
-  C->set_debug_location(location);
-  return C->builder.CreateSelect(expression->compile(C, true),
-                                 true_expression->compile(C, true),
-                                 false_expression->compile(C, true));
+fir::Value AstTernary::compile(CompilerContext *C, bool rvalue) {
+  auto test = expression->compile(C, true);
+  auto truev = true_expression->compile(C, true);
+  auto falsev = false_expression->compile(C, true);
+  return C->ir.select(test, truev, falsev);
 }
 
 } // namespace blang

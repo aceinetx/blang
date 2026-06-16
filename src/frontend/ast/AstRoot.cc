@@ -10,9 +10,9 @@ void AstRoot::print(int indent) {
   }
 }
 
-llvm::Value *AstRoot::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstRoot::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
-  llvm::Value *last = nullptr;
+  fir::Value last;
   for (auto child : children) {
     last = child->compile(C, true);
   }

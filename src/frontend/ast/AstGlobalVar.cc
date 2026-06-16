@@ -1,11 +1,6 @@
 #include "frontend/ast/AstGlobalVar.hh"
 #include "CompilerContext.hh"
 #include <fmt/core.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/GlobalVariable.h>
-#include <llvm/Support/Casting.h>
-
-using namespace llvm;
 
 namespace blang {
 void AstGlobalVar::print(int indent) {
@@ -15,8 +10,10 @@ void AstGlobalVar::print(int indent) {
     value->print(indent + 1);
 }
 
-llvm::Value *AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
+
+#if 0
 
   GlobalVariable *var = nullptr;
   if (values.empty()) {
@@ -62,8 +59,9 @@ llvm::Value *AstGlobalVar::compile(CompilerContext *C, bool rvalue) {
   }
 
   C->emit_global_var_debug_info(var, name, location);
+#endif
 
-  return nullptr;
+  return {0};
 }
 
 void AstGlobalVar::bindings(std::ostream &os) {

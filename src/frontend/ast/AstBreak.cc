@@ -2,19 +2,16 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstBreak::print(int indent) {
   printIndent(indent);
   fmt::print("- AstBreak\n");
 }
 
-llvm::Value *AstBreak::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstBreak::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
-  C->set_debug_location(location);
-  C->builder.CreateBr(C->while_statement_end_block);
-  return nullptr;
+  C->ir.br(C->while_statement_end_block);
+  return {0};
 }
 
 } // namespace blang

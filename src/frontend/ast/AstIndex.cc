@@ -1,8 +1,7 @@
 #include "frontend/ast/AstIndex.hh"
+#include "Assert.hh"
 #include "CompilerContext.hh"
 #include <fmt/core.h>
-
-using namespace llvm;
 
 namespace blang {
 void AstIndex::print(int indent) {
@@ -12,8 +11,8 @@ void AstIndex::print(int indent) {
   index->print(indent + 1);
 }
 
-llvm::Value *AstIndex::compile(CompilerContext *C, bool rvalue) {
-  C->set_debug_location(location);
+fir::Value AstIndex::compile(CompilerContext *C, bool rvalue) {
+#if 0
   auto *array = C->builder.CreateIntToPtr(expression->compile(C, true),
                                           C->builder.getPtrTy());
 
@@ -25,6 +24,9 @@ llvm::Value *AstIndex::compile(CompilerContext *C, bool rvalue) {
     element = C->builder.CreatePtrToInt(element, C->get_word_ty());
 
   return element;
+#endif
+  blangassert(0 && "Unsupported");
+  return {0};
 }
 
 } // namespace blang

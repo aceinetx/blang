@@ -2,8 +2,6 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstIf::print(int indent) {
   printIndent(indent);
@@ -14,46 +12,42 @@ void AstIf::print(int indent) {
     else_node->print(indent + 1);
 }
 
-llvm::Value *AstIf::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstIf::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
-  C->set_debug_location(location);
-
   /* create the blocks */
-  auto then_block = BasicBlock::Create(C->context, "", C->current_function);
+  auto then_block = C->ir.block();
 
-  BasicBlock *else_block = nullptr;
+  frIRBlock *else_block = nullptr;
   if (else_node)
-    else_block = BasicBlock::Create(C->context, "", C->current_function);
-  auto end_block = BasicBlock::Create(C->context, "", C->current_function);
+    else_block = C->ir.block();
+  auto end_block = C->ir.block();
 
   /* compile the expression */
-  auto *value = C->builder.CreateICmpNE(expression->compile(C, true),
-                                        ConstantInt::get(C->get_word_ty(), 0));
+  auto value = expression->compile(C, true);
 
   /* create the conditional branch */
   if (else_node)
-    C->builder.CreateCondBr(value, then_block, else_block);
+    C->ir.cond_br(value, then_block, else_block);
   else
-    C->builder.CreateCondBr(value, then_block, end_block);
+    C->ir.cond_br(value, then_block, end_block);
 
   /* compile the blocks */
-  C->builder.SetInsertPoint(then_block);
+  C->ir.set_insert_point(then_block);
   then_node->compile(C, true);
-  if (!C->builder.GetInsertBlock()->getTerminator())
-    C->builder.CreateBr(end_block);
+  C->ir.br(end_block);
 
   if (else_node) {
-    C->builder.SetInsertPoint(else_block);
+    C->ir.set_insert_point(else_block);
 
     else_node->compile(C, true);
-    if (!C->builder.GetInsertBlock()->getTerminator())
-      C->builder.CreateBr(end_block);
+
+    C->ir.br(end_block);
   }
 
-  C->builder.SetInsertPoint(end_block);
+  C->ir.br(end_block);
 
-  return nullptr;
+  return {0};
 }
 
 } // namespace blang

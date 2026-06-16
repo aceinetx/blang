@@ -3,19 +3,17 @@
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
-using namespace llvm;
-
 namespace blang {
 void AstNumber::print(int indent) {
   printIndent(indent);
   fmt::print("- AstNumber {}\n", number);
 }
 
-llvm::Value *AstNumber::compile(CompilerContext *C, bool rvalue) {
+fir::Value AstNumber::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "number");
   }
 
-  return ConstantInt::get(C->get_word_ty(), number);
+  return C->ir.constant(C->get_word_ty(), number);
 }
 } // namespace blang
