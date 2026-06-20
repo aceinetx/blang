@@ -1,5 +1,4 @@
 #include "frontend/ast/AstVarRef.hh"
-#include "Assert.hh"
 #include "CompilerContext.hh"
 #include "frontend/exceptions/UndeclaredNameException/UndeclaredNameException.hh"
 #include <fmt/core.h>
@@ -10,17 +9,14 @@ void AstVarRef::print(int indent) {
   fmt::print("- AstVarRef {}\n", name);
 }
 
-fir::Value AstVarRef::compile(CompilerContext *C, bool rvalue) {
-  blangassert(name != "");
+llvm::Value *AstVarRef::compile(CompilerContext *C, bool rvalue) {
+  assert(name != "");
 
-  auto value_opt = C->get_scope_var(name);
-  if (!value_opt)
+  auto *value = C->get_scope_var(name);
+  if (!value)
     throw UndeclaredNameException(location, name);
-  auto value = *value_opt;
-  if (rvalue) {
-    return C->ir.load(value, C->get_word_ty());
-  } else {
-    return C->ir.cast(value, C->get_word_ty());
-  }
+  C->set_debug_location(location);
+  return rvalue ? C->builder.CreateLoad(C->get_word_ty(), value)
+                : C->builder.CreatePtrToInt(value, C->get_word_ty());
 }
 } // namespace blang

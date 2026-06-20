@@ -12,57 +12,64 @@ void AstBinop::print(int indent) {
   right->print(indent + 1);
 }
 
-fir::Value AstBinop::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstBinop::compile(CompilerContext *C, bool rvalue) {
   blangassert(rvalue);
   auto lhs = left->compile(C, true);
   auto rhs = right->compile(C, true);
-  fir::Value result;
+  llvm::Value *result = nullptr;
 
+  C->set_debug_location(location);
   switch (op) {
   case PLUS:
-    result = C->ir.add(lhs, rhs);
+    result = C->builder.CreateAdd(lhs, rhs);
     break;
   case MINUS:
-    result = C->ir.sub(lhs, rhs);
+    result = C->builder.CreateSub(lhs, rhs);
     break;
   case MUL:
-    result = C->ir.mul(lhs, rhs);
+    result = C->builder.CreateMul(lhs, rhs);
     break;
   case DIV:
-    result = C->ir.div(lhs, rhs);
+    result = C->builder.CreateSDiv(lhs, rhs);
     break;
   case EQUAL:
-    result = C->ir.eq(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpEQ(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case NEQUAL:
-    result = C->ir.neq(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpNE(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case GREATER:
-    result = C->ir.gt(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpSGT(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case LESS:
-    result = C->ir.lt(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpSLT(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case GREQ:
-    result = C->ir.gte(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpSGE(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case LSEQ:
-    result = C->ir.lte(lhs, rhs);
+    result = C->builder.CreateZExt(C->builder.CreateICmpSLE(lhs, rhs),
+                                   C->get_word_ty());
     break;
   case BITOR:
-    result = C->ir.bit_or(lhs, rhs);
+    result = C->builder.CreateOr(lhs, rhs);
     break;
   case BITAND:
-    result = C->ir.bit_and(lhs, rhs);
+    result = C->builder.CreateAnd(lhs, rhs);
     break;
   case BITSHL:
-    result = C->ir.bit_shl(lhs, rhs);
+    result = C->builder.CreateShl(lhs, rhs);
     break;
   case BITSHR:
-    result = C->ir.bit_shr(lhs, rhs);
+    result = C->builder.CreateLShr(lhs, rhs);
     break;
   case PERCENT:
-    blangassert(0 && "Unsupported");
+    result = C->builder.CreateURem(lhs, rhs);
     break;
   }
 

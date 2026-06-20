@@ -2,6 +2,8 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
+using namespace llvm;
+
 namespace blang {
 void AstSwitch::print(int indent) {
   printIndent(indent);
@@ -10,39 +12,45 @@ void AstSwitch::print(int indent) {
   statement->print(indent + 1);
 }
 
-fir::Value AstSwitch::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstSwitch::compile(CompilerContext *C, bool rvalue) {
   C->last_switch = this;
 
   value = expression->compile(C, true);
 
-  evaluator = C->ir.block();
-  body = C->ir.block();
-  end = C->ir.block();
+  evaluator = BasicBlock::Create(C->context, "", C->current_function);
+  body = BasicBlock::Create(C->context, "", C->current_function);
+  end = BasicBlock::Create(C->context, "", C->current_function);
 
-  C->ir.br(evaluator);
+  C->set_debug_location(location);
 
-  C->ir.set_insert_point(body);
+  C->builder.CreateBr(evaluator);
+
+  C->builder.SetInsertPoint(body);
   statement->compile(C, true);
 
-  C->ir.br(end);
+  if (!C->builder.GetInsertBlock()->getTerminator())
+    C->builder.CreateBr(end);
 
-  C->ir.set_insert_point(evaluator);
-  C->ir.br(end);
+  C->builder.SetInsertPoint(evaluator);
+  if (!evaluator->getTerminator())
+    C->builder.CreateBr(end);
 
-  C->ir.set_insert_point(end);
+  C->builder.SetInsertPoint(end);
 
   C->last_switch = nullptr;
-  return {0};
+  return nullptr;
 }
 
-void AstSwitch::add_case(CompilerContext *C, long number, fir::Block block) {
-  C->ir.set_insert_point(evaluator);
-  auto number_value = C->ir.constant(C->get_word_ty(), number);
-  auto result = C->ir.neq(value, number_value);
+void AstSwitch::add_case(CompilerContext *C, long number,
+                         llvm::BasicBlock *block) {
+  C->builder.SetInsertPoint(evaluator);
+  auto result = C->builder.CreateICmpEQ(
+      value, ConstantInt::get(C->get_word_ty(), number));
 
-  auto new_evaluator = C->ir.block();
+  BasicBlock *new_evaluator =
+      BasicBlock::Create(C->context, "", C->current_function);
 
-  C->ir.cond_br(result, new_evaluator, block);
+  C->builder.CreateCondBr(result, block, new_evaluator);
 
   evaluator = new_evaluator;
 }

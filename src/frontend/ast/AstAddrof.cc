@@ -10,9 +10,10 @@ void AstAddrof::print(int indent) {
   expression->print(indent + 1);
 }
 
-fir::Value AstAddrof::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstAddrof::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue)
     throw LvalueException(location, "addrof");
+  C->set_debug_location(location);
 
   return expression->compile(C, false);
 }

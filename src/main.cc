@@ -7,7 +7,8 @@
 using namespace blang;
 
 int main(int argc, char **argv) {
-  std::string output = "a.c";
+  std::string output = "a.out";
+  EmitLevel emit_level = EmitLevel::EMIT_EXE;
 
   Blang blang = Blang("b");
   std::string input = "";
@@ -22,6 +23,10 @@ int main(int argc, char **argv) {
     if (arg.starts_with("-")) {
       if (arg == "-o") {
         output = argsShift();
+      } else if (arg == "-c") {
+        emit_level = EmitLevel::EMIT_OBJ;
+      } else if (arg == "-emit-llvm") {
+        emit_level = EmitLevel::EMIT_IR;
       } else if (arg == "-l") {
         blang.link_libraries.push_back(argsShift());
       } else if (arg == "-L") {
@@ -30,6 +35,20 @@ int main(int argc, char **argv) {
         bindings = true;
       } else if (arg == "--bindings-out") {
         bindings_out = argsShift();
+      } else if (arg == "-O0") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O0;
+      } else if (arg == "-O1") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O1;
+      } else if (arg == "-O2") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O2;
+      } else if (arg == "-O3") {
+        blang.optimizationLevel = llvm::OptimizationLevel::O3;
+      } else if (arg == "-Os") {
+        blang.optimizationLevel = llvm::OptimizationLevel::Os;
+      } else if (arg == "-Oz") {
+        blang.optimizationLevel = llvm::OptimizationLevel::Oz;
+      } else if (arg == "-g") {
+        blang.debug = true;
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
@@ -38,10 +57,14 @@ USAGE: blang [options] file...
 OPTIONS:
   --help              Print this message
   -o <file>           Write output to <file>
+  -c                  Only run compile, and assemble steps
+  -emit-llvm          Output LLVM IR
   -L <dir>            Add directory to library search path
   -l <lib>            Link libraries 
   --bindings          Generate .h C bindings
   --bindings-out      Generate .h C bindings alongside compilation
+  -O(0|1|2|3|s|z)     Set optimization level
+  -g                  Emit DWARF debug information
 )");
         return 0;
       } else {
@@ -65,7 +88,7 @@ OPTIONS:
   try {
     if (!bindings) {
       blang.compile(input);
-      blang.emit(output);
+      blang.emit(output, emit_level);
 
       if (bindings_out.empty()) {
         return 0;

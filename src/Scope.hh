@@ -1,8 +1,11 @@
 #pragma once
-#include "fircpp/value.hpp"
 #include <string>
 #include <unordered_map>
 
+namespace llvm {
+class Value;
+}
+
 namespace blang {
-using Scope = std::unordered_map<std::string, fir::Value>;
+using Scope = std::unordered_map<std::string, llvm::Value *>;
 } // namespace blang

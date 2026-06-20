@@ -3,17 +3,21 @@
 #include "frontend/exceptions/LvalueException/LvalueException.hh"
 #include <fmt/core.h>
 
+using namespace llvm;
+
 namespace blang {
 void AstStringLit::print(int indent) {
   printIndent(indent);
   fmt::print("- AstStringLit {}\n", str);
 }
 
-fir::Value AstStringLit::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstStringLit::compile(CompilerContext *C, bool rvalue) {
   if (!rvalue) {
     throw LvalueException(location, "string literal");
   }
-  auto var = C->ir.constant(str);
+  Constant *c = ConstantDataArray::getString(C->context, str);
+  auto *var = new GlobalVariable(C->fmodule, c->getType(), true,
+                                 GlobalValue::PrivateLinkage, c);
   return var;
 }
 

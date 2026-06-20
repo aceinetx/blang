@@ -4,6 +4,6 @@
 namespace blang {
 struct AstBreak : public AstNode {
   void print(int indent = 0) override;
-  fir::Value compile(CompilerContext *C, bool rvalue) override;
+  llvm::Value *compile(CompilerContext *C, bool rvalue) override;
 };
 } // namespace blang

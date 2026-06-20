@@ -3,6 +3,8 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
+using namespace llvm;
+
 namespace blang {
 void AstAutoVarList::print(int indent) {
   printIndent(indent);
@@ -15,10 +17,11 @@ void AstAutoVarList::print(int indent) {
   }
 }
 
-fir::Value AstAutoVarList::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstAutoVarList::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   (void)C;
   blangassert(0 && "AstAutoVarList should not be compiled");
+  return nullptr;
 }
 
 std::vector<AstAutoVarList::Entry>::iterator AstAutoVarList::begin() {

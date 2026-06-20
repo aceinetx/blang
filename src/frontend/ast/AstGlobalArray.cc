@@ -1,7 +1,13 @@
 #include "frontend/ast/AstGlobalArray.hh"
 #include "Assert.hh"
 #include "CompilerContext.hh"
+#include <algorithm>
 #include <fmt/core.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/GlobalVariable.h>
+#include <llvm/Support/Casting.h>
+
+using namespace llvm;
 
 namespace blang {
 void AstGlobalArray::print(int indent) {
@@ -11,13 +17,10 @@ void AstGlobalArray::print(int indent) {
     value->print(indent + 1);
 }
 
-fir::Value AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
 
   blangassert(size > 0 || values.size() > 0);
-  blangassert(0 && "Unsupported");
-
-#if 0
 
   size_t needed_size = std::max((size_t)size, values.size());
 
@@ -58,8 +61,7 @@ fir::Value AstGlobalArray::compile(CompilerContext *C, bool rvalue) {
 
   C->emit_global_array_debug_info(inner_var, var, name, needed_size, location);
 
-#endif
-  return {0};
+  return nullptr;
 }
 
 void AstGlobalArray::bindings(std::ostream &os) {

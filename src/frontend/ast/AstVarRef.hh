@@ -4,7 +4,7 @@
 namespace blang {
 struct AstVarRef : public AstNode {
   void print(int indent = 0) override;
-  fir::Value compile(CompilerContext *C, bool rvalue) override;
+  llvm::Value *compile(CompilerContext *C, bool rvalue) override;
 
   std::string name = "";
 };

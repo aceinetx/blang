@@ -3,6 +3,8 @@
 #include "CompilerContext.hh"
 #include <fmt/core.h>
 
+using namespace llvm;
+
 namespace blang {
 void AstIdentifierList::print(int indent) {
   printIndent(indent);
@@ -13,10 +15,10 @@ void AstIdentifierList::print(int indent) {
   }
 }
 
-fir::Value AstIdentifierList::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstIdentifierList::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
   blangassert(0 && "AstIdentifierList should never be compiled");
-  return {0};
+  return nullptr;
 }
 
 } // namespace blang

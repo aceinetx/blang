@@ -9,10 +9,10 @@ void AstReturn::print(int indent) {
   expression->print(indent + 1);
 }
 
-fir::Value AstReturn::compile(CompilerContext *C, bool rvalue) {
+llvm::Value *AstReturn::compile(CompilerContext *C, bool rvalue) {
   (void)rvalue;
-  auto value = expression->compile(C, true);
-  C->ir.ret(value);
-  return {0};
+  C->set_debug_location(location);
+  C->builder.CreateRet(expression->compile(C, true));
+  return nullptr;
 }
 } // namespace blang
