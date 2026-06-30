@@ -73,6 +73,8 @@ void Blang::compile(std::string code) {
   Driver driver = Driver(code);
   Parser parser = Parser(driver);
   parser.parse();
+  if (print_ast)
+    driver.get_root()->print();
   driver.get_root()->compile(&context);
 
   if (debug)

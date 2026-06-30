@@ -206,10 +206,16 @@ statement_base:
 		$$ = $1;
 	} | return {
 		$$ = $1;
-	} | auto {
-		$$ = $1;
-	} | extrn {
-		$$ = $1;
+	} | auto statement {
+		mknode(AstBlock, node, @1);
+		node->children.push_back($1);
+		node->children.push_back($2);
+		$$ = node;
+	} | extrn statement {
+		mknode(AstBlock, node, @1);
+		node->children.push_back($1);
+		node->children.push_back($2);
+		$$ = node;
 	} | while {
 		$$ = $1;
 	} | break {
