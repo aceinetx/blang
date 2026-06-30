@@ -49,6 +49,8 @@ int main(int argc, char **argv) {
         blang.optimizationLevel = llvm::OptimizationLevel::Oz;
       } else if (arg == "-g") {
         blang.debug = true;
+      } else if (arg == "--ast") {
+        blang.print_ast = true;
       } else if (arg == "--help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
