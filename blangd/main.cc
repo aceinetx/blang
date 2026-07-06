@@ -173,7 +173,7 @@ name: **{}**
 
 class: **{}**)",
         symbol_class, symbol_display, symbol_type, symbol, symbol_class);
-  } catch (std::exception e) {
+  } catch (std::exception &e) {
     std::cerr << "Exception while handling hover: " << e.what() << "\n";
   }
 
