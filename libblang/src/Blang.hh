@@ -10,7 +10,6 @@
 #include <llvm/Support/InitLLVM.h>
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
-#include <location.hh>
 
 namespace blang {
 enum class EmitLevel {

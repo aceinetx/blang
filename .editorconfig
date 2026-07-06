@@ -11,3 +11,9 @@ indent_size = 2
 [*.nix]
 indent_style = space
 indent_size = 2
+
+[*.lua]
+indent_style = space
+indent_size = 4
+end_of_line = lf
+insert_final_newline = true

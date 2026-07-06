@@ -7,7 +7,7 @@ rule("blang-yacc")
         -- @see https://github.com/xmake-io/xmake/issues/4820
         if target:sourcebatches()["blang-yacc"] then
             local sourcefile_dir = path.join(target:autogendir(), "rules", "yacc_yacc")
-            target:add("includedirs", sourcefile_dir)
+            target:add("includedirs", sourcefile_dir, {public=true})
         end
     end)
     before_buildcmd_file(function (target, batchcmds, sourcefile_yacc, opt)
@@ -39,4 +39,3 @@ rule("blang-yacc")
         batchcmds:set_depcache(target:dependfile(objectfile))
     end)
 rule_end()
-

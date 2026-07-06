@@ -42,6 +42,7 @@
             curl
             jsoncpp
             argtable
+            catch2
           ];
 
           installPhase = ''
@@ -65,6 +66,7 @@
             curl
             jsoncpp
             argtable
+            catch2
           ];
         };
       }

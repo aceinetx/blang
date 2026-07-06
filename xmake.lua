@@ -8,15 +8,19 @@ if is_plat("linux") then
 	set_policy("build.sanitizer.leak", true)
 end
 
+add_rules("blang-yacc", {public=true})
+
 add_repositories("aceinet-xmake https://github.com/aceinetx/aceinet-xmake.git")
 
 add_requires("fmt", {external=false})
 add_requires("bison")
 add_requires("nlohmann_json")
+add_requires("catch2")
 
 set_warnings("all") -- warns
 set_languages("c++20", "c90")
 
 includes("libblang")
+includes("libblang-symscan")
 includes("blang")
 includes("blangd")
