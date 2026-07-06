@@ -1,23 +1,16 @@
+#include "location.hh"
+#include <Util.hh>
+#include <blangd/util.hh>
 #include <cassert>
 #include <cstdio>
 #include <cstring>
-#include <fstream>
 #include <iostream>
+#include <libblang-symscan/symscan.hh>
 #include <nlohmann/json.hpp>
 
 constexpr size_t MAX_REQUEST_LENGTH = 0xFFFFF;
 
 static size_t id = -1;
-
-static std::vector<std::string> readfile(const std::string &path) {
-  std::vector<std::string> lines;
-  std::ifstream file(path);
-  std::string line;
-  while (std::getline(file, line)) {
-    lines.push_back(line);
-  }
-  return lines;
-}
 
 static size_t get_content_length() {
   std::string line;
@@ -85,7 +78,6 @@ static nlohmann::json hover(nlohmann::json &req) {
   size_t position_line = req["params"]["position"]["line"];
   std::string path = req["params"]["textDocument"]["uri"];
   path = path.substr(strlen("file://"));
-  auto lines = readfile(path);
 
   std::cerr << position_line << ":" << position_char << "@" << path << "\n";
 
@@ -93,7 +85,65 @@ static nlohmann::json hover(nlohmann::json &req) {
   resp["jsonrpc"] = "2.0";
   resp["id"] = id;
   resp["result"] = nlohmann::json{};
-  resp["result"]["contents"] = lines[position_line];
+  resp["result"]["contents"] = "unknown";
+
+  auto source_opt = blang::readFile(path);
+  if (!source_opt) {
+    resp["result"]["contents"] = "can't read file";
+    return resp;
+  }
+  auto source = *source_opt;
+
+  try {
+    auto pos =
+        blang::blangd::index_from_linecol(source, position_line, position_char);
+    auto word_range = blang::blangd::word_range(source, pos);
+    auto word =
+        source.substr(std::get<0>(word_range),
+                      std::get<1>(word_range) - std::get<0>(word_range) + 1);
+    resp["result"]["contents"] = "unknown " + word;
+
+    auto pos_yacc =
+        blang::position(nullptr, int(position_line), int(position_char));
+
+    auto scan = blang::symscan::scan_source(source, pos_yacc);
+
+    for (const auto &[sym, _] : scan.functions) {
+      if (sym == word) {
+        resp["result"]["contents"] = "function " + sym;
+      }
+    }
+
+    for (const auto &sym : scan.global) {
+      if (sym == word) {
+        resp["result"]["contents"] = "global " + sym;
+      }
+    }
+
+    if (!scan.focusedFunction.empty()) {
+      auto func = scan.functions[scan.focusedFunction];
+      for (const auto &sym : func.autoSymbols) {
+        if (sym == word) {
+          resp["result"]["contents"] = "automatic " + sym;
+        }
+      }
+
+      for (const auto &sym : func.extrnSymbols) {
+        if (sym == word) {
+          resp["result"]["contents"] = "extern " + sym;
+        }
+      }
+
+      for (const auto &sym : func.args) {
+        if (sym == word) {
+          resp["result"]["contents"] = "argument " + sym;
+        }
+      }
+    }
+  } catch (std::exception e) {
+    std::cerr << "Exception while handling hover: " << e.what() << "\n";
+  }
+
   return resp;
 }
 
@@ -110,6 +160,7 @@ int main() {
     } else if (method == "shutdown") {
       return 0;
     } else if (method == "textDocument/hover") {
+      std::cerr << json << "\n";
       respond(hover(json));
     } else {
       std::cerr << "Unknown method: " << method << "\n";

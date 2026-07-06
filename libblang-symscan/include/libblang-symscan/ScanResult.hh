@@ -11,6 +11,7 @@ struct FunctionScanResult {
 };
 
 struct ScanResult {
+  std::string focusedFunction;
   std::vector<std::string> global;
   std::unordered_map<std::string, FunctionScanResult> functions;
 };

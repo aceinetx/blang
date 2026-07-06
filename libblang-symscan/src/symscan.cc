@@ -4,8 +4,22 @@
 
 using namespace blang;
 
-static void scan_func(const std::string &source, Lexer &lexer,
-                      symscan::FunctionScanResult &func) {
+static bool position_falls_in_range(class position &loc, class position &begin,
+                                    class position &end) {
+  if (loc.line == begin.line && loc.column >= begin.column) {
+    return true;
+  }
+  if (loc.line > begin.line && loc.line < end.line) {
+    return true;
+  }
+  if (loc.line == end.line && loc.column <= end.column) {
+    return true;
+  }
+  return false;
+}
+
+static Parser::symbol_type scan_func(const std::string &source, Lexer &lexer,
+                                     symscan::FunctionScanResult &func) {
   int brace_count = 0;
 
   auto brace = lexer.next();
@@ -23,7 +37,7 @@ static void scan_func(const std::string &source, Lexer &lexer,
     case Parser::symbol_kind::S_RBRACE:
       brace_count--;
       if (brace_count <= 0)
-        return;
+        return token;
       break;
     case Parser::symbol_kind::S_AUTO: {
       for (;;) {
@@ -49,7 +63,9 @@ static void scan_func(const std::string &source, Lexer &lexer,
   }
 }
 
-symscan::ScanResult symscan::scan_source(const std::string &source) {
+symscan::ScanResult
+symscan::scan_source(const std::string &source,
+                     std::optional<position> context_position) {
   ScanResult result{.global = {}, .functions = {}};
   Lexer lexer{source};
 
@@ -60,6 +76,8 @@ symscan::ScanResult symscan::scan_source(const std::string &source) {
       auto symbol = token.value.as<std::string>();
       auto token = lexer.next();
       if (token.kind() == Parser::symbol_kind::S_LPAREN) {
+        auto begin = token.location.begin;
+
         // Function definition
         FunctionScanResult func;
         for (;;) {
@@ -69,7 +87,12 @@ symscan::ScanResult symscan::scan_source(const std::string &source) {
           else if (token.kind() == Parser::symbol_kind::S_RPAREN)
             break;
         }
-        scan_func(source, lexer, func);
+        auto end = scan_func(source, lexer, func).location.begin;
+
+        if (context_position) {
+          if (position_falls_in_range(*context_position, begin, end))
+            result.focusedFunction = symbol;
+        }
 
         result.functions[symbol] = func;
       } else {
