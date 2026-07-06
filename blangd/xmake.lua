@@ -1,5 +1,3 @@
-add_requires("nlohmann_json")
-
 target("blangd")
 	set_kind("binary")
 
