@@ -15,6 +15,7 @@ target("blangd")
 	add_files("main.cc")
 
     add_deps("libblangd")
+    add_packages("fmt")
 target_end()
 
 target("blangd-test")
