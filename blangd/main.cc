@@ -168,7 +168,9 @@ static nlohmann::json hover(nlohmann::json &req) {
 ### {} {}
 ---
 type: **{}**
+
 name: **{}**
+
 class: **{}**)",
         symbol_class, symbol_display, symbol_type, symbol, symbol_class);
   } catch (std::exception e) {
