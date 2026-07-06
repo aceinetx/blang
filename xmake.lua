@@ -9,6 +9,8 @@ if is_plat("linux") then
 	set_policy("build.sanitizer.leak", true)
 end
 
+add_repositories("aceinet-xmake https://github.com/aceinetx/aceinet-xmake.git")
+
 add_requires("fmt", {external=false})
 add_requires("bison")
 
@@ -35,6 +37,8 @@ target("blang")
 		proc:wait()
 		proc:close()
 
-		target:add("ldflags", io.readfile(stdout):trim())
+		target:add("ldflags", io.readfile(stdout):trim(), {force=true})
 	end)
 target_end()
+
+includes("blangd")

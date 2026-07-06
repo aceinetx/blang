@@ -31,11 +31,17 @@
           buildInputs = with pkgs; [
             gcc
             xmake
+            cmake
+            ninja
             pkg-config
             llvm
             fmt
             bison
             m4
+            openssl
+            curl
+            jsoncpp
+            argtable
           ];
 
           installPhase = ''
@@ -48,11 +54,17 @@
           buildInputs = with pkgs; [
             gcc
             xmake
+            cmake
+            ninja
             pkg-config
             llvm
             fmt
             bison
             m4
+            openssl
+            curl
+            jsoncpp
+            argtable
           ];
         };
       }
