@@ -1,4 +1,5 @@
 #include "Assert.hh"
+#include <fmt/format.h>
 
 namespace blang {
 AssertException::AssertException(std::string expr) {
