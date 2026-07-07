@@ -20,7 +20,7 @@ jobs:
       - name: Build
         shell: msys2 {0}
         run: |
-          xmake build blang
+          xmake build -y blang
           xmake install -o out
 
       - name: Upload artifact
