@@ -1,5 +1,6 @@
 #include "frontend/exceptions/LexerException/LexerException.hh"
 #include <fmt/core.h>
+#include <fmt/format.h>
 
 namespace blang {
 LexerException::LexerException(class location loc, std::string message)
