@@ -19,8 +19,9 @@ llvm::Value *AstFuncCall::compile(CompilerContext *C, bool rvalue) {
 
   C->set_debug_location(location);
 
-  auto *callee_value = C->builder.CreateIntToPtr(expression->compile(C, true),
+  auto *callee_value = C->builder.CreateIntToPtr(expression->compile(C, false),
                                                  C->builder.getPtrTy());
+
   std::vector<llvm::Value *> arg_values = {};
   for (auto arg : args) {
     arg_values.push_back(arg->compile(C, true));
