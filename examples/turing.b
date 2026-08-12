@@ -25,14 +25,13 @@ increment(){
     while(i >= 0){
       if(tape[i] == 0){
         tape[i] = 1;
-        goto end;
+        break;
       } else if(tape[i] == 1){
         tape[i] = 0;
       }
 
       i--;
     }
-    end:
 
     print_tape(tape, 4);
   }

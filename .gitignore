@@ -6,3 +6,6 @@ build
 *.o
 *.s
 *.out
+.zig-cache
+zig-out
+zig-pkg

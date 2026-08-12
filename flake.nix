@@ -24,35 +24,28 @@
           src = self;
 
           buildPhase = ''
-            xmake b
-            xmake i -o .
+            zig build
           '';
 
           buildInputs = with pkgs; [
             gcc
-            xmake
+            zig_0_16
             pkg-config
             llvm
-            fmt
-            bison
-            m4
           ];
 
           installPhase = ''
             mkdir -p $out/bin
-            cp bin/blang $out/bin/
+            cp zig-out/bin/blang $out/bin/
           '';
         };
 
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             gcc
-            xmake
+            zig_0_16
             pkg-config
             llvm
-            fmt
-            bison
-            m4
           ];
         };
       }
