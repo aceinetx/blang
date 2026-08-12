@@ -28,7 +28,6 @@
 #include "frontend/ast/AstExtern.hh"
 #include "frontend/ast/AstStringLit.hh"
 #include "frontend/ast/AstWhile.hh"
-#include "frontend/ast/AstBreak.hh"
 #include "frontend/ast/AstGoto.hh"
 #include "frontend/ast/AstLabel.hh"
 #include "frontend/ast/AstUnot.hh"
@@ -82,7 +81,7 @@ namespace blang { class Driver; }
 %token ASSIGNMUL ASSIGNBITAND ASSIGNMINUS
 %token PLUSPLUS MINUSMINUS
 
-%token RETURN AUTO EXTRN WHILE BREAK GOTO IF ELSE SWITCH CASE /* keywords */
+%token RETURN AUTO EXTRN WHILE GOTO IF ELSE SWITCH CASE /* keywords */
 
 %type <std::shared_ptr<blang::AstIdentifierList>> function_definition_args
 %type <std::shared_ptr<blang::AstFuncDef>> function_definition
@@ -96,7 +95,6 @@ namespace blang { class Driver; }
 %type <std::shared_ptr<blang::AstAutoVar>> auto
 %type <std::shared_ptr<blang::AstExtern>> extrn
 %type <std::shared_ptr<blang::AstWhile>> while
-%type <std::shared_ptr<blang::AstBreak>> break
 %type <std::shared_ptr<blang::AstGoto>> goto
 %type <std::shared_ptr<blang::AstLabel>> label
 %type <std::shared_ptr<blang::AstIf>> if
@@ -217,8 +215,6 @@ statement_base:
 		node->children.push_back($2);
 		$$ = node;
 	} | while {
-		$$ = $1;
-	} | break {
 		$$ = $1;
 	} | goto {
 		$$ = $1;
@@ -366,13 +362,6 @@ label:
 	IDENTIFIER COLON {
 		mknode(AstLabel, node, @1);
 		node->name = $1;
-		$$ = node;
-	}
-	;
-
-break:
-	BREAK SEMICOLON {
-		mknode(AstBreak, node, @1);
 		$$ = node;
 	}
 	;
