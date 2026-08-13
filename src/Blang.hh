@@ -1,5 +1,5 @@
 #pragma once
-#include "CompilerContext.hh"
+#include "Unit.hh"
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Metadata.h>
@@ -13,37 +13,31 @@
 #include <location.hh>
 
 namespace blang {
-enum class EmitLevel {
-  EMIT_EXE,
-  EMIT_OBJ,
-  EMIT_IR,
-};
-
 struct Blang {
-  Blang(std::string moduleName);
+  Blang(std::filesystem::path build_directory);
   Blang(const Blang &) = delete;
   Blang(Blang &&) = delete;
   Blang &operator=(const Blang &) = delete;
   Blang &operator=(Blang &&) = delete;
   ~Blang();
 
-  void compile(std::string code);
-  void bindings(std::string code, std::ostream &stream);
+  struct CompileOptions {
+    bool autorun = false;
+    bool clean = false;
+    bool link = true;
+    std::vector<std::string> link_libraries = {};
+    std::vector<std::string> link_paths = {};
+    std::string output_exe = "a.out";
+  };
 
-  std::vector<std::string> link_libraries = {};
-  std::vector<std::string> link_paths = {};
-  llvm::OptimizationLevel optimizationLevel = llvm::OptimizationLevel::O2;
-  bool debug = false;
-  bool print_ast = false;
-  std::string source_filename = "<unknown>";
+  void add_unit(std::string code, std::filesystem::path source_path, bool debug,
+                bool print_ast, llvm::OptimizationLevel optimizationLevel);
 
-  void emit(std::string out, EmitLevel level);
+  void compile(CompileOptions &opt);
 
 private:
-  std::string targetTriple;
-  const llvm::Target *target;
-  std::unique_ptr<llvm::TargetMachine> targetMachine;
-
-  CompilerContext context;
+  std::vector<Unit> units;
+  std::mutex compilation_lock;
+  std::filesystem::path build_directory;
 };
 } // namespace blang

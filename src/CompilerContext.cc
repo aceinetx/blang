@@ -197,5 +197,4 @@ void CompilerContext::emit_global_array_debug_info(
       di_compile_unit, var_name, var_name, di_file, line, ptr_di_type, false);
   outer_gvar->addDebugInfo(outer_gve);
 }
-
 } // namespace blang

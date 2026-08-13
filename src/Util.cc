@@ -13,8 +13,8 @@ std::string _argsShift(int *argc, char ***argv) {
   return *(*argv)++;
 }
 
-std::optional<std::string> readFile(const std::string &filename) {
-  std::ifstream file(filename);
+std::optional<std::string> readFile(const std::filesystem::path &path) {
+  std::ifstream file(path);
   if (!file) {
     return {};
   }

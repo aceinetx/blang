@@ -1,4 +1,5 @@
 #pragma once
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -7,7 +8,7 @@
 
 namespace blang {
 std::string _argsShift(int *argc, char ***argv);
-std::optional<std::string> readFile(const std::string &filename);
+std::optional<std::string> readFile(const std::filesystem::path &path);
 
 namespace strings {
 std::string replace_all(const std::string &str, const std::string &from,

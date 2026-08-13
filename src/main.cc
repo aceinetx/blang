@@ -1,117 +1,93 @@
 #include "Blang.hh"
 #include "Util.hh"
-#include "frontend/DiagnosticPrinter/DiagnosticPrinter.hh"
+#include <filesystem>
 #include <fmt/core.h>
-#include <fstream>
+#include <getopt.h>
 
 using namespace blang;
 
 int main(int argc, char **argv) {
-  std::string output = "a.out";
-  EmitLevel emit_level = EmitLevel::EMIT_EXE;
-
-  Blang blang = Blang("b");
-  std::string input = "";
-
-  bool bindings = false;
-  std::string bindings_out = "";
+  bool debug = false;
+  bool print_ast = false;
+  auto optimizationLevel = llvm::OptimizationLevel::O1;
+  std::vector<std::filesystem::path> sources;
+  std::string build_dir = ".build";
+  Blang::CompileOptions copt;
 
   argsShift();
   for ([[maybe_unused]] int i = 0; argc; ++i) {
     std::string arg = argsShift();
 
     if (arg.starts_with("-")) {
-      if (arg == "-o") {
-        output = argsShift();
-      } else if (arg == "-c") {
-        emit_level = EmitLevel::EMIT_OBJ;
-      } else if (arg == "-emit-llvm") {
-        emit_level = EmitLevel::EMIT_IR;
-      } else if (arg == "-l") {
-        blang.link_libraries.push_back(argsShift());
-      } else if (arg == "-L") {
-        blang.link_paths.push_back(argsShift());
-      } else if (arg == "--bindings") {
-        bindings = true;
-      } else if (arg == "--bindings-out") {
-        bindings_out = argsShift();
-      } else if (arg == "-O0") {
-        blang.optimizationLevel = llvm::OptimizationLevel::O0;
-      } else if (arg == "-O1") {
-        blang.optimizationLevel = llvm::OptimizationLevel::O1;
-      } else if (arg == "-O2") {
-        blang.optimizationLevel = llvm::OptimizationLevel::O2;
-      } else if (arg == "-O3") {
-        blang.optimizationLevel = llvm::OptimizationLevel::O3;
-      } else if (arg == "-Os") {
-        blang.optimizationLevel = llvm::OptimizationLevel::Os;
-      } else if (arg == "-Oz") {
-        blang.optimizationLevel = llvm::OptimizationLevel::Oz;
-      } else if (arg == "-g") {
-        blang.debug = true;
-      } else if (arg == "--ast") {
-        blang.print_ast = true;
-      } else if (arg == "--help") {
+      if (arg == "-help") {
         fmt::print(R"(OVERVIEW: blang LLVM compiler
 
 USAGE: blang [options] file...
 
 OPTIONS:
-  --help              Print this message
-  -o <file>           Write output to <file>
-  -c                  Only run compile, and assemble steps
-  -emit-llvm          Output LLVM IR
+  -help               Print this message
+  -c                  Don't link final executable
+  -o <file>           Write final executable to <file>
+  -o-dir <path>       Set the build directory path
   -L <dir>            Add directory to library search path
   -l <lib>            Link libraries 
-  --bindings          Generate .h C bindings
-  --bindings-out      Generate .h C bindings alongside compilation
   -O(0|1|2|3|s|z)     Set optimization level
   -g                  Emit DWARF debug information
+  -ast                Print ast
+  -autorun            Automatically run the final executable (only takes effect without -c flag)
+  -clean              Automatically remove the build directory (only takes effect with -autorun flag)
 )");
         return 0;
+      } else if (arg == "-c") {
+        copt.link = false;
+      } else if (arg == "-o") {
+        copt.output_exe = argsShift();
+      } else if (arg == "-o-dir") {
+        build_dir = argsShift();
+      } else if (arg == "-L") {
+        copt.link_paths.push_back(argsShift());
+      } else if (arg == "-l") {
+        copt.link_libraries.push_back(argsShift());
+      } else if (arg == "-O0") {
+        optimizationLevel = llvm::OptimizationLevel::O0;
+      } else if (arg == "-O1") {
+        optimizationLevel = llvm::OptimizationLevel::O1;
+      } else if (arg == "-O2") {
+        optimizationLevel = llvm::OptimizationLevel::O2;
+      } else if (arg == "-O3") {
+        optimizationLevel = llvm::OptimizationLevel::O3;
+      } else if (arg == "-Os") {
+        optimizationLevel = llvm::OptimizationLevel::Os;
+      } else if (arg == "-Oz") {
+        optimizationLevel = llvm::OptimizationLevel::Oz;
+      } else if (arg == "-g") {
+        debug = true;
+      } else if (arg == "-ast") {
+        print_ast = true;
+      } else if (arg == "-autorun") {
+        copt.autorun = true;
+      } else if (arg == "-clean") {
+        copt.clean = true;
       } else {
         fmt::print("blang: error: unknown argument: {}\n", arg);
         return 1;
       }
-    } else { /* assume it's a file */
-      auto result = readFile(arg);
-      if (!result) {
-        fmt::print("blang: could not open file {}\n", arg);
-        return 1;
-      }
-
-      input = *result;
-      blang.source_filename = arg;
+    } else {
+      sources.emplace_back(arg);
     }
   }
 
-  DiagnosticPrinter diag_printer = DiagnosticPrinter("b", input);
+  Blang blang{build_dir};
 
-  try {
-    if (!bindings) {
-      blang.compile(input);
-      blang.emit(output, emit_level);
-
-      if (bindings_out.empty()) {
-        return 0;
-      }
-
-      output = bindings_out;
-    }
-
-    auto file = std::ofstream(output);
-    if (!file.is_open()) {
-      fmt::print("blang: could not open file {}\n", output);
+  for (auto &path : sources) {
+    auto result = readFile(path);
+    if (!result) {
+      fmt::print("blang: could not read file {}\n", path.string());
       return 1;
     }
-    blang.bindings(input, file);
-    file.close();
-    fmt::print("blang: bindings written to {}\n", output);
-  } catch (LexerException &exc) {
-    diag_printer.printDiagnostic(exc);
-  } catch (ParserException &exc) {
-    diag_printer.printDiagnostic(exc);
-  } catch (LocationException &exc) {
-    diag_printer.printDiagnostic(exc);
+
+    blang.add_unit(*result, path, debug, print_ast, optimizationLevel);
   }
+
+  blang.compile(copt);
 }

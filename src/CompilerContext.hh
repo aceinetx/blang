@@ -18,6 +18,11 @@
 namespace blang {
 struct CompilerContext {
   CompilerContext(std::string moduleName);
+  CompilerContext(const CompilerContext &) = delete;
+  CompilerContext(CompilerContext &&other) = delete;
+  CompilerContext &operator=(const CompilerContext &) = delete;
+  CompilerContext &operator=(CompilerContext &&other) = delete;
+  ~CompilerContext() = default;
 
   llvm::Type *get_word_ty();
 
