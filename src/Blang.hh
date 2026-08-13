@@ -11,6 +11,7 @@
 #include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 #include <location.hh>
+#include <mutex>
 
 namespace blang {
 struct Blang {

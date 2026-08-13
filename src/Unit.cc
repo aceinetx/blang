@@ -7,6 +7,7 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/TargetParser/Host.h>
+#include <mutex>
 #include <utility>
 
 using namespace llvm;
