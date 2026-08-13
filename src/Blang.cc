@@ -137,7 +137,7 @@ void Blang::emit(std::string filename, EmitLevel level) {
     dest.flush();
 
     if (level == EmitLevel::EMIT_EXE) {
-      std::string cmd = fmt::format("clang {} -o {} ", obj_filename, filename);
+      std::string cmd = fmt::format("cc {} -o {} ", obj_filename, filename);
 
       for (std::string lib : link_libraries)
         cmd += "-l" + lib + " ";
