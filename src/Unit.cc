@@ -22,6 +22,7 @@ blang::Unit::Unit(std::string code, std::filesystem::path source_path,
       optimizationLevel(optimizationLevel) {
   context->push_scope();
 
+#if LLVM_VERSION_MAJOR > 20
   auto targetTriple = Triple(sys::getDefaultTargetTriple());
   context->fmodule.setTargetTriple(targetTriple);
 
@@ -36,6 +37,22 @@ blang::Unit::Unit(std::string code, std::filesystem::path source_path,
   targetMachine = std::unique_ptr<TargetMachine>(target->createTargetMachine(
       targetTriple, "generic", "", opt, Reloc::PIC_));
   context->fmodule.setDataLayout(targetMachine->createDataLayout());
+#else
+  auto targetTriple = sys::getDefaultTargetTriple();
+  context->fmodule.setTargetTriple(targetTriple);
+
+  std::string err;
+  target = TargetRegistry::lookupTarget(targetTriple, err);
+  if (!target) {
+    throw std::runtime_error(
+        fmt::format("failed to lookup target {}: {}", targetTriple, err));
+  }
+
+  TargetOptions opt;
+  targetMachine = std::unique_ptr<TargetMachine>(target->createTargetMachine(
+      targetTriple, "generic", "", opt, Reloc::PIC_));
+  context->fmodule.setDataLayout(targetMachine->createDataLayout());
+#endif
 }
 
 blang::Unit::Unit(Unit &&other) noexcept
