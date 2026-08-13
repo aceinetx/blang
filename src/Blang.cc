@@ -89,7 +89,7 @@ void Blang::compile(CompileOptions &opt) {
 
     if (opt.autorun) {
       auto path = std::filesystem::absolute(opt.output_exe);
-      run_command(path);
+      run_command(path.string());
 
       if (opt.clean) {
         fmt::print("blang: cleanup\n");
