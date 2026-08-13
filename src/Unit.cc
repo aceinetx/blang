@@ -16,9 +16,9 @@ blang::Unit::Unit(std::string code, std::filesystem::path source_path,
                   bool debug, bool print_ast,
                   llvm::OptimizationLevel optimizationLevel,
                   std::filesystem::path build_directory)
-    : context(new CompilerContext(source_path.filename().stem())),
+    : context(new CompilerContext(source_path.filename().stem().string())),
       code(std::move(code)), debug(debug), print_ast(print_ast),
-      source_filename(source_path.filename()),
+      source_filename(source_path.filename().string()),
       build_directory(std::move(build_directory)),
       optimizationLevel(optimizationLevel) {
   context->push_scope();

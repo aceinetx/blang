@@ -86,7 +86,7 @@ OPTIONS:
       return 1;
     }
 
-    blang.add_unit(*result, path, debug, print_ast, optimizationLevel);
+    blang.add_unit(*result, path.string(), debug, print_ast, optimizationLevel);
   }
 
   blang.compile(copt);
