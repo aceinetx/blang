@@ -16,9 +16,9 @@
 
 using namespace llvm;
 
-static void run_command(const std::string &cmd) {
+static int run_command(const std::string &cmd) {
   fmt::print("blang: running command: {}\n", cmd);
-  std::system(cmd.c_str());
+  return std::system(cmd.c_str());
 }
 
 namespace blang {
