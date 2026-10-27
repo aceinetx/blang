@@ -19,4 +19,8 @@ pub fn main(init: std.process.Init) !void {
 
     var ir = libblang.ir.IR.init(init.gpa);
     defer ir.deinit();
+
+    _ = try ir.gen(parser.root.?);
+
+    std.log.info("{any}", .{ir.instructions.items});
 }
