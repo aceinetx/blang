@@ -17,6 +17,6 @@ pub fn main(init: std.process.Init) !void {
 
     parser.root.?.print(0);
 
-    var ir = libblang.ir.IR.init();
+    var ir = libblang.ir.IR.init(init.gpa);
     defer ir.deinit();
 }
